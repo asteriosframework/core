@@ -1,0 +1,31 @@
+#!/bin/sh
+
+usage()
+{
+  echo "Usage: $(basename "$0") [ -c | --coverage | --help ]"
+  exit 2
+}
+
+# shellcheck disable=SC2046
+PARSED_ARGUMENTS=$(getopt -a -n $(basename "$0") -o ch --long coverage,help -- "$@")
+VALID_ARGUMENTS=$?
+if [ "$VALID_ARGUMENTS" != "0" ]; then
+  usage
+fi
+
+eval set -- "$PARSED_ARGUMENTS"
+while :
+do
+  case "$1" in
+    -c | --coverage)   COVERAGE=":coverage"      ; shift   ;;
+    --help)            usage                                ;;
+    # -- means the end of the arguments; drop this, and break out of the while loop
+    --) shift; break ;;
+    # If invalid options were passed, then getopt should have reported an error,
+    # which we checked as VALID_ARGUMENTS when getopt was called...
+    *) echo "Unexpected option: $1 - this should not happen."
+       usage ;;
+  esac
+done
+
+env XDEBUG_MODE=coverage composer run-script tests${COVERAGE}
