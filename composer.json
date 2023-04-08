@@ -1,0 +1,60 @@
+{
+  "name": "asterios/core",
+  "description" : "Asterios PHP Core",
+  "type": "asterios-package",
+  "homepage": "https://www.asteriosphp.de",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Benjamin Butschko"
+    },
+    {
+      "name": "Jörg Heinrich"
+    }
+  ],
+  "minimum-stability": "stable",
+  "config": {
+    "preferred-install": {
+      "*": "dist"
+    },
+    "platform": {
+      "php": "8.1"
+    },
+    "optimize-autoloader": true
+  },
+  "autoload": {
+    "psr-4": {
+      "Asterios\\Core\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Asterios\\Test\\": "tests/"
+    }
+  },
+  "require": {
+    "vanilla/htmlawed": "2.2.5",
+    "mobiledetect/mobiledetectlib": "3.74.0"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest",
+    "phpunit/phpunit": "9.6.5",
+    "mockery/mockery": "1.5.1",
+    "phpstan/phpstan": "1.10.6"
+  },
+  "scripts": {
+    "tests": [
+      "Composer\\Config::disableProcessTimeout",
+      "./vendor/bin/phpunit  --colors=never -c ./phpunit.xml"
+    ],
+    "tests:coverage": [
+      "Composer\\Config::disableProcessTimeout",
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit --colors=never -c ./phpunit.xml --coverage-text ./tests"
+    ],
+    "phpstan": [
+      "Composer\\Config::disableProcessTimeout",
+      "./vendor/bin/phpstan analyse -c phpstan.neon --no-progress --memory-limit 1G --xdebug"
+    ],
+    "ddev:phpstan": "composer phpstan"
+  }
+}

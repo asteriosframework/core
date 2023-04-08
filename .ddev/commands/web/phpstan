@@ -1,0 +1,3 @@
+#!/bin/sh
+
+env XDEBUG_MODE=develop composer run-script phpstan
