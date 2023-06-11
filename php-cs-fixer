@@ -1,0 +1,44 @@
+#!/bin/bash
+
+script="$(basename($0))"
+
+Help()
+{
+    cat <<<EOF
+    PHP CS Fixer Tool
+
+    Syntax: $script [-h|t|f]
+    Options:
+      h Print this help page
+      t Run in dry-run mode
+      f Fixes possible issues
+
+EOF
+
+}
+
+TestRun()
+{
+    ddev php tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --dry-run src
+}
+
+FixRun()
+{
+    ddev php tools/php-cs-fixer/vendor/bin/php-cs-fixer fix src
+}
+
+while getopts ":htf" option; do
+    case $option in
+        h) Help
+           exit
+           ;;
+        t) shift
+           TestRun
+           exit
+           ;;
+        f) shift
+           FixRun
+           exit
+           ;;
+    esac
+done
