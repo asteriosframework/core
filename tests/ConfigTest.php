@@ -109,7 +109,7 @@ class ConfigTest extends TestCase
      * @param string $item
      * @param $value
      * @param $expected_value
-     * @param null $default
+     * @param mixed|null $default
      */
     public function get_memory(string $item, $value, $expected_value, $default = null): void
     {

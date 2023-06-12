@@ -28,7 +28,7 @@ class Session
      * This function get given session value.
      *
      * @param mixed $key
-     * @param null $default
+     * @param mixed|null $default
      * @return array|mixed|null
      */
     public static function get($key, $default = null)

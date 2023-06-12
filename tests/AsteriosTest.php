@@ -15,7 +15,7 @@ class AsteriosTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        Date::set_timezone('Europe/Berlin');
+        (new Date)->setTimezone('Europe/Berlin');
         Asterios::set_environment(Asterios::PRODUCTION);
     }
 

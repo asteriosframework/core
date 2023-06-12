@@ -425,10 +425,10 @@ class File
 
         if ($timestamp)
         {
-            return @filemtime($file);
+            return @\filemtime($file);
         }
 
-        return date($date_format, @filemtime($file));
+        return date($date_format, @\filemtime($file));
     }
 
     /**

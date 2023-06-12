@@ -106,7 +106,7 @@ class Asterios
      */
     public static function set_timezone(string $timezone): void
     {
-        Date::set_timezone($timezone);
+        (new Date)->setTimezone($timezone);
     }
 
     /**
@@ -115,7 +115,7 @@ class Asterios
      */
     public static function get_timezone(): string
     {
-        return Date::get_timezone();
+        return (new Date)->getTimezone();
     }
 
     /**

@@ -57,7 +57,7 @@ class Logger
      */
     public static function info(string $message, array $context = []): void
     {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
         static::write_log([
             'message' => $message,
@@ -79,7 +79,7 @@ class Logger
      */
     public static function notice(string $message, array $context = []): void
     {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
         static::write_log([
             'message' => $message,
@@ -101,7 +101,7 @@ class Logger
      */
     public static function debug(string $message, array $context = []): void
     {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
         static::write_log([
             'message' => $message,
@@ -123,7 +123,7 @@ class Logger
      */
     public static function warning(string $message, array $context = []): void
     {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
         static::write_log([
             'message' => $message,
@@ -145,7 +145,7 @@ class Logger
      */
     public static function error(string $message, array $context = []): void
     {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
         static::write_log([
             'message' => $message,
@@ -167,7 +167,7 @@ class Logger
      */
     public static function fatal(string $message, array $context = []): void
     {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
         static::write_log([
             'message' => $message,

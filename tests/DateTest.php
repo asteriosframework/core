@@ -12,7 +12,6 @@ class DateTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        Date::set_timezone(Date::DEFAULT_TIMEZONE);
         (new Date)->setTimezone(Date::DEFAULT_TIMEZONE);
     }
 
@@ -24,9 +23,9 @@ class DateTest extends TestCase
      */
     public function set_timezone(string $timezone, string $expected): void
     {
-        Date::set_timezone($timezone);
+        (new Date)->setTimezone($timezone);
 
-        $actual = Date::get_timezone();
+        $actual = (new Date)->getTimezone();
 
         self::assertEquals($expected, $actual);
     }
@@ -41,7 +40,7 @@ class DateTest extends TestCase
      */
     public function days_in_month(int $month, int $year, int $expected): void
     {
-        $actual = Date::days_in_month($month, $year);
+        $actual = (new Date)->daysInMonth($month, $year);
 
         self::assertEquals($expected, $actual);
     }
