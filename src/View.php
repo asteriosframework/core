@@ -43,7 +43,8 @@ class View
         try
         {
             $this->render();
-        } catch (ViewTemplateAccessException $e)
+        }
+        catch (ViewTemplateAccessException $e)
         {
             $this->view_error_tpl(404);
         }
@@ -92,7 +93,8 @@ class View
                 {
                     include $__file_name;
                 }
-            } catch (ViewTemplateAccessException $e)
+            }
+            catch (ViewTemplateAccessException $e)
             {
                 $this->view_error_tpl(404);
             }

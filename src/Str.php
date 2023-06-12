@@ -139,13 +139,15 @@ class Str implements StrInterface, SingletonInterface
             case 'uuid':
                 $pool = ['8', '9', 'a', 'b'];
 
-                return sprintf('%s-%s-4%s-%s%s-%s',
+                return sprintf(
+                    '%s-%s-4%s-%s%s-%s',
                     self::random('hexdec', 8),
                     self::random('hexdec', 4),
                     self::random('hexdec', 3),
                     $pool[array_rand($pool)],
                     self::random('hexdec', 3),
-                    self::random('hexdec', 12));
+                    self::random('hexdec', 12)
+                );
         }
     }
 

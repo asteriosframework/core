@@ -9,12 +9,12 @@ class Asterios
     /**
      * @var  string  The version of Asterios PHP Framework
      */
-    const VERSION = '1.1.0';
+    public const VERSION = '1.1.0';
 
     /**
      * @var  string  The version of Asterios PHP Framework
      */
-    const NAME = 'Asterios PHP Framework';
+    public const NAME = 'Asterios PHP Framework';
 
     /**
      * @var  string  constant used for when in development
@@ -106,7 +106,7 @@ class Asterios
      */
     public static function set_timezone(string $timezone): void
     {
-        (new Date)->setTimezone($timezone);
+        (new Date())->setTimezone($timezone);
     }
 
     /**
@@ -115,7 +115,7 @@ class Asterios
      */
     public static function get_timezone(): string
     {
-        return (new Date)->getTimezone();
+        return (new Date())->getTimezone();
     }
 
     /**

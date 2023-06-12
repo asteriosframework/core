@@ -315,7 +315,8 @@ class File
             }
 
             return rmdir($directory);
-        } catch (FileAccessException $e)
+        }
+        catch (FileAccessException $e)
         {
             Debug::backtrace($e);
         }
@@ -400,7 +401,8 @@ class File
             }
 
             return (object)$content_difference;
-        } catch (FileAccessException $e)
+        }
+        catch (FileAccessException $e)
         {
             Debug::backtrace();
 

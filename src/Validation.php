@@ -22,7 +22,6 @@ use Asterios\Core\Exception\ValidationUnexpectedValueException;
  */
 class Validation
 {
-
     public const RULE_ALPHA = 'alpha';
     public const RULE_ALPHA_NUMERIC = 'alpha_numeric';
     public const RULE_NUMERIC = 'numeric';
@@ -240,8 +239,10 @@ class Validation
 
     private function _validate_email(string $input): bool
     {
-        return preg_match("/[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/",
-                $input) === 1;
+        return preg_match(
+            "/[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/",
+            $input
+        ) === 1;
     }
 
     /**
@@ -304,7 +305,8 @@ class Validation
             {
                 throw new ValidationUnexpectedValueException('Given rule "' . $rule . '" is not supported!');
             }
-        } catch (ValidationUnexpectedValueException $e)
+        }
+        catch (ValidationUnexpectedValueException $e)
         {
             $this->error_messages['fatal'] = $e->getMessage();
 
@@ -327,7 +329,8 @@ class Validation
             {
                 throw new ValidationDomainException('Given rule "' . $rule . '" need optional parameter!');
             }
-        } catch (ValidationDomainException $e)
+        }
+        catch (ValidationDomainException $e)
         {
             $this->error_messages['fatal'] = $e->getMessage();
 

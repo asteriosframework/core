@@ -26,14 +26,16 @@ class Athene
     ) {
         $this->config = Config::load('athene');
 
-        if (null === $configuration) {
+        if (null === $configuration)
+        {
             $this->configuration = ORMSetup::createAttributeMetadataConfiguration(
                 paths: [__DIR__ . '/../Models'],
                 isDevMode: true,
             );
         }
 
-        if (null === $configuration) {
+        if (null === $configuration)
+        {
             $this->connection = DriverManager::getConnection([
                 'dbname' => $this->config['dbname'],
                 'user' => $this->config['user'],

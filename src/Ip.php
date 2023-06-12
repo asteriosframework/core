@@ -127,7 +127,7 @@ class Ip
         return $this->ip2long6($final_ip);
     }
 
-    function ipv6_in_range(string $ip, string $range_ip): bool
+    public function ipv6_in_range(string $ip, string $range_ip): bool
     {
         $pieces = $this->ip_to_array($range_ip);
 

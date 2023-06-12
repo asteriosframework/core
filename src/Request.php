@@ -4,7 +4,6 @@ namespace Asterios\Core;
 
 class Request
 {
-
     /**
      * The file to read and write cookies to for requests
      *
