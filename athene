@@ -3,15 +3,20 @@
 
 declare(strict_types=1);
 
+require_once(__DIR__ . '/vendor/autoload.php');
+
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
 use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
+use Asterios\Core\Athene\Athene;
+use Asterios\Core\Config;
 
-// Adjust this path to your actual bootstrap.php
-require __DIR__ . '/../bootstrap.php';
+Config::set_config_path(__DIR__ . '/src/config');
+
+$athene = new Athene();
 
 $commands = [];
 
 ConsoleRunner::run(
-    new SingleManagerProvider($entityManager),
+    new SingleManagerProvider($athene->getEntityManager()),
     $commands
 );
