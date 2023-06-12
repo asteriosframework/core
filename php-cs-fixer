@@ -1,10 +1,10 @@
 #!/bin/bash
 
-script="$(basename($0))"
+script="$(basename $0)"
 
 Help()
 {
-    cat <<<EOF
+    cat <<EOF
     PHP CS Fixer Tool
 
     Syntax: $script [-h|t|f]
@@ -19,26 +19,30 @@ EOF
 
 TestRun()
 {
-    ddev php tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --dry-run src
+    ./tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config ./.php-cs-fixer.php --diff --dry-run
 }
 
 FixRun()
 {
-    ddev php tools/php-cs-fixer/vendor/bin/php-cs-fixer fix src
+    ./tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config ./.php-cs-fixer.php
 }
 
-while getopts ":htf" option; do
-    case $option in
-        h) Help
-           exit
-           ;;
-        t) shift
-           TestRun
-           exit
-           ;;
-        f) shift
-           FixRun
-           exit
-           ;;
-    esac
-done
+getopts ":htf" OPTS
+
+if [ "$OPTS" = "?" ] || [ "${OPTS}x" = "x" ]
+then
+  Help
+  exit
+fi
+
+case "$OPTS" in
+    h) Help
+        exit
+        ;;
+    t) TestRun
+       exit
+       ;;
+    f) FixRun
+       exit
+       ;;
+esac
