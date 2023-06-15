@@ -16,11 +16,11 @@ mutagen_enabled: false
 use_dns_when_possible: true
 composer_version: "2"
 web_environment:
-    - XDEBUG_MODE=debug,coverage
+    - XDEBUG_MODE=coverage,debug
     - XDEBUG_IDEKEY=PHPSTORMdd
     - XDEBUG_START=yes
     - PHP_IDE_CONFIG=serverName=asterios-core
     - XDEBUG_SESSION_START=ddev
-    - SAIL_XDEBUG_MODE=debug,coverage
+    - SAIL_XDEBUG_MODE=coverage,debug
 nodejs_version: "18"
 timezone: Europe/Berlin
