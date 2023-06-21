@@ -5,6 +5,9 @@ namespace Asterios\Test;
 use Asterios\Core\Str;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class StrTest extends TestCase
 {
     /**

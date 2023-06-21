@@ -6,6 +6,9 @@ use Asterios\Core\InputService;
 use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class InputServiceTest extends MockeryTestCase
 {
     protected function tearDown(): void

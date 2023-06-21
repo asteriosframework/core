@@ -5,6 +5,9 @@ namespace Asterios\Test;
 use Asterios\Core\Validation;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class ValidationTest extends TestCase
 {
     /**
