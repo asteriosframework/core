@@ -2,11 +2,14 @@
 
 namespace Asterios\Test;
 
-use Exception;
 use Asterios\Core\Date;
 use Asterios\Core\Exception\DateException;
+use Exception;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class DateTest extends TestCase
 {
     protected function tearDown(): void

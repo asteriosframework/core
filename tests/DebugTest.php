@@ -35,6 +35,9 @@ namespace Asterios\Test
     use Mockery as m;
     use Mockery\Adapter\Phpunit\MockeryTestCase;
 
+    /**
+     * @runTestsInSeparateProcesses
+     */
     class DebugTest extends MockeryTestCase
     {
         protected function tearDown(): void

@@ -8,6 +8,9 @@ use Asterios\Core\Config;
 use Asterios\Core\Router;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class RouterTest extends TestCase
 {
     /**

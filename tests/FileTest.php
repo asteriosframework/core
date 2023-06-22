@@ -5,6 +5,9 @@ namespace Asterios\Test;
 use Asterios\Core\File;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class FileTest extends MockeryTestCase
 {
     /** @var File */

@@ -2,11 +2,14 @@
 
 namespace Asterios\Test;
 
-use Detection\MobileDetect;
 use Asterios\Core\Devicedetect;
+use Detection\MobileDetect;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class DevicedetectTest extends TestCase
 {
     protected function tearDown(): void
