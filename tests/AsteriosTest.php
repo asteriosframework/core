@@ -10,6 +10,9 @@ use Asterios\Core\Exception\AsteriosException;
 use Asterios\Core\Exception\ConfigLoadException;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class AsteriosTest extends TestCase
 {
     protected function tearDown(): void

@@ -6,6 +6,9 @@ use Asterios\Core\Controller;
 use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class ControllerTest extends MockeryTestCase
 {
     protected function tearDown(): void

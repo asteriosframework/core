@@ -17,6 +17,9 @@ namespace Asterios\Test
     use Mockery as m;
     use Mockery\Adapter\Phpunit\MockeryTestCase;
 
+    /**
+     * @runTestsInSeparateProcesses
+     */
     class AssetsTest extends MockeryTestCase
     {
         public function tearDown(): void
@@ -66,7 +69,6 @@ namespace Asterios\Test
 
         /**
          * @test
-
          * @dataProvider img_provider
          * @param AssetsDto $dto
          * @param bool $file_exists

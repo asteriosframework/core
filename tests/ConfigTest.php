@@ -8,6 +8,9 @@ use Asterios\Core\Config;
 use Asterios\Core\Exception\ConfigLoadException;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class ConfigTest extends TestCase
 {
     /**
@@ -142,7 +145,7 @@ class ConfigTest extends TestCase
                 'default',
                 Asterios::DEVELOPMENT,
                 [
-                    'debug'   => true,
+                    'debug' => true,
                     'default' => [
                         'timezone' => 'Europe/Berlin',
                     ],
@@ -161,11 +164,11 @@ class ConfigTest extends TestCase
                 'default',
                 Asterios::PRODUCTION,
                 [
-                    'debug'   => false,
+                    'debug' => false,
                     'default' => [
                         'timezone' => 'Europe/Berlin',
                     ],
-                    'foo'     => 'bar',
+                    'foo' => 'bar',
                 ],
             ],
         ];
@@ -181,7 +184,7 @@ class ConfigTest extends TestCase
                 'logger',
                 null,
                 (object)[
-                    'path'     => 'logs',
+                    'path' => 'logs',
                     'filename' => 'asterios',
                 ],
             ],

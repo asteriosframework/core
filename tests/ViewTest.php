@@ -10,6 +10,9 @@ use Asterios\Core\View;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class ViewTest extends MockeryTestCase
 {
     protected function tearDown(): void

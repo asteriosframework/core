@@ -6,21 +6,21 @@ webserver_type: nginx-fpm
 router_http_port: "80"
 router_https_port: "443"
 xdebug_enabled: true
-additional_hostnames: []
-additional_fqdns: []
+additional_hostnames: [ ]
+additional_fqdns: [ ]
 database:
-    type: mariadb
-    version: "10.4"
+  type: mariadb
+  version: "10.4"
 nfs_mount_enabled: false
 mutagen_enabled: false
 use_dns_when_possible: true
 composer_version: "2"
 web_environment:
-    - XDEBUG_MODE=debug,coverage
-    - XDEBUG_IDEKEY=PHPSTORMdd
-    - XDEBUG_START=yes
-    - PHP_IDE_CONFIG=serverName=asterios-core
-    - XDEBUG_SESSION_START=ddev
-    - SAIL_XDEBUG_MODE=debug,coverage
+  - XDEBUG_MODE=debug,coverage
+  - XDEBUG_IDEKEY=PHPSTORMdd
+  - XDEBUG_START=yes
+  - PHP_IDE_CONFIG=serverName=asterios-core
+  - XDEBUG_SESSION_START=ddev
+  - SAIL_XDEBUG_MODE=debug,coverage
 nodejs_version: "18"
 timezone: Europe/Berlin
