@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Asterios\Core
-{
-    function filemtime(): int
-    {
-        return 12345678;
-    }
-}
+// namespace Asterios\Core
+// {
+//     function filemtime(): int
+//     {
+//         return 12345678;
+//     }
+// }
 
 namespace Asterios\Test
 {
@@ -16,12 +16,29 @@ namespace Asterios\Test
     use Asterios\Core\File;
     use Mockery as m;
     use Mockery\Adapter\Phpunit\MockeryTestCase;
+    use org\bovigo\vfs\vfsStream;
+    use org\bovigo\vfs\vfsStreamDirectory;
+    use org\bovigo\vfs\vfsStreamWrapper;
 
     /**
      * @runTestsInSeparateProcesses
      */
     class AssetsTest extends MockeryTestCase
     {
+        protected vfsStreamDirectory $root;
+        protected array $structure = [
+            'style.css' => '/* some CSS style content */',
+            'script.js' => '/* some JavaScript content */',
+        ];
+
+        public function setUp(): void
+        {
+            parent::setUp();
+
+            vfsStreamWrapper::register();
+            $this->root = vfsStream::setup('folder', null, $this->structure);
+        }
+
         public function tearDown(): void
         {
             m::close();
@@ -131,38 +148,41 @@ namespace Asterios\Test
 
         public function css_provider(): array
         {
+            $this->root = vfsStream::setup('folder', null, $this->structure);
+            $styleCssMtime = $this->root->getChild('style.css')->filemtime();
+
             return [
-                [
+                'DOCTYPE_HTML4' => [
                     (new AssetsDto())->set_file('style.css')
-                        ->set_path('folder')
+                        ->set_path($this->root->url())
                         ->set_document_type(Assets::DOCTYPE_HTML4),
                     true,
-                    '<link rel="stylesheet" type="text/css" href="folder/style.css?12345678">' . PHP_EOL,
+                    '<link rel="stylesheet" type="text/css" href="vfs://folder/style.css?' . $this->root->getChild('style.css')->filemtime() . '">' . PHP_EOL,
                 ],
-                [
+                'DOCTYPE_HTML5' => [
                     (new AssetsDto())->set_file('style.css')
-                        ->set_path('folder')
+                        ->set_path($this->root->url())
                         ->set_document_type(Assets::DOCTYPE_HTML5),
                     true,
-                    '<link rel="stylesheet" type="text/css" href="folder/style.css?12345678">' . PHP_EOL,
+                    '<link rel="stylesheet" type="text/css" href="vfs://folder/style.css?' . $this->root->getChild('style.css')->filemtime() . '">' . PHP_EOL,
                 ],
-                [
+                'DOCTYPE_XHTML' => [
                     (new AssetsDto())->set_file('style.css')
-                        ->set_path('folder')
+                        ->set_path($this->root->url())
                         ->set_document_type(Assets::DOCTYPE_XHTML),
                     true,
-                    '<link rel="stylesheet" type="text/css" href="folder/style.css?12345678"/>' . PHP_EOL,
+                    '<link rel="stylesheet" type="text/css" href="vfs://folder/style.css?' . $this->root->getChild('style.css')->filemtime() . '"/>' . PHP_EOL,
                 ],
-                [
+                'DOCTYPE_HTML5 scripts.js' => [
                     (new AssetsDto())->set_file('scripts.js')
-                        ->set_path('folder')
+                        ->set_path($this->root->url())
                         ->set_document_type(Assets::DOCTYPE_HTML5),
                     true,
                     false,
                 ],
-                [
+                'DOCTYPE_HTML5 false' => [
                     (new AssetsDto())->set_file('styles.css')
-                        ->set_path('folder')
+                        ->set_path($this->root->url())
                         ->set_document_type(Assets::DOCTYPE_HTML5),
                     false,
                     false,

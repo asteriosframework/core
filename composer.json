@@ -40,12 +40,13 @@
     "roave/security-advisories": "dev-latest",
     "phpunit/phpunit": "9.6.5",
     "mockery/mockery": "1.5.1",
-    "phpstan/phpstan": "1.10.6"
+    "phpstan/phpstan": "1.10.6",
+    "mikey179/vfsstream": "^1.6"
   },
   "scripts": {
     "tests": [
       "Composer\\Config::disableProcessTimeout",
-      "./vendor/bin/phpunit  --colors=never -c ./phpunit.xml"
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit  --colors=never -c ./phpunit.xml"
     ],
     "tests:coverage": [
       "Composer\\Config::disableProcessTimeout",
