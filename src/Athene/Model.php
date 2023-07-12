@@ -59,7 +59,8 @@ class Model
     {
         $model = $this->modelRepository->find($id);
 
-        if (null === $model) {
+        if (null === $model)
+        {
             throw new ModelNotFoundException('Model with the key ' . $id . ' not found', 2000);
         }
 
@@ -78,7 +79,8 @@ class Model
     {
         $model = $this->find($id);
 
-        foreach ($values as $column => $value) {
+        foreach ($values as $column => $value)
+        {
 
             $setter = 'set' . ucfirst(b($column)->camel()->toString());
 
