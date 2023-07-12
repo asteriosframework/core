@@ -50,7 +50,7 @@
   "scripts": {
     "tests": [
       "Composer\\Config::disableProcessTimeout",
-      "./vendor/bin/phpunit  --colors=never -c ./phpunit.xml"
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit  --colors=never -c ./phpunit.xml"
     ],
     "tests:coverage": [
       "Composer\\Config::disableProcessTimeout",
@@ -60,6 +60,13 @@
       "Composer\\Config::disableProcessTimeout",
       "./vendor/bin/phpstan analyse -c phpstan.neon --no-progress --memory-limit 1G --xdebug"
     ],
-    "ddev:phpstan": "composer phpstan"
+    "ddev:phpstan": "composer phpstan",
+    "cs-fixer:check": "./php-cs-fixer -t",
+    "cs-fixer:fix": "./php-cs-fixer -f",
+    "all": [
+      "@cs-fixer:check",
+      "@phpstan",
+      "@tests"
+    ]
   }
 }
