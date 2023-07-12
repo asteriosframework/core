@@ -5,16 +5,19 @@ declare(strict_types=1);
 
 require_once(__DIR__ . '/vendor/autoload.php');
 
+use Asterios\Core\Config;
+use Asterios\Core\Athene\Athene;
+use Asterios\Core\Commands\About;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
 use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
-use Asterios\Core\Athene\Athene;
-use Asterios\Core\Config;
 
 Config::set_config_path(__DIR__ . '/src/config');
 
 $athene = new Athene();
 
-$commands = [];
+$commands = [
+    new About(),
+];
 
 ConsoleRunner::run(
     new SingleManagerProvider($athene->getEntityManager()),
