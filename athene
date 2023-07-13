@@ -8,18 +8,59 @@ require_once(__DIR__ . '/vendor/autoload.php');
 use Asterios\Core\Config;
 use Asterios\Core\Athene\Athene;
 use Asterios\Core\Commands\About;
-use Doctrine\ORM\Tools\Console\ConsoleRunner;
-use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
+use Doctrine\Migrations\Tools\Console\ConsoleRunner;
+use Doctrine\DBAL\Tools\Console as DBALConsole;
+use Doctrine\ORM\Tools\Console\Command;
+use Doctrine\ORM\Tools\Console\EntityManagerProvider\ConnectionFromManagerProvider;
+use Doctrine\ORM\Tools\Console\EntityManagerProvider\HelperSetManagerProvider;
+
+//use Doctrine\ORM\Tools\Console\ConsoleRunner;
+//use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
 
 Config::set_config_path(__DIR__ . '/src/config');
 
 $athene = new Athene();
 
+$entityManagerProvider = new HelperSetManagerProvider(
+    \Doctrine\ORM\Tools\Console\ConsoleRunner::createHelperSet(
+        $athene->getEntityManager()
+    )
+);
+$connectionProvider = new ConnectionFromManagerProvider($entityManagerProvider);
+
+
 $commands = [
     new About(),
+        // DBAL Commands
+    new DBALConsole\Command\ReservedWordsCommand($connectionProvider),
+    new DBALConsole\Command\RunSqlCommand($connectionProvider),
+
+        // ORM Commands
+    new Command\ClearCache\CollectionRegionCommand($entityManagerProvider),
+    new Command\ClearCache\EntityRegionCommand($entityManagerProvider),
+    new Command\ClearCache\MetadataCommand($entityManagerProvider),
+    new Command\ClearCache\QueryCommand($entityManagerProvider),
+    new Command\ClearCache\QueryRegionCommand($entityManagerProvider),
+    new Command\ClearCache\ResultCommand($entityManagerProvider),
+    new Command\SchemaTool\CreateCommand($entityManagerProvider),
+    new Command\SchemaTool\UpdateCommand($entityManagerProvider),
+    new Command\SchemaTool\DropCommand($entityManagerProvider),
+    new Command\EnsureProductionSettingsCommand($entityManagerProvider),
+    new Command\ConvertDoctrine1SchemaCommand(),
+    new Command\GenerateRepositoriesCommand($entityManagerProvider),
+    new Command\GenerateEntitiesCommand($entityManagerProvider),
+    new Command\GenerateProxiesCommand($entityManagerProvider),
+    new Command\ConvertMappingCommand($entityManagerProvider),
+    new Command\RunDqlCommand($entityManagerProvider),
+    new Command\ValidateSchemaCommand($entityManagerProvider),
+    new Command\InfoCommand($entityManagerProvider),
+    new Command\MappingDescribeCommand($entityManagerProvider),
 ];
+if (class_exists(DBALConsole\Command\ImportCommand::class)) {
+    $commands[] = new DBALConsole\Command\ImportCommand();
+}
 
 ConsoleRunner::run(
-    new SingleManagerProvider($athene->getEntityManager()),
-    $commands
+    $commands,
+    $athene->getDependencyFactory()
 );

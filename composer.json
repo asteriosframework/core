@@ -39,7 +39,8 @@
     "symfony/cache": "^6.3",
     "symfony/yaml": "^6.3",
     "doctrine/dbal": "^3.6",
-    "doctrine/orm": "^2.15"
+    "doctrine/orm": "^2.15",
+    "doctrine/doctrine-migrations-bundle": "^3.2"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",

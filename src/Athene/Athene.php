@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Asterios\Core\Athene;
 
 use Asterios\Core\Config;
+use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
+use Doctrine\Migrations\Configuration\Migration\ConfigurationArray;
+use Doctrine\Migrations\DependencyFactory;
 use Doctrine\ORM\ORMSetup;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Configuration;
@@ -15,6 +18,8 @@ class Athene
 {
     protected array $config = [];
     protected EntityManager $entityManager;
+
+    protected DependencyFactory $dependencyFactory;
 
     public function __construct(
         protected Configuration|null $configuration = null,
@@ -47,6 +52,11 @@ class Athene
         }
 
         $this->entityManager = new EntityManager($this->connection, $this->configuration);
+
+        $this->dependencyFactory = DependencyFactory::fromEntityManager(
+            new ConfigurationArray(
+                $this->config['athene']['migrations']
+            ), new ExistingEntityManager($this->entityManager));
     }
 
     public function getConnection(): Connection
@@ -57,5 +67,10 @@ class Athene
     public function getEntityManager(): EntityManager
     {
         return $this->entityManager;
+    }
+
+    public function getDependencyFactory(): DependencyFactory
+    {
+        return $this->dependencyFactory;
     }
 }

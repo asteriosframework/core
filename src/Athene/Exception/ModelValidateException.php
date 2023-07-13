@@ -6,10 +6,10 @@ namespace Asterios\Core\Athene\Exception;
 
 use Exception;
 
-class ModelNotFoundException extends Exception
+class ModelValidateException extends Exception
 {
     /**
      * @var string
      */
-    protected $message = 'Model not found';
+    protected $message = 'Model validation exception';
 }

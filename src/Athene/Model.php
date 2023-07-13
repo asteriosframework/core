@@ -5,13 +5,18 @@ declare(strict_types=1);
 namespace Asterios\Core\Athene;
 
 use Asterios\Core\Athene\Exception\ModelNotFoundException;
+use Asterios\Core\Athene\Exception\ModelValidateException;
 use BadMethodCallException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use Doctrine\Common\Collections\ArrayCollection;
 use Asterios\Core\Athene\Traits\ModelGetterAndSetter;
 
+use Doctrine\ORM\Mapping\PrePersist;
+use Doctrine\ORM\Mapping\PreUpdate;
 use function Symfony\Component\String\b;
 
 /**
@@ -19,12 +24,17 @@ use function Symfony\Component\String\b;
  * @template T of object
  */
 #[MappedSuperclass]
+#[Entity]
+#[HasLifecycleCallbacks]
 class Model
 {
     use ModelGetterAndSetter;
 
     protected EntityManager $entityManager;
     protected EntityRepository $modelRepository;
+
+    protected array $validators = [];
+    protected array $lastValidationErrors = [];
 
     public function __construct()
     {
@@ -33,6 +43,20 @@ class Model
         $this->entityManager = $entityManager;
 
         $this->modelRepository = $this->entityManager->getRepository(get_class($this));
+    }
+
+    #[PrePersist, PreUpdate]
+    public function validate(): void
+    {
+        $this->lastValidationErrors = [];
+
+        foreach ($this->validators as $validator) {
+            $this->$validator($this->lastValidationErrors);
+        }
+
+        if ([] === $this->lastValidationErrors) {
+            throw new ModelValidateException(implode(PHP_EOL, $this->lastValidationErrors));
+        }
     }
 
     /**
