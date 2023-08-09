@@ -1,0 +1,13 @@
+stages:          # List of stages for jobs, and their order of execution
+  - build
+  - test
+  #- deploy
+
+default:
+  tags:
+    - gitlab-org
+
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+  - local: gitlab-ci/build.yml
+  - local: gitlab-ci/test.yml
