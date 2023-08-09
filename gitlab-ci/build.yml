@@ -5,8 +5,6 @@ cache:
 
 build:
   stage: build
-  tags:
-    - gitlab-org
   image: php:latest
   script:
     - apt-get update -yqq
