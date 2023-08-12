@@ -10,6 +10,9 @@ default:
   tags:
     - asteriosphp
 
+variables:
+  DOCKER_IMAGE: registry.gitlab.com/jfheinrich-eu/docker/laravel:latest
+
 include:
   - template: Jobs/SAST.gitlab-ci.yml
   - local: gitlab-ci/build.yml

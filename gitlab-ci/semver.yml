@@ -1,13 +1,8 @@
 cache:
-  key:
-    files:
-      - composer.lock
+  key: build_cache
   paths:
     - vendor/
-    - node_modules/
-    - package.json
-    - package-lock.json
-    - composer.lock
+    - node_modules
 
 fetch-semantic-version:
   image: ${DOCKER_IMAGE}
@@ -29,10 +24,7 @@ fetch-semantic-version:
     key: build_cache
     paths:
       - vendor/
-      - node_modules/
-      - package.json
-      - package-lock.json
-      - composer.lock
+      - node_modules
 
 generate-non-semantic-version:
   stage: release-fetch-version
@@ -85,7 +77,4 @@ release:
     key: build_cache
     paths:
       - vendor/
-      - node_modules/
-      - package.json
-      - package-lock.json
-      - composer.lock
+      - node_modules
