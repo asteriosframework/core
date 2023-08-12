@@ -20,7 +20,7 @@ class ConfigTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->config_path = implode(DIRECTORY_SEPARATOR, [getcwd(), 'tests', 'testdata', 'config']);
+        $this->config_path = implode(DIRECTORY_SEPARATOR, [__DIR__, '/..', 'tests', 'testdata', 'config']);
     }
 
     /**

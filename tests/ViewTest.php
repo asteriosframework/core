@@ -27,7 +27,7 @@ class ViewTest extends MockeryTestCase
      */
     public function forge_exception(): void
     {
-        $testdata_path = getcwd() . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR;
+        $testdata_path = __DIR__ . '/..' . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR;
         Asterios::set_environment(Asterios::DEVELOPMENT);
         Config::set_config_path($testdata_path . 'viewconfig');
 
@@ -48,7 +48,7 @@ class ViewTest extends MockeryTestCase
      */
     public function forge(): void
     {
-        $testdata_path = getcwd() . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR;
+        $testdata_path = __DIR__ . '/..' . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR;
         Asterios::set_environment(Asterios::DEVELOPMENT);
         Config::set_config_path($testdata_path . 'viewconfig');
 
@@ -67,7 +67,7 @@ class ViewTest extends MockeryTestCase
      */
     public function forge_404(): void
     {
-        $testdata_path = getcwd() . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR;
+        $testdata_path = __DIR__ . '/..' . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR;
         Asterios::set_environment(Asterios::DEVELOPMENT);
         Config::set_config_path($testdata_path . 'viewconfig');
 

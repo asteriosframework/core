@@ -31,7 +31,7 @@ class RouterTest extends TestCase
         ];
 
         Asterios::set_environment(Asterios::DEVELOPMENT);
-        Config::set_config_path(getcwd() . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR . 'config');
+        Config::set_config_path(__DIR__ . '/..' . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR . 'config');
 
         $router = new Router('routes_router');
         $result = $router->get_routes();

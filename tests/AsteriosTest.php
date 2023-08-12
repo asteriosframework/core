@@ -22,13 +22,21 @@ class AsteriosTest extends TestCase
         Asterios::set_environment(Asterios::PRODUCTION);
     }
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $rootDir = __DIR__ . '/..';
+
+        Config::set_config_path($rootDir . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR . 'config');
+    }
+
     /**
      * @test
      */
     public function config_exception(): void
     {
         Asterios::set_environment(Asterios::DEVELOPMENT);
-        Config::set_config_path(getcwd() . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR . 'config');
 
         $this->expectException(ConfigLoadException::class);
 
@@ -46,7 +54,6 @@ class AsteriosTest extends TestCase
     public function config(string $environment, string $item, $expected_value): void
     {
         Asterios::set_environment($environment);
-        Config::set_config_path(getcwd() . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR . 'config');
 
         $config = Asterios::config($item);
 
@@ -74,7 +81,7 @@ class AsteriosTest extends TestCase
      */
     public function init_exception(): void
     {
-        $config_path = implode(DIRECTORY_SEPARATOR, [getcwd(), 'tests', 'testdata', 'asterios']);
+        $config_path = implode(DIRECTORY_SEPARATOR, [__DIR__, '/..', 'tests', 'testdata', 'asterios']);
         Asterios::set_environment(Asterios::DEVELOPMENT);
         Config::set_config_path($config_path);
 
