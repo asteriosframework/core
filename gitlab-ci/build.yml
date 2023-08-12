@@ -11,3 +11,5 @@ build:
   script:
     - npm ci > /dev/null
     - composer install
+    - cd tools/php-cs-fixer
+    - composer install
