@@ -1,13 +1,17 @@
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
+  - release-fetch-version
+  - release-build
+  - release
   #- deploy
 
 default:
   tags:
-    - gitlab-org
+    - asteriosphp
 
 include:
   - template: Jobs/SAST.gitlab-ci.yml
   - local: gitlab-ci/build.yml
   - local: gitlab-ci/test.yml
+  - local: gitlab-ci/semver.yml
