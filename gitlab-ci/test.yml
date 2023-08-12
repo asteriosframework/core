@@ -10,7 +10,8 @@ cache:
 # If Xdebug was installed you can generate a coverage report and see code coverage metrics.
 test:
   stage: build
-  image: php:latest
+  image: ${DOCKER_IMAGE}
+  needs: ['build']
   services:
     - name: mariadb:10.4
       alias: db
