@@ -38,9 +38,9 @@
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
-    "phpunit/phpunit": "9.6.5",
-    "mockery/mockery": "1.5.1",
-    "phpstan/phpstan": "1.10.6"
+    "phpunit/phpunit": "^10.3",
+    "mockery/mockery": "^1.6",
+    "phpstan/phpstan": "^1.10"
   },
   "scripts": {
     "tests": [
@@ -50,6 +50,10 @@
     "tests:coverage": [
       "Composer\\Config::disableProcessTimeout",
       "XDEBUG_MODE=coverage ./vendor/bin/phpunit --colors=never -c ./phpunit.xml --coverage-text ./tests"
+    ],
+    "tests:coverage-pretty": [
+      "Composer\\Config::disableProcessTimeout",
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml --coverage-text --testdox ./tests"
     ],
     "phpstan": [
       "Composer\\Config::disableProcessTimeout",
