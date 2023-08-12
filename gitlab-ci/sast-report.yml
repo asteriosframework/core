@@ -1,4 +1,4 @@
-sastnodejs-scan-sast:
+nodejs-scan-sast:
   stage: test
   allow_failure: true
   after_script:
