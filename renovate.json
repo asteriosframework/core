@@ -9,7 +9,8 @@
     ":preserveSemverRanges"
   ],
   "enabledManagers": [
-    "composer"
+    "composer",
+    "npm"
   ],
   "baseBranches": [
     "develop"
