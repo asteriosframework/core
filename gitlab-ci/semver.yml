@@ -8,8 +8,6 @@ fetch-semantic-version:
   image: ${DOCKER_IMAGE}
   stage: release-fetch-version
   needs: ['build']
-  tags:
-    - semver
   only:
     refs:
       - main
@@ -29,8 +27,6 @@ fetch-semantic-version:
 
 generate-non-semantic-version:
   stage: release-fetch-version
-  tags:
-    - semver
   except:
     refs:
       - main
@@ -45,8 +41,6 @@ generate-non-semantic-version:
 
 release-build:
   stage: release-build
-  tags:
-    - semver
   script:
     - echo "Version is $(cat VERSION)"
 
@@ -54,8 +48,6 @@ release:
   image: ${DOCKER_IMAGE}
   needs: ['build']
   stage: release
-  tags:
-    - semver
   only:
     refs:
       - main

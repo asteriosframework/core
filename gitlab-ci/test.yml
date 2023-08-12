@@ -9,7 +9,7 @@ cache:
 # Run our tests
 # If Xdebug was installed you can generate a coverage report and see code coverage metrics.
 test:
-  stage: build
+  stage: test
   image: ${DOCKER_IMAGE}
   needs: ['build']
   services:
@@ -23,9 +23,25 @@ test:
   variables:
     XDEBUG_MODE: coverage
   script:
-    - XDEBUG_MODE=coverage ./vendor/bin/phpunit --colors=never -c ./phpunit.xml --coverage-text ./tests
+    - XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml --do-not-cache-result --log-junit phpunit-report.xml --coverage-cobertura phpunit-coverage.xml --coverage-text --colors=never ./tests
   artifacts:
+    when: always
     reports:
+      junit: phpunit-report.xml
       coverage_report:
         coverage_format: cobertura
-        path: coverage.cobertura.xml
+        path: phpunit-coverage.xml
+  coverage: '/^\s+Lines:\s+[0-9]+[.][0-9]+\%/'
+
+code-quality:
+  image: ${DOCKER_IMAGE}
+  needs: ['build']
+  stage: test
+  script:
+    - composer cs-fixer:check
+    - composer phpstan
+  cache:
+    key: build_cache
+    paths:
+      - vendor/
+      - node_modules/

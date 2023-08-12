@@ -1,0 +1,29 @@
+badges:
+  image: python:3.9
+  stage: badges
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    PRIVATE_TOKEN: $PRIVATE_ACCESS_TOKEN
+  cache:
+    key: badges
+    paths:
+      - .cache/pip
+      - venv/
+  before_script:
+    - python -V
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+  script:
+    - pip install badges-gitlab
+    - badges-gitlab -V
+    - badges-gitlab
+  artifacts:
+    when: always
+    paths:
+      - public/badges/*.svg
+    expire_in: 3 months
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
+      allow_failure: true

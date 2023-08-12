@@ -1,0 +1,53 @@
+sastnodejs-scan-sast:
+  stage: test
+  allow_failure: true
+  after_script:
+    - if [[ -f gl-sast-report.json ]]; then cp gl-sast-report.json gl-sast-nodejs-scan-report.json; fi
+  artifacts:
+    paths:
+      - gl-sast-nodejs-scan-report.json
+    when: always
+
+phpcs-security-audit-sast:
+  stage: test
+  allow_failure: true
+  after_script:
+    - if [[ -f gl-sast-report.json ]]; then cp gl-sast-report.json gl-sast-phpcs-security-audit-report.json; fi
+  artifacts:
+    paths:
+      - gl-sast-phpcs-security-audit-report.json
+    when: always
+
+nodejs-scan-sast-convert:
+  stage: convert
+  allow_failure: true
+  image:
+    name: ${DOCKER_SEC_IMAGE}
+    entrypoint: [""]
+  dependencies:
+    - nodejs-scan-sast
+  rules:
+    - exists:
+      - gl-sast-nodejs-scan-report.json
+  script:
+    - if [[ -f gl-sast-nodejs-scan-report.json ]]; then ss2ju sast gl-sast-nodejs-scan-report.json gl-sast-nodejs-scan-report.xml; fi
+  artifacts:
+    reports:
+      junit: gl-sast-nodejs-scan-report.xml
+
+phpcs-security-audit-sast-convert:
+  stage: convert
+  allow_failure: true
+  image:
+    name: ${DOCKER_SEC_IMAGE}
+    entrypoint: [""]
+  dependencies:
+    - phpcs-security-audit-sast
+  rules:
+    - exists:
+      - gl-sast-phpcs-security-audit-report.json
+  script:
+    - if [[ -f gl-sast-phpcs-security-audit-report.json ]]; then ss2ju sast gl-sast-phpcs-security-audit-report.json gl-sast-phpcs-security-audit-report.xml; fi
+  artifacts:
+    reports:
+      junit: gl-sast-phpcs-security-audit-report.xml

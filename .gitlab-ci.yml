@@ -1,9 +1,11 @@
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
+  - convert^
   - release-fetch-version
   - release-build
   - release
+  - badges
   #- deploy
 
 default:
@@ -12,9 +14,14 @@ default:
 
 variables:
   DOCKER_IMAGE: registry.gitlab.com/jfheinrich-eu/docker/laravel:latest
+  DOCKER_SEC_IMAGE: "angrymeir/secscanner2junit:latest"
+  SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, vendor, node_modules, resources/static/abc2svg"
+  #SAST_EXCLUDED_ANALYZERS: "phpcs-security-audit"
 
 include:
   - template: Jobs/SAST.gitlab-ci.yml
   - local: gitlab-ci/build.yml
   - local: gitlab-ci/test.yml
   - local: gitlab-ci/semver.yml
+  - local: gitlab-ci/sast-report.yml
+  - local: gitlab-ci/badges.yml
