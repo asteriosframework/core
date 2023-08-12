@@ -165,7 +165,7 @@ class InputServiceTest extends MockeryTestCase
 
     ########## Provider ##########
 
-    public function getProvider(): array
+    public static function getProvider(): array
     {
         return [
             ['page', null, null, null],
@@ -177,7 +177,7 @@ class InputServiceTest extends MockeryTestCase
         ];
     }
 
-    public function realIpProvider(): array
+    public static function realIpProvider(): array
     {
         return [
             ['HTTP_CLIENT_IP', 'value HTTP_CLIENT_IP', 'value HTTP_CLIENT_IP'],
@@ -186,7 +186,7 @@ class InputServiceTest extends MockeryTestCase
         ];
     }
 
-    public function postProvider(): array
+    public static function postProvider(): array
     {
         return [
             [null, null, null],
@@ -195,7 +195,7 @@ class InputServiceTest extends MockeryTestCase
         ];
     }
 
-    public function cookieProvider(): array
+    public static function cookieProvider(): array
     {
         return [
             [null, null, null],

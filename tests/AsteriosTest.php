@@ -112,7 +112,7 @@ class AsteriosTest extends TestCase
 
     ########## Provider ##########
 
-    public function config_provider(): array
+    public static function config_provider(): array
     {
         return [
             [Asterios::DEVELOPMENT, 'debug', true],
@@ -121,7 +121,7 @@ class AsteriosTest extends TestCase
         ];
     }
 
-    public function set_timezone_provider(): array
+    public static function set_timezone_provider(): array
     {
         return [
             ['Europe/Berlin', 'Europe/Berlin'],
@@ -129,7 +129,7 @@ class AsteriosTest extends TestCase
         ];
     }
 
-    public function is_environment_provider(): array
+    public static function is_environment_provider(): array
     {
         return [
             ['is_production', Asterios::PRODUCTION, true],

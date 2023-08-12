@@ -132,7 +132,7 @@ class DevicedetectTest extends TestCase
 
     ########## Provider ##########
 
-    public function is_mobile_provider(): array
+    public static function is_mobile_provider(): array
     {
         return [
             [true, true],
@@ -140,7 +140,7 @@ class DevicedetectTest extends TestCase
         ];
     }
 
-    public function is_tablet_provider(): array
+    public static function is_tablet_provider(): array
     {
         return [
             [true, true],
@@ -148,7 +148,7 @@ class DevicedetectTest extends TestCase
         ];
     }
 
-    public function is_desktop_provider(): array
+    public static function is_desktop_provider(): array
     {
         return [
             [true, true, false],
@@ -158,7 +158,7 @@ class DevicedetectTest extends TestCase
         ];
     }
 
-    public function get_http_header_provider(): array
+    public static function get_http_header_provider(): array
     {
         return [
             ['key', 'value', 'value'],

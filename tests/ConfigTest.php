@@ -138,7 +138,7 @@ class ConfigTest extends TestCase
 
     ########## Provider ##########
 
-    public function load_provider(): array
+    public static function load_provider(): array
     {
         return [
             [
@@ -174,7 +174,7 @@ class ConfigTest extends TestCase
         ];
     }
 
-    public function get_dot_notation_provider(): array
+    public static function get_dot_notation_provider(): array
     {
         return [
             ['dotnotation', 'logger.path', null, 'logs'],
@@ -192,7 +192,7 @@ class ConfigTest extends TestCase
         ];
     }
 
-    public function get_memory_provider(): array
+    public static function get_memory_provider(): array
     {
         return [
             ['foo', 'bar', 'bar'],
@@ -204,7 +204,7 @@ class ConfigTest extends TestCase
         ];
     }
 
-    public function get_memory_default_provider(): array
+    public static function get_memory_default_provider(): array
     {
         return [
             ['bar.foo', null],

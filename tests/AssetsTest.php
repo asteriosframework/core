@@ -129,7 +129,7 @@ namespace Asterios\Test
 
         ########## Provider ##########
 
-        public function css_provider(): array
+        public static function css_provider(): array
         {
             return [
                 [
@@ -170,7 +170,7 @@ namespace Asterios\Test
             ];
         }
 
-        public function js_provider(): array
+        public static function js_provider(): array
         {
             return [
                 [
@@ -194,7 +194,7 @@ namespace Asterios\Test
             ];
         }
 
-        public function img_provider(): array
+        public static function img_provider(): array
         {
             return [
                 [
@@ -236,7 +236,7 @@ namespace Asterios\Test
             ];
         }
 
-        public function favicon_provider(): array
+        public static function favicon_provider(): array
         {
             return [
                 [
@@ -275,7 +275,7 @@ namespace Asterios\Test
             ];
         }
 
-        public function forge_provider(): array
+        public static function forge_provider(): array
         {
             return [
                 [

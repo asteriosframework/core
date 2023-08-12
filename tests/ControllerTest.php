@@ -34,7 +34,7 @@ class ControllerTest extends MockeryTestCase
 
     ########## Provider ##########
 
-    public function response_provider(): array
+    public static function response_provider(): array
     {
         return [
             ['application/json', ['data' => true], '{"data":true}'],
