@@ -5,6 +5,7 @@ cache:
   paths:
     - vendor/
     - node_modules
+    - tools/php-cs-fixer/vendor/
 
 # Run our tests
 # If Xdebug was installed you can generate a coverage report and see code coverage metrics.
@@ -45,3 +46,4 @@ code-quality:
     paths:
       - vendor/
       - node_modules/
+      - tools/php-cs-fixer/vendor/

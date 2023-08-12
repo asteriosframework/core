@@ -4,6 +4,7 @@ cache:
   paths:
     - vendor/
     - node_modules
+    - tools/php-cs-fixer/vendor/
 
 build:
   stage: build

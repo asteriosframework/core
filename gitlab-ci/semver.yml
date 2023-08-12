@@ -3,6 +3,7 @@ cache:
   paths:
     - vendor/
     - node_modules
+    - tools/php-cs-fixer/vendor/
 
 fetch-semantic-version:
   image: ${DOCKER_IMAGE}
@@ -24,6 +25,7 @@ fetch-semantic-version:
     paths:
       - vendor/
       - node_modules
+      - tools/php-cs-fixer/vendor/
 
 generate-non-semantic-version:
   stage: release-fetch-version
@@ -72,3 +74,4 @@ release:
     paths:
       - vendor/
       - node_modules
+      - tools/php-cs-fixer/vendor/
