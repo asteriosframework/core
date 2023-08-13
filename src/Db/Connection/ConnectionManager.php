@@ -36,6 +36,8 @@ class ConnectionManager implements ConnectionManagerInterface
             'mysql' => $this->mysqlConnect(),
             default => throw new DbConnectionManagerException(message: 'Driver "' . $this->config->type . '" not found'),
         };
+
+        Config::set_memory('DbConnection', $this->connection);
     }
 
     /**

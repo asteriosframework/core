@@ -12,7 +12,7 @@ return [
             'db_password' => 'db',
             'db_database' => 'db',
             'db_attributes' => [
-                // PDO attributes like PDO::MYSQL_ATTR_US_BUFFERED_QUERY
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ],
             'db_charset' => 'utf8',
         ],
