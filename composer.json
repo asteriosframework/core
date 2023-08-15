@@ -38,7 +38,7 @@
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
-    "phpunit/phpunit": "9.6.10",
+    "phpunit/phpunit": "10.3.2",
     "mockery/mockery": "1.6.6",
     "phpstan/phpstan": "1.10.6"
   },
