@@ -53,7 +53,11 @@
     ],
     "tests:coverage-pretty": [
       "Composer\\Config::disableProcessTimeout",
-      "XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml --coverage-text --testdox ./tests"
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml --coverage-text --coverage-html coverage-report/ --testdox ./tests"
+    ],
+    "tests:ci": [
+      "Composer\\Config::disableProcessTimeout",
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml --do-not-cache-result --log-junit phpunit-report.xml --coverage-cobertura phpunit-coverage.xml --coverage-html coverage-report/ --coverage-text --colors=never ./tests"
     ],
     "phpstan": [
       "Composer\\Config::disableProcessTimeout",

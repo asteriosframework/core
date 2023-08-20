@@ -24,7 +24,7 @@ test:
   variables:
     XDEBUG_MODE: coverage
   script:
-    - XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml --do-not-cache-result --log-junit phpunit-report.xml --coverage-cobertura phpunit-coverage.xml --coverage-text --colors=never ./tests
+    - composer tests:ci
   artifacts:
     when: always
     reports:
@@ -32,6 +32,8 @@ test:
       coverage_report:
         coverage_format: cobertura
         path: phpunit-coverage.xml
+    paths:
+      - coverage-report/
   coverage: '/^\s+Lines:\s+[0-9]+[.][0-9]+\%/'
 
 code-quality:

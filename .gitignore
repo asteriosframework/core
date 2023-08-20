@@ -8,3 +8,4 @@
 .phpunit.result.cache
 phpunit.xml.bak
 .devcontainer/devcontainer.json
+coverage-report/
