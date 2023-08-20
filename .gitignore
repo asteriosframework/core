@@ -9,3 +9,5 @@
 phpunit.xml.bak
 .devcontainer/devcontainer.json
 coverage-report/
+phpunit-coverage.xml
+phpunit-report.xml

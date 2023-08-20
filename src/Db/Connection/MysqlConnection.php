@@ -12,7 +12,7 @@ use Asterios\Core\Exception\DbConnectionManagerException;
 use Asterios\Core\Db\ORM\Support\Collections\ResultCollection;
 use PDOException;
 
-class MysqlConnection implements ConnectionInterface
+class MySqlConnection implements ConnectionInterface
 {
     protected PDO $connection;
 

@@ -31,10 +31,10 @@ class ConnectionManager implements ConnectionManagerInterface
     {
         $this->config = Config::get('db', $config_group);
 
-        $this->connection = match ($this->config->type)
+        $this->connection = match ($this->config->db_type)
         {
             'mysql' => $this->mysqlConnect(),
-            default => throw new DbConnectionManagerException(message: 'Driver "' . $this->config->type . '" not found'),
+            default => throw new DbConnectionManagerException(message: 'Driver "' . $this->config->db_type . '" not found'),
         };
 
         Config::set_memory('DbConnection', $this->connection);
@@ -62,9 +62,9 @@ class ConnectionManager implements ConnectionManagerInterface
      */
     protected function mysqlConnect(): ConnectionInterface
     {
-        $this->config->{'$dsn'} = "mysql:host={$this->config->db_host};dbname={$this->config->db_database};charset={$this->config->db_charset}";
+        $this->config->{'dsn'} = "mysql:host={$this->config->db_host};dbname={$this->config->db_database};charset={$this->config->db_charset}";
 
-        return MysqlConnection::connect(
+        return MySqlConnection::connect(
             dsn: $this->config->dsn,
             username: $this->config->db_user,
             password: $this->config->db_password,
