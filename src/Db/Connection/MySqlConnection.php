@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Asterios\Core\Db\Connection;
 
+use Asterios\Core\Db\Exceptions\DbException;
 use Asterios\Core\Db\Exceptions\DbQueryException;
 use Asterios\Core\Db\ORM\Statement;
 use PDO;
@@ -70,7 +71,18 @@ class MySqlConnection implements ConnectionInterface
      */
     public function exec(string $statement): false|int
     {
-        return $this->connection->exec($statement);
+        try
+        {
+            return $this->connection->exec($statement);
+        }
+        catch (PDOException $e)
+        {
+            throw new DbException(
+                message: $e->getMessage(),
+                code: (int) $e->getCode(),
+                previous: $e->getPrevious()
+            );
+        }
     }
     /**
      * @inheritdoc
@@ -94,12 +106,7 @@ class MySqlConnection implements ConnectionInterface
     public function errorDriverCode(): int
     {
         $error = $this->errorInfo();
-        if (is_array($error) && isset($error[2]))
-        {
-            return (int) $error[1];
-        }
-
-        return 0;
+        return (int) $error[1];
     }
 
     /**
@@ -108,12 +115,7 @@ class MySqlConnection implements ConnectionInterface
     public function errorMessage(): string
     {
         $error = $this->errorInfo();
-        if (is_array($error) && isset($error[2]))
-        {
-            return (string) $error[2];
-        }
-
-        return '';
+        return (string) $error[2];
     }
 
     /**
@@ -129,7 +131,7 @@ class MySqlConnection implements ConnectionInterface
         {
             throw new DbQueryException(
                 message: $e->getMessage(),
-                code: $e->getCode(),
+                code: (int) $e->getCode(),
                 previous: $e->getPrevious()
             );
         }

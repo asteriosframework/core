@@ -32,6 +32,12 @@ final class Statement
      */
     public function fetchAll(int $mode, null|callable |string $callbackClass = null, null|array $constructorArgs = null): array
     {
-        return $this->statement->fetchAll($mode, $callbackClass, $constructorArgs);
+        return match ($mode)
+        {
+            self::FETCH_CLASS => $this->statement->fetchAll($mode, $callbackClass, $constructorArgs),
+            self::FETCH_COLUMN => $this->statement->fetchAll($mode, (int) $callbackClass),
+            self::FETCH_FUNC => $this->statement->fetchAll($mode, $callbackClass),
+            default => $this->statement->fetchAll($mode)
+        };
     }
 }
