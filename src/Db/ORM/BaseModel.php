@@ -13,41 +13,8 @@ use Asterios\Core\Interfaces\Db\ConnectionInterface;
 use Asterios\Core\Interfaces\Db\ConnectionManagerInterface;
 use Asterios\Core\Db\ORM\Support\Collections\ResultCollection;
 
-final class BaseModel
+class BaseModel
 {
-    /**
-     * @param string $sql
-     * @param ConnectionManagerInterface|null $connectionManager
-     * @return int|false
-     * @throws DbException
-     */
-    public static function exec(string $sql, ConnectionManagerInterface $connectionManager = null): int|false
-    {
-        $conn = self::connect($connectionManager);
-
-        try
-        {
-            $affected = $conn->exec($sql);
-            if (false === $affected)
-            {
-                throw new DbException(
-                    implode($conn->errorInfo()),
-                    code: $conn->errorDriverCode()
-                );
-            }
-
-            return $affected;
-        }
-        catch (PDOException $e)
-        {
-            throw new DbException(
-                message: $e->getMessage(),
-                code: $e->getCode(),
-                previous: $e->getPrevious()
-            );
-        }
-    }
-
     /**
      * @param string $query
      * @param string $class
@@ -59,15 +26,8 @@ final class BaseModel
     {
         $conn = self::connect($connectionManager);
 
-        $statement = $conn->query($query);
 
-        if (false === $statement)
-        {
-            throw new DbQueryException(
-                message: $conn->errorMessage(),
-                code: $conn->errorDriverCode()
-            );
-        }
+        $statement = $conn->query($query);
 
         if (null !== $class)
         {

@@ -27,6 +27,11 @@ interface ConnectionInterface
     ): ConnectionInterface;
 
     /**
+     * @return void
+     */
+    public function disconnect(): void;
+
+    /**
      * @return null|string
      */
     public function errorCode(): ?string;

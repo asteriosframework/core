@@ -15,7 +15,7 @@ use PDOException;
 
 class MySqlConnection implements ConnectionInterface
 {
-    protected PDO $connection;
+    protected ?PDO $connection = null;
 
     /**
      * @param string $dsn
@@ -47,6 +47,16 @@ class MySqlConnection implements ConnectionInterface
                 previous: $e
             );
         }
+    }
+
+    public function __destruct()
+    {
+        $this->disconnect();
+    }
+
+    public function disconnect(): void
+    {
+        $this->connection = null;
     }
 
 

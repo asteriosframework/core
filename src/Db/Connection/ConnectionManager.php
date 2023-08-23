@@ -19,9 +19,9 @@ class ConnectionManager implements ConnectionManagerInterface
     protected object $config;
 
     /**
-     * @var ConnectionInterface
+     * @var ConnectionInterface|null
      */
-    protected $connection;
+    protected ?ConnectionInterface $connection;
 
     /**
      * @param string $config_group
@@ -38,6 +38,19 @@ class ConnectionManager implements ConnectionManagerInterface
         };
 
         Config::set_memory('DbConnection', $this->connection);
+    }
+
+    public function __destruct()
+    {
+        $this->disconnect();
+    }
+
+    /**
+     * @return void
+     */
+    public function disconnect(): void
+    {
+        $this->connection = null;
     }
 
     /**
