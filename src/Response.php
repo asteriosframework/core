@@ -4,7 +4,6 @@ namespace Asterios\Core;
 
 class Response
 {
-
     /**
      * The body of the response without the headers block
      *
@@ -69,7 +68,7 @@ class Response
      *
      * @return string
      **/
-    function __toString()
+    public function __toString()
     {
         return $this->body;
     }

@@ -80,7 +80,7 @@ class Model
     protected $_id;
     protected $db_schema = [];
     /** @var null|int */
-    static protected $app_id = null;
+    protected static $app_id = null;
 
     /**
      * This method can be used in three ways: find a specific id (primary key), find first or all entries with conditions.
@@ -122,7 +122,7 @@ class Model
     {
         $model = static::class;
 
-        return new $model;
+        return new $model();
     }
 
     /**
@@ -1030,8 +1030,7 @@ class Model
         $this->has_properties($data);
 
         $sql = self::SQL_COMMAND_UPDATE . ' 
-            ' . $this->table() . ' ' . self::SQL_COMMAND_SET . ' ' . $this->prepare_update($data) . ' ' . self::SQL_STATEMENT_WHERE . ' ' . $this->backticks
-            ($this->primary_key()) . ' = ' . $id;
+            ' . $this->table() . ' ' . self::SQL_COMMAND_SET . ' ' . $this->prepare_update($data) . ' ' . self::SQL_STATEMENT_WHERE . ' ' . $this->backticks($this->primary_key()) . ' = ' . $id;
 
         return Db::write($sql, $this->connection);
     }

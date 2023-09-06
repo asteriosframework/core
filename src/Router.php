@@ -387,7 +387,7 @@ class Router
 
             if (class_exists($controller))
             {
-                $instance = new $controller;
+                $instance = new $controller();
 
                 $isAuth = true;
 

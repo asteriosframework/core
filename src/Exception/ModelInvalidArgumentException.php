@@ -2,4 +2,6 @@
 
 namespace Asterios\Core\Exception;
 
-class ModelInvalidArgumentException extends AsteriosException {}
+class ModelInvalidArgumentException extends AsteriosException
+{
+}

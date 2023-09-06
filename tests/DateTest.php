@@ -136,7 +136,7 @@ class DateTest extends TestCase
 
     ########## Provider ##########
 
-    public function setTimezoneProvider(): array
+    public static function setTimezoneProvider(): array
     {
         return [
             ['Europe/Berlin', 'Europe/Berlin'],
@@ -144,7 +144,7 @@ class DateTest extends TestCase
         ];
     }
 
-    public function daysInMonthProvider(): array
+    public static function daysInMonthProvider(): array
     {
         return [
             [2, 2021, 28],
@@ -154,7 +154,7 @@ class DateTest extends TestCase
         ];
     }
 
-    public function getTimestampProvider(): array
+    public static function getTimestampProvider(): array
     {
         return [
             ['01.01.2022', '1640991600'],
@@ -162,7 +162,7 @@ class DateTest extends TestCase
         ];
     }
 
-    public function formatProvider(): array
+    public static function formatProvider(): array
     {
         return [
             ['2022-01-01', 'd.m.Y', '01.01.2022'],

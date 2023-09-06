@@ -2,4 +2,6 @@
 
 namespace Asterios\Core\Exception;
 
-class ModelException extends AsteriosException {}
+class ModelException extends AsteriosException
+{
+}

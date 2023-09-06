@@ -57,7 +57,8 @@ class Date
 
             return (new \DateTime($date, new \DateTimeZone(self::DEFAULT_TIMEZONE)))->format('t');
 
-        } catch (\Exception $e)
+        }
+        catch (\Exception $e)
         {
             throw new DateException($e->getMessage());
         }
@@ -72,7 +73,8 @@ class Date
         try
         {
             return (new \DateTime($date, new \DateTimeZone(self::DEFAULT_TIMEZONE)))->getTimestamp();
-        } catch (\Exception $e)
+        }
+        catch (\Exception $e)
         {
             throw new DateException($e->getMessage());
         }
@@ -86,7 +88,8 @@ class Date
         try
         {
             return (new \DateTime($date, new \DateTimeZone(self::DEFAULT_TIMEZONE)))->format($format);
-        } catch (\Exception $e)
+        }
+        catch (\Exception $e)
         {
             throw new DateException($e->getMessage());
         }

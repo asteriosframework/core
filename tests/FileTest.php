@@ -33,7 +33,7 @@ class FileTest extends MockeryTestCase
 
     // Provider
 
-    public function fileExtensionFromMimeTypeProvider(): array
+    public static function fileExtensionFromMimeTypeProvider(): array
     {
         return [
             ['application/pdf', 'pdf'],
