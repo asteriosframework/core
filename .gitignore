@@ -4,4 +4,8 @@
 /.idea/
 *.DS_Store
 .phpunit.result.cache
+.php-cs-fixer.cache
 node_modules/
+coverage-report/
+phpunit-coverage.xml
+phpunit-report.xml
