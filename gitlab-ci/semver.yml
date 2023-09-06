@@ -5,6 +5,11 @@ cache:
     - node_modules
     - tools/php-cs-fixer/vendor/
 
+before_script:
+  - touch CHANGELOG.md
+  - touch VERSION
+  - touch LICENSE
+
 fetch-semantic-version:
   image: ${DOCKER_IMAGE}
   stage: release-fetch-version
@@ -56,13 +61,7 @@ release:
       - develop
       - /^(([0-9]+)\.)?([0-9]+)\.x/                                                                   # This matches maintenance branches
       - /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/ # This matches pre-releases
-  before_script:
-    - which ssh-agent || ( apk --update add openssh-client ) && eval $(ssh-agent -s) && ssh-add ~/.ssh/id_ed25519
-    - ssh-keyscan  gitlab.com >> ~/.ssh/known_hosts
   script:
-    - touch CHANGELOG.md
-    - touch VERSION
-    - touch LICENSE
     - npx semantic-release
   artifacts:
     paths:
