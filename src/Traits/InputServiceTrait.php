@@ -18,6 +18,6 @@ trait InputServiceTrait
 
     public function getInputService(): InputService
     {
-        return $this->inputService ?? new InputService;
+        return $this->inputService ?? new InputService();
     }
 }

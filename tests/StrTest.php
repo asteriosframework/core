@@ -338,7 +338,7 @@ class StrTest extends TestCase
 
     ########## Provider ##########
 
-    public function startsWithProvider(): array
+    public static function startsWithProvider(): array
     {
         return [
             ['foo_bar', 'foo_', true],
@@ -346,7 +346,7 @@ class StrTest extends TestCase
         ];
     }
 
-    public function endsWithProvider(): array
+    public static function endsWithProvider(): array
     {
         return [
             ['foo_bar', '_bar', true],
@@ -354,7 +354,7 @@ class StrTest extends TestCase
         ];
     }
 
-    public function subProvider(): array
+    public static function subProvider(): array
     {
         return [
             ['foo', 1, 2, 'ISO-8859-15', 'oo'],
@@ -363,7 +363,7 @@ class StrTest extends TestCase
         ];
     }
 
-    public function lengthProvider(): array
+    public static function lengthProvider(): array
     {
         return [
             ['foo', 'UTF-8', 3],
@@ -371,7 +371,7 @@ class StrTest extends TestCase
         ];
     }
 
-    public function lowerProvider(): array
+    public static function lowerProvider(): array
     {
         return [
             ['FOO', 'UTF-8', 'foo'],
@@ -380,7 +380,7 @@ class StrTest extends TestCase
         ];
     }
 
-    public function upperProvider(): array
+    public static function upperProvider(): array
     {
         return [
             ['foo', 'UTF-8', 'FOO'],
@@ -389,7 +389,7 @@ class StrTest extends TestCase
         ];
     }
 
-    public function isJsonProvider(): array
+    public static function isJsonProvider(): array
     {
         return [
             ['{"foo": "bar"}', true],
@@ -398,7 +398,7 @@ class StrTest extends TestCase
         ];
     }
 
-    public function isXmlProvider(): array
+    public static function isXmlProvider(): array
     {
         return [
             ['<xml><foo></foo></xml>', true],
@@ -407,7 +407,7 @@ class StrTest extends TestCase
         ];
     }
 
-    public function isSerializedProvider(): array
+    public static function isSerializedProvider(): array
     {
         return [
             [serialize('foo'), true],
@@ -415,7 +415,7 @@ class StrTest extends TestCase
         ];
     }
 
-    public function isHtmlProvider(): array
+    public static function isHtmlProvider(): array
     {
         return [
             ['<html lang="en"><head><title>Test</title></head><body></body></html>', true],
@@ -423,7 +423,7 @@ class StrTest extends TestCase
         ];
     }
 
-    public function filterKeysProvider(): array
+    public static function filterKeysProvider(): array
     {
         return [
             [['foo' => 'bar', 'bar' => 'foo'], ['foo'], false, ['foo' => 'bar']],
@@ -431,7 +431,7 @@ class StrTest extends TestCase
         ];
     }
 
-    public function trimDataProvider(): array
+    public static function trimDataProvider(): array
     {
         return [
             [0, 0, null],

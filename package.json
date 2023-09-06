@@ -1,0 +1,38 @@
+{
+    "name": "asteriosphp-core",
+    "private": false,
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@gitlab.com/asteriosframework/core.git"
+    },
+    "keywords": [],
+    "author": "Benjamin Butschko <ben@asteriosphp.de>",
+    "contributors": [
+        {
+            "name": "Benjamin Butschko <ben@asteriosphp.de>"
+        },
+        {
+            "name": "Joerg Heinrich <joerg@asteriosphp.de>"
+        },
+        {
+            "name": "Andreas Roos <andreas@asteriosphp.de>"
+        }
+    ],
+    "license": "MIT",
+    "bugs": {
+        "url": "https://gitlab.com/asteriosframework/core/issues"
+    },
+    "homepage": "https://asteriosphp.de",
+    "version": "0.0.0-development",
+    "devDependencies": {
+        "@semantic-release/changelog": "^6.0.3",
+        "@semantic-release/exec": "^6.0.3",
+        "@semantic-release/git": "^10.0.1",
+        "@semantic-release/gitlab": "^12.0.1",
+        "semantic-release": "^21.0.2",
+        "semantic-release-license": "^1.0.3"
+    },
+    "dependencies": {
+        "conventional-changelog-conventionalcommits": "^7.0.0"
+    }
+}

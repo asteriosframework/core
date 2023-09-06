@@ -11,12 +11,12 @@ class Config
     /**
      * @var string
      */
-    static protected $config_path;
+    protected static $config_path;
 
     /**
      * @var array
      */
-    static protected $memory_items = [];
+    protected static $memory_items = [];
 
     /**
      * @param string $config_path

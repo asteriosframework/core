@@ -45,16 +45,32 @@
   "scripts": {
     "tests": [
       "Composer\\Config::disableProcessTimeout",
-      "./vendor/bin/phpunit  --colors=never -c ./phpunit.xml"
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit  --colors=never -c ./phpunit.xml"
     ],
     "tests:coverage": [
       "Composer\\Config::disableProcessTimeout",
       "XDEBUG_MODE=coverage ./vendor/bin/phpunit --colors=never -c ./phpunit.xml --coverage-text ./tests"
     ],
+    "tests:coverage-pretty": [
+      "Composer\\Config::disableProcessTimeout",
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml --coverage-text --coverage-html coverage-report/ --testdox ./tests"
+    ],
+    "tests:ci": [
+      "Composer\\Config::disableProcessTimeout",
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml --do-not-cache-result --log-junit phpunit-report.xml --coverage-cobertura phpunit-coverage.xml --coverage-html coverage-report/ --coverage-text --colors=never ./tests"
+    ],
     "phpstan": [
       "Composer\\Config::disableProcessTimeout",
       "./vendor/bin/phpstan analyse -c phpstan.neon --no-progress --memory-limit 1G --xdebug"
     ],
-    "ddev:phpstan": "composer phpstan"
+    "ddev:phpstan": "composer phpstan",
+    "cs-fixer:check": "./php-cs-fixer -t",
+    "cs-fixer:fix": "./php-cs-fixer -f",
+    "all": [
+      "@cs-fixer:check",
+      "@phpstan",
+      "@tests"
+    ]
+
   }
 }

@@ -26,7 +26,7 @@ class ValidationTest extends TestCase
 
     // Provider
 
-    public function run_validate_email_provider(): array
+    public static function run_validate_email_provider(): array
     {
         return [
             ['john.doe@domain.tld', true],
