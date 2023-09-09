@@ -1,7 +1,7 @@
 # AseriosPHP <!-- omit in toc -->
 
-[![pipeline status](https://gitlab.com/asteriosframework/core/badges/feature/AF-9/pipeline.svg)](https://gitlab.com/asteriosframework/core/-/commits/feature/AF-9)
-[![coverage report](https://gitlab.com/asteriosframework/core/badges/feature/AF-9/coverage.svg)](https://gitlab.com/asteriosframework/core/-/commits/feature/AF-9)
+[![pipeline status](https://gitlab.com/asteriosframework/core/badges/develop/pipeline.svg)](https://gitlab.com/asteriosframework/core/-/commits/develop)
+[![coverage report](https://gitlab.com/asteriosframework/core/badges/develop/coverage.svg)](https://gitlab.com/asteriosframework/core/-/commits/develop)
 [![Latest Release](https://gitlab.com/asteriosframework/core/-/badges/release.svg)](https://gitlab.com/asteriosframework/core/-/releases)
 
 - [Installation](#installation)

@@ -1,6 +1,6 @@
 {
   "name": "asterios/core",
-  "description" : "Asterios PHP Core",
+  "description": "Asterios PHP Core",
   "type": "asterios-package",
   "homepage": "https://www.asteriosphp.de",
   "license": "MIT",
@@ -38,9 +38,9 @@
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
-    "phpunit/phpunit": "^10.3",
-    "mockery/mockery": "^1.6",
-    "phpstan/phpstan": "^1.10"
+    "phpunit/phpunit": "10.3.3",
+    "mockery/mockery": "1.6.6",
+    "phpstan/phpstan": "1.10.33"
   },
   "scripts": {
     "tests": [

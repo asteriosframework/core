@@ -5,15 +5,20 @@ cache:
     - node_modules
     - tools/php-cs-fixer/vendor/
 
+before_script:
+  - touch CHANGELOG.md
+  - touch VERSION
+  - touch LICENSE
+
 fetch-semantic-version:
   image: ${DOCKER_IMAGE}
   stage: release-fetch-version
-  needs: ['build']
+  needs: ["build"]
   only:
     refs:
       - main
       - develop
-      - /^(([0-9]+)\.)?([0-9]+)\.x/                                                                   # This matches maintenance branches
+      - /^(([0-9]+)\.)?([0-9]+)\.x/ # This matches maintenance branches
       - /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/ # This matches pre-releases
   script:
     - npx semantic-release --generate-notes false --dry-run
@@ -33,7 +38,7 @@ generate-non-semantic-version:
     refs:
       - main
       - develop
-      - /^(([0-9]+)\.)?([0-9]+)\.x/                                                                   # This matches maintenance branches
+      - /^(([0-9]+)\.)?([0-9]+)\.x/ # This matches maintenance branches
       - /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/ # This matches pre-releases
   script:
     - echo build-$CI_PIPELINE_ID > VERSION
@@ -48,27 +53,21 @@ release-build:
 
 release:
   image: ${DOCKER_IMAGE}
-  needs: ['build']
+  needs: ["build"]
   stage: release
   only:
     refs:
       - main
       - develop
-      - /^(([0-9]+)\.)?([0-9]+)\.x/                                                                   # This matches maintenance branches
+      - /^(([0-9]+)\.)?([0-9]+)\.x/ # This matches maintenance branches
       - /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/ # This matches pre-releases
-  before_script:
-    - which ssh-agent || ( apk --update add openssh-client ) && eval $(ssh-agent -s) && ssh-add ~/.ssh/id_ed25519
-    - ssh-keyscan  gitlab.com >> ~/.ssh/known_hosts
   script:
-    - touch CHANGELOG.md
-    - touch VERSION
-    - touch LICENSE
     - npx semantic-release
   artifacts:
     paths:
-    - CHANGELOG.md
-    - VERSION
-    - LICENSE
+      - CHANGELOG.md
+      - VERSION
+      - LICENSE
   cache:
     key: build_cache
     paths:
