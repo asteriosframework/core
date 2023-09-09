@@ -13,7 +13,6 @@
     "npm"
   ],
   "baseBranches": [
-    "develop",
-    "feature/AF-9"
+    "develop"
   ]
 }
