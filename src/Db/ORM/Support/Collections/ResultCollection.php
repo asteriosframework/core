@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace Asterios\Core\Db\ORM\Support\Collections;
 
+/**
+ * @template TKey of array-key
+ * @template TValue of array|object
+ *
+ * @extends Collection<TKey, TValue>
+ */
 class ResultCollection extends Collection
 {
     /**
-     * @param mixed $index
-     * @param mixed $value
+     * @param TKey $index
+     * @param TValue $value
      * @return void
      */
     public function offsetSet($index, $value): void
