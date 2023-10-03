@@ -33,7 +33,7 @@
     }
   },
   "require": {
-    "vanilla/htmlawed": "2.2.5",
+    "vanilla/htmlawed": "2.2.15",
     "mobiledetect/mobiledetectlib": "3.74.0"
   },
   "require-dev": {
