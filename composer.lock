@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b9c880de4490afa708fc2dfc8461feac",
+    "content-hash": "facdf3eaaa3b4cfccb6b776a735bb3ae",
     "packages": [
         {
             "name": "mobiledetect/mobiledetectlib",
