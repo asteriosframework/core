@@ -129,7 +129,7 @@ class MathTest extends TestCase
     /**
      * @return array[]
      */
-    public static function percentageValueProvider(): array
+    public function percentageValueProvider(): array
     {
         return [
             [16.764, 7, 1.17],
@@ -141,7 +141,7 @@ class MathTest extends TestCase
     /**
      * @return array[]
      */
-    public static function squareMetreProvider(): array
+    public function squareMetreProvider(): array
     {
         return [
             [4, 3.5, 2, 14],
@@ -152,7 +152,7 @@ class MathTest extends TestCase
     /**
      * @return array[]
      */
-    public static function cubicMetreProvider(): array
+    public function cubicMetreProvider(): array
     {
         return [
             [3, 3, 3, 2, 27],
@@ -163,7 +163,7 @@ class MathTest extends TestCase
     /**
      * @return array[]
      */
-    public static function cubicInLitreProvider(): array
+    public function cubicInLitreProvider(): array
     {
         return [
             [0.001, 1],
@@ -171,7 +171,7 @@ class MathTest extends TestCase
         ];
     }
 
-    public static function temperatureProvider(): array
+    public function temperatureProvider(): array
     {
         return [
             [23, MathEnum::CELSIUS, MathEnum::KELVIN, 296.15],
