@@ -40,7 +40,8 @@
     "roave/security-advisories": "dev-latest",
     "phpunit/phpunit": "10.4.1",
     "mockery/mockery": "1.6.6",
-    "phpstan/phpstan": "1.10.38"
+    "phpstan/phpstan": "1.10.38",
+    "friendsofphp/php-cs-fixer": "^3.39"
   },
   "scripts": {
     "tests": [
