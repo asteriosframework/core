@@ -19,7 +19,7 @@ class AsteriosTest extends TestCase
     {
         parent::tearDown();
         Date::set_timezone('Europe/Berlin');
-        Asterios::set_environment(Asterios::PRODUCTION);
+        Asterios::setEnvironment(Asterios::PRODUCTION);
     }
 
     /**
@@ -27,7 +27,7 @@ class AsteriosTest extends TestCase
      */
     public function config_exception(): void
     {
-        Asterios::set_environment(Asterios::DEVELOPMENT);
+        Asterios::setEnvironment(Asterios::DEVELOPMENT);
         Config::set_config_path(getcwd() . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR . 'config');
 
         $this->expectException(ConfigLoadException::class);
@@ -45,7 +45,7 @@ class AsteriosTest extends TestCase
      */
     public function config(string $environment, string $item, $expected_value): void
     {
-        Asterios::set_environment($environment);
+        Asterios::setEnvironment($environment);
         Config::set_config_path(getcwd() . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR . 'config');
 
         $config = Asterios::config($item);
@@ -61,8 +61,8 @@ class AsteriosTest extends TestCase
      */
     public function set_timezone(string $timezone, string $expected_value): void
     {
-        Asterios::set_timezone($timezone);
-        $result = Asterios::get_timezone();
+        Asterios::setTimezone($timezone);
+        $result = Asterios::getTimezone();
 
         self::assertEquals($expected_value, $result);
     }
@@ -75,13 +75,13 @@ class AsteriosTest extends TestCase
     public function init_exception(): void
     {
         $config_path = implode(DIRECTORY_SEPARATOR, [getcwd(), 'tests', 'testdata', 'asterios']);
-        Asterios::set_environment(Asterios::DEVELOPMENT);
+        Asterios::setEnvironment(Asterios::DEVELOPMENT);
         Config::set_config_path($config_path);
 
         $this->expectException(AsteriosException::class);
 
         Asterios::init();
-        $result = Asterios::is_initialized();
+        $result = Asterios::isInitialized();
         self::assertTrue($result);
         Asterios::init();
     }
@@ -91,8 +91,8 @@ class AsteriosTest extends TestCase
      */
     public function get_encoding(): void
     {
-        Asterios::set_encoding('UTF-8');
-        $result = Asterios::get_encoding();
+        Asterios::setEncoding('UTF-8');
+        $result = Asterios::getEncoding();
 
         self::assertEquals('UTF-8', $result);
     }
@@ -103,7 +103,7 @@ class AsteriosTest extends TestCase
      */
     public function is_environment(string $method, string $env, bool $expected_value): void
     {
-        Asterios::set_environment($env);
+        Asterios::setEnvironment($env);
 
         $result = Asterios::$method();
 
