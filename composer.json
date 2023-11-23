@@ -35,7 +35,8 @@
   "require": {
     "vanilla/htmlawed": "2.2.15",
     "mobiledetect/mobiledetectlib": "3.74.0",
-    "ext-mysqli": "*"
+    "ext-mysqli": "*",
+    "ext-curl": "*"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
