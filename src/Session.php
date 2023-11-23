@@ -123,7 +123,7 @@ class Session
                 {
                     $array[$key] = [];
                 }
-                $array =& $array[$key];
+                $array = &$array[$key];
             }
             $array[array_shift($keys)] = $value;
         }
