@@ -132,14 +132,14 @@ class AsteriosTest extends TestCase
     public static function is_environment_provider(): array
     {
         return [
-            ['is_production', Asterios::PRODUCTION, true],
-            ['is_production', Asterios::DEVELOPMENT, false],
-            ['is_staging', Asterios::STAGING, true],
-            ['is_staging', Asterios::PRODUCTION, false],
-            ['is_feature', Asterios::FEATURE, true],
-            ['is_feature', Asterios::DEVELOPMENT, false],
-            ['is_development', Asterios::DEVELOPMENT, true],
-            ['is_development', Asterios::FEATURE, false],
+            ['isProduction', Asterios::PRODUCTION, true],
+            ['isProduction', Asterios::DEVELOPMENT, false],
+            ['isStaging', Asterios::STAGING, true],
+            ['isStaging', Asterios::PRODUCTION, false],
+            ['isFeature', Asterios::FEATURE, true],
+            ['isFeature', Asterios::DEVELOPMENT, false],
+            ['isDevelopment', Asterios::DEVELOPMENT, true],
+            ['isDevelopment', Asterios::FEATURE, false],
         ];
     }
 }

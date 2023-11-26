@@ -19,12 +19,12 @@ EOF
 
 TestRun()
 {
-    ./tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config ./.php-cs-fixer.php --diff --dry-run
+    ./vendor/bin/php-cs-fixer fix --config ./.php-cs-fixer.php --diff --dry-run
 }
 
 FixRun()
 {
-    ./tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config ./.php-cs-fixer.php
+    ./vendor/bin/php-cs-fixer fix --config ./.php-cs-fixer.php
 }
 
 getopts ":htf" OPTS
