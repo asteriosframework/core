@@ -24,8 +24,7 @@ nodejs-scan-sast-convert:
   image:
     name: ${DOCKER_SEC_IMAGE}
     entrypoint: [""]
-  dependencies:
-    - nodejs-scan-sast
+  needs: ['nodejs-scan-sast']
   script:
     - if [[ -f gl-sast-nodejs-scan-report.json ]]; then ss2ju sast gl-sast-nodejs-scan-report.json gl-sast-nodejs-scan-report.xml; fi
   artifacts:
@@ -38,8 +37,7 @@ phpcs-security-audit-sast-convert:
   image:
     name: ${DOCKER_SEC_IMAGE}
     entrypoint: [""]
-  dependencies:
-    - phpcs-security-audit-sast
+  needs: ['phpcs-security-audit-sast']
   script:
     - if [[ -f gl-sast-phpcs-security-audit-report.json ]]; then ss2ju sast gl-sast-phpcs-security-audit-report.json gl-sast-phpcs-security-audit-report.xml; fi
   artifacts:
