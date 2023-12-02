@@ -26,9 +26,6 @@ nodejs-scan-sast-convert:
     entrypoint: [""]
   dependencies:
     - nodejs-scan-sast
-  rules:
-    - exists:
-      - gl-sast-nodejs-scan-report.json
   script:
     - if [[ -f gl-sast-nodejs-scan-report.json ]]; then ss2ju sast gl-sast-nodejs-scan-report.json gl-sast-nodejs-scan-report.xml; fi
   artifacts:
@@ -43,9 +40,6 @@ phpcs-security-audit-sast-convert:
     entrypoint: [""]
   dependencies:
     - phpcs-security-audit-sast
-  rules:
-    - exists:
-      - gl-sast-phpcs-security-audit-report.json
   script:
     - if [[ -f gl-sast-phpcs-security-audit-report.json ]]; then ss2ju sast gl-sast-phpcs-security-audit-report.json gl-sast-phpcs-security-audit-report.xml; fi
   artifacts:
