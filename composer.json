@@ -64,7 +64,7 @@
     ],
     "phpstan": [
       "Composer\\Config::disableProcessTimeout",
-      "./vendor/bin/phpstan analyse -c phpstan.neon --no-progress --memory-limit 1G --xdebug"
+      "./vendor/bin/phpstan analyse -c phpstan.neon --no-progress --memory-limit 1G"
     ],
     "ddev:phpstan": "composer phpstan",
     "cs-fixer:check": "./php-cs-fixer -t",
