@@ -2,7 +2,11 @@
 
 namespace Asterios\Core
 {
-    function filemtime(): int
+    /**
+     * @param string $filename
+     * @return int|false
+     */
+    function filemtime(string $filename): int|false
     {
         return 12345678;
     }

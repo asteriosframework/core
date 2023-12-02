@@ -30,7 +30,7 @@ class Session
      * This function get given session value.
      *
      * @param mixed $key
-     * @param null $default
+     * @param mixed $default
      * @return mixed
      */
     public static function get(mixed $key, $default = null): mixed
