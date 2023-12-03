@@ -210,8 +210,7 @@ class Assets
      */
     private static function get_file_time(): int
     {
-        $filename = self::get_doc_root() . self::get_asset_file();
-        return filemtime($filename);
+        return filemtime(self::get_doc_root() . self::get_asset_file());
     }
 
     /**
