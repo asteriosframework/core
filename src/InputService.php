@@ -62,7 +62,7 @@ class InputService
      * @param mixed $default
      * @return mixed
      */
-    public function cookie(string $key, $default = null)
+    public function cookie(string $key, mixed $default = null): mixed
     {
         return $_COOKIE[$key] ?? $default;
     }
@@ -72,7 +72,7 @@ class InputService
      * @param mixed $default
      * @return mixed
      */
-    public function post(string $key, $default = null)
+    public function post(string $key, mixed $default = null): mixed
     {
         return isset($_POST[$key]) ? trim($_POST[$key]) : $default;
     }
@@ -82,7 +82,7 @@ class InputService
      * @param mixed $default
      * @return mixed
      */
-    public function get(string $key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         if (isset($_GET[$key]))
         {

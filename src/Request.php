@@ -12,7 +12,7 @@ class Request
     public $cookie_file;
 
     /**
-     * Determines whether or not requests should follow redirects
+     * Determines whether requests should follow redirects
      *
      * @var boolean
      **/
@@ -26,7 +26,7 @@ class Request
     public $headers = [];
 
     /**
-     * An associative array of CURLOPT options to send along with requests
+     * An associative array of CURL-OPT options to send along with requests
      *
      * @var array
      **/
@@ -65,8 +65,8 @@ class Request
      **/
     public function __construct()
     {
-        $this->cookie_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'curl_cookie.txt';
-        $this->user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Curl/PHP ' . PHP_VERSION . ' (http://github.com/shuber/curl)';
+        $this->cookie_file = __DIR__ . DIRECTORY_SEPARATOR . 'curl_cookie.txt';
+        $this->user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Curl/PHP ' . PHP_VERSION . ' (https://github.com/shuber/curl)';
     }
 
     /**
@@ -104,7 +104,7 @@ class Request
     {
         if (!empty($vars))
         {
-            $url .= (stripos($url, '?') !== false) ? '&' : '?';
+            $url .= (strpos($url, '?') !== false) ? '&' : '?';
             $url .= (is_string($vars)) ? $vars : http_build_query($vars, '', '&');
         }
 
@@ -219,7 +219,7 @@ class Request
     }
 
     /**
-     * Sets the CURLOPT options for the current request
+     * Sets the CURL-OPT options for the current request
      *
      * @param string $url
      * @param mixed $vars

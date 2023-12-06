@@ -30,7 +30,7 @@ class ConfigTest extends TestCase
     {
         $default_file_name = 'foo';
 
-        Asterios::set_environment(Asterios::DEVELOPMENT);
+        Asterios::setEnvironment(Asterios::DEVELOPMENT);
         Config::set_config_path($this->config_path);
 
         $this->expectException(ConfigLoadException::class);
@@ -49,7 +49,7 @@ class ConfigTest extends TestCase
      */
     public function load(string $config_file, string $environment, array $expected_value): void
     {
-        Asterios::set_environment($environment);
+        Asterios::setEnvironment($environment);
         Config::set_config_path($this->config_path);
 
         $config = Config::load($config_file);
@@ -64,7 +64,7 @@ class ConfigTest extends TestCase
     {
         $default_file_name = 'default';
 
-        Asterios::set_environment(Asterios::DEVELOPMENT);
+        Asterios::setEnvironment(Asterios::DEVELOPMENT);
         Config::set_config_path($this->config_path);
 
         $config = Config::get($default_file_name);
@@ -79,7 +79,7 @@ class ConfigTest extends TestCase
     {
         $default_file_name = 'foo';
 
-        Asterios::set_environment(Asterios::DEVELOPMENT);
+        Asterios::setEnvironment(Asterios::DEVELOPMENT);
         Config::set_config_path($this->config_path);
 
         $this->expectException(ConfigLoadException::class);
@@ -98,7 +98,7 @@ class ConfigTest extends TestCase
      */
     public function get_item_dot_notation(string $config_file, string $item, $default_value, $expected_value): void
     {
-        Asterios::set_environment(Asterios::DEVELOPMENT);
+        Asterios::setEnvironment(Asterios::DEVELOPMENT);
         Config::set_config_path($this->config_path);
 
         $config = Config::get($config_file, $item, $default_value);
@@ -112,7 +112,7 @@ class ConfigTest extends TestCase
      * @param string $item
      * @param $value
      * @param $expected_value
-     * @param null $default
+     * @param mixed $default
      */
     public function get_memory(string $item, $value, $expected_value, $default = null): void
     {

@@ -42,22 +42,22 @@ class Asterios
     /**
      * @var  string  The Asterios environment
      */
-    private static $environment = Asterios::PRODUCTION;
+    private static string $environment = Asterios::PRODUCTION;
 
     /**
      * @var string Encoding
      * */
-    private static $encoding = 'UTF-8';
+    private static string $encoding = 'UTF-8';
 
     /**
      * @var bool It will be true if Asterios has been initialized
      */
-    private static $initialized = false;
+    private static bool $initialized = false;
 
     /**
      * @param string $environment
      */
-    public static function set_environment(string $environment): void
+    public static function setEnvironment(string $environment): void
     {
         self::$environment = $environment;
     }
@@ -65,7 +65,7 @@ class Asterios
     /**
      * @return string
      */
-    public static function get_environment(): string
+    public static function getEnvironment(): string
     {
         return self::$environment;
     }
@@ -85,11 +85,11 @@ class Asterios
 
         $security_check = self::config('security.input_filter');
 
-        if (empty($security_check) && self::get_environment() === self::DEVELOPMENT)
+        if (empty($security_check) && self::getEnvironment() === self::DEVELOPMENT)
         {
             // @codeCoverageIgnoreStart
             Logger::info('Warning: Using your application without input filtering is a security risk!');
-            // @codeCoverageIgnoreEnd
+        // @codeCoverageIgnoreEnd
         }
         else
         {
@@ -104,18 +104,18 @@ class Asterios
      * This method set the timezone. If timezone is null, the timezone from the configuration file will be used.
      * @param string $timezone
      */
-    public static function set_timezone(string $timezone): void
+    public static function setTimezone(string $timezone): void
     {
-        Date::set_timezone($timezone);
+        (new Date())->setTimezone($timezone);
     }
 
     /**
      * This method will return the defined timezone.
      * @return string
      */
-    public static function get_timezone(): string
+    public static function getTimezone(): string
     {
-        return Date::get_timezone();
+        return (new Date())->getTimezone();
     }
 
     /**
@@ -126,7 +126,7 @@ class Asterios
      * @return mixed
      * @throws Exception\ConfigLoadException
      */
-    public static function config(?string $item = null, string $config_file = 'default')
+    public static function config(?string $item = null, string $config_file = 'default'): mixed
     {
         return Config::get($config_file, $item);
     }
@@ -134,7 +134,7 @@ class Asterios
     /**
      * @return string
      */
-    public static function get_encoding(): string
+    public static function getEncoding(): string
     {
         return self::$encoding;
     }
@@ -142,7 +142,7 @@ class Asterios
     /**
      * @param string $encoding
      */
-    public static function set_encoding(string $encoding): void
+    public static function setEncoding(string $encoding): void
     {
         self::$encoding = $encoding;
     }
@@ -150,27 +150,27 @@ class Asterios
     /**
      * @return bool
      */
-    public static function is_initialized(): bool
+    public static function isInitialized(): bool
     {
         return self::$initialized;
     }
 
-    public static function is_production(): bool
+    public static function isProduction(): bool
     {
         return self::$environment === self::PRODUCTION;
     }
 
-    public static function is_staging(): bool
+    public static function isStaging(): bool
     {
         return self::$environment === self::STAGING;
     }
 
-    public static function is_feature(): bool
+    public static function isFeature(): bool
     {
         return self::$environment === self::FEATURE;
     }
 
-    public static function is_development(): bool
+    public static function isDevelopment(): bool
     {
         return self::$environment === self::DEVELOPMENT;
     }

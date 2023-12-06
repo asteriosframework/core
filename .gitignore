@@ -9,3 +9,4 @@ node_modules/
 coverage-report/
 phpunit-coverage.xml
 phpunit-report.xml
+.vscode/
