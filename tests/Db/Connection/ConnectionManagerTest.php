@@ -30,7 +30,7 @@ class ConnectionManagerTest extends MockeryTestCase
             ]
         );
 
-        Asterios::set_environment(Asterios::DEVELOPMENT);
+        Asterios::setEnvironment(Asterios::DEVELOPMENT);
         Config::set_config_path($this->config_path);
     }
 

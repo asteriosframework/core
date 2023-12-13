@@ -28,7 +28,7 @@ class ViewTest extends MockeryTestCase
     public function forge_exception(): void
     {
         $testdata_path = __DIR__ . '/..' . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR;
-        Asterios::set_environment(Asterios::DEVELOPMENT);
+        Asterios::setEnvironment(Asterios::DEVELOPMENT);
         Config::set_config_path($testdata_path . 'viewconfig');
 
         Config::set_memory('TPLPATH', $testdata_path . 'views');
@@ -49,7 +49,7 @@ class ViewTest extends MockeryTestCase
     public function forge(): void
     {
         $testdata_path = __DIR__ . '/..' . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR;
-        Asterios::set_environment(Asterios::DEVELOPMENT);
+        Asterios::setEnvironment(Asterios::DEVELOPMENT);
         Config::set_config_path($testdata_path . 'viewconfig');
 
         Config::set_memory('TPLPATH', $testdata_path . 'views' . DIRECTORY_SEPARATOR);
@@ -68,7 +68,7 @@ class ViewTest extends MockeryTestCase
     public function forge_404(): void
     {
         $testdata_path = __DIR__ . '/..' . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR;
-        Asterios::set_environment(Asterios::DEVELOPMENT);
+        Asterios::setEnvironment(Asterios::DEVELOPMENT);
         Config::set_config_path($testdata_path . 'viewconfig');
 
         Config::set_memory('TPLPATH', $testdata_path . 'views' . DIRECTORY_SEPARATOR);
