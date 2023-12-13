@@ -14,5 +14,7 @@
   ],
   "baseBranches": [
     "develop"
-  ]
+  ],
+  "rangeStrategy": "update-lockfile",
+  "rebaseWhen": "conflicted"
 }

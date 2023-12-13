@@ -58,21 +58,21 @@ class Str implements StrInterface, SingletonInterface
 
     public function length(string $string, ?string $encoding = null): int
     {
-        $encoding || $encoding = Asterios::get_encoding();
+        $encoding || $encoding = Asterios::getEncoding();
 
         return function_exists('mb_strlen') ? mb_strlen($string, $encoding) : strlen($string);
     }
 
     public function lower(string $string, ?string $encoding = null): string
     {
-        $encoding || $encoding = Asterios::get_encoding();
+        $encoding || $encoding = Asterios::getEncoding();
 
         return function_exists('mb_strtolower') ? mb_strtolower($string, $encoding) : strtolower($string);
     }
 
     public function upper(string $string, ?string $encoding = null): string
     {
-        $encoding || $encoding = Asterios::get_encoding();
+        $encoding || $encoding = Asterios::getEncoding();
 
         return function_exists('mb_strtoupper') ? mb_strtoupper($string, $encoding) : strtoupper($string);
     }

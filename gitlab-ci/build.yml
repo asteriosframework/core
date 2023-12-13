@@ -4,13 +4,10 @@ cache:
   paths:
     - vendor/
     - node_modules
-    - tools/php-cs-fixer/vendor/
 
 build:
   stage: build
   image: ${DOCKER_IMAGE}
   script:
     - npm ci > /dev/null
-    - composer install
-    - cd tools/php-cs-fixer
     - composer install

@@ -2,7 +2,13 @@
 
 namespace Asterios\Core
 {
-    function debug_backtrace(): array
+    /**
+     * Summary of Asterios\Core\debug_backtrace
+     * @param int $options
+     * @param int $limit
+     * @return array<int,array<string,string|int>>
+     */
+    function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT, int $limit = 0): array
     {
         return [
             [

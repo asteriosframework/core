@@ -3,6 +3,9 @@
 namespace Asterios\Core;
 
 use Asterios\Core\Exception\DateException;
+use DateTime;
+use DateTimeZone;
+use Exception;
 
 class Date
 {
@@ -25,7 +28,7 @@ class Date
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      * @deprecated Use non-static method instead
      *
      */
@@ -33,7 +36,7 @@ class Date
     {
         $date = sprintf('%d-%d-01', $year, $month);
 
-        return (new \DateTime($date))->format('t');
+        return (new DateTime($date))->format('t');
     }
 
     public function setTimezone(string $timezone): void
@@ -55,10 +58,10 @@ class Date
         {
             $date = sprintf('%d-%d-01', $year, $month);
 
-            return (new \DateTime($date, new \DateTimeZone(self::DEFAULT_TIMEZONE)))->format('t');
+            return (new DateTime($date, new DateTimeZone(self::DEFAULT_TIMEZONE)))->format('t');
 
         }
-        catch (\Exception $e)
+        catch (Exception $e)
         {
             throw new DateException($e->getMessage());
         }
@@ -72,9 +75,9 @@ class Date
     {
         try
         {
-            return (new \DateTime($date, new \DateTimeZone(self::DEFAULT_TIMEZONE)))->getTimestamp();
+            return (new DateTime($date, new DateTimeZone(self::DEFAULT_TIMEZONE)))->getTimestamp();
         }
-        catch (\Exception $e)
+        catch (Exception $e)
         {
             throw new DateException($e->getMessage());
         }
@@ -87,9 +90,9 @@ class Date
     {
         try
         {
-            return (new \DateTime($date, new \DateTimeZone(self::DEFAULT_TIMEZONE)))->format($format);
+            return (new DateTime($date, new DateTimeZone(self::DEFAULT_TIMEZONE)))->format($format);
         }
-        catch (\Exception $e)
+        catch (Exception $e)
         {
             throw new DateException($e->getMessage());
         }

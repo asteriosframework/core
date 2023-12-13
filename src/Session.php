@@ -2,6 +2,8 @@
 
 namespace Asterios\Core;
 
+use ArrayAccess;
+
 class Session
 {
     public const USER_SESSION_KEY = 'user';
@@ -31,14 +33,9 @@ class Session
      * @param mixed|null $default
      * @return array|mixed|null
      */
-    public static function get($key, $default = null)
+    public static function get(mixed $key, $default = null): mixed
     {
-        $array = [];
-
-        if (isset($_SESSION[self::USER_SESSION_KEY]))
-        {
-            $array = $_SESSION[self::USER_SESSION_KEY];
-        }
+        $array = $_SESSION[self::USER_SESSION_KEY] ?? [];
 
         if (is_null($key))
         {
@@ -66,7 +63,7 @@ class Session
 
         foreach (explode('.', $key) as $key_part)
         {
-            if (!($array instanceof \ArrayAccess && isset($array[$key_part])))
+            if (!($array instanceof ArrayAccess && isset($array[$key_part])))
             {
                 if (!is_array($array) || !array_key_exists($key_part, $array))
                 {
@@ -119,11 +116,11 @@ class Session
             while (count($keys) > 1)
             {
                 $key = array_shift($keys);
-                if (!isset($array[$key]) or !is_array($array[$key]))
+                if (!isset($array[$key]) || !is_array($array[$key]))
                 {
                     $array[$key] = [];
                 }
-                $array =& $array[$key];
+                $array = &$array[$key];
             }
             $array[array_shift($keys)] = $value;
         }

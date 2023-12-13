@@ -3,7 +3,6 @@ cache:
   paths:
     - vendor/
     - node_modules
-    - tools/php-cs-fixer/vendor/
 
 before_script:
   - touch CHANGELOG.md
@@ -30,7 +29,6 @@ fetch-semantic-version:
     paths:
       - vendor/
       - node_modules
-      - tools/php-cs-fixer/vendor/
 
 generate-non-semantic-version:
   stage: release-fetch-version
@@ -73,4 +71,3 @@ release:
     paths:
       - vendor/
       - node_modules
-      - tools/php-cs-fixer/vendor/

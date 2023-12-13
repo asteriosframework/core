@@ -11,3 +11,4 @@ phpunit.xml.bak
 coverage-report/
 phpunit-coverage.xml
 phpunit-report.xml
+.vscode/

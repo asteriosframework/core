@@ -44,7 +44,7 @@ class Config
     public static function load(string $file): array
     {
         $config_path = self::get_config_path();
-        $environment = Asterios::get_environment();
+        $environment = Asterios::getEnvironment();
         $environment_config_file = [];
 
         $default_config_file_path = $config_path . DIRECTORY_SEPARATOR . $file . '.php';

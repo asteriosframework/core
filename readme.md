@@ -26,13 +26,6 @@ $ git clone git@gitlab.com:asteriosframework/core.git
 $ composer require asterios/core
 ```
 
-*Post install*
-
-```bash
-$ cd tools/php-cs-fixer
-tools/php-cs-fixer$ composer install
-```
-
 ## Description
 AsteriosPHP is a lightweight PHP 8.x framework.
 
