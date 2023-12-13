@@ -4,3 +4,7 @@ echo "Delete vendor directory"
 ddev exec rm -rf ./vendor || true
 ddev auth ssh
 ddev composer install
+
+echo "Delete node modules directory"
+ddev exec rm -rf ./node_modules || true
+ddev npm install
