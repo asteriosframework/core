@@ -16,5 +16,6 @@
     "develop"
   ],
   "rangeStrategy": "update-lockfile",
-  "rebaseWhen": "conflicted"
+  "rebaseWhen": "conflicted",
+  "configMigration": true
 }
