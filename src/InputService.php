@@ -59,30 +59,30 @@ class InputService
 
     /**
      * @param string $key
-     * @param mixed $default
-     * @return mixed
+     * @param int|string|array|bool|null $default
+     * @return int|string|array|bool|null
      */
-    public function cookie(string $key, mixed $default = null): mixed
+    public function cookie(string $key, int|string|array|bool $default = null): int|string|array|bool|null
     {
         return $_COOKIE[$key] ?? $default;
     }
 
     /**
      * @param string $key
-     * @param mixed $default
-     * @return mixed
+     * @param int|string|array|bool|null $default
+     * @return int|string|array|bool|null
      */
-    public function post(string $key, mixed $default = null): mixed
+    public function post(string $key, int|string|array|bool $default = null): int|string|array|bool|null
     {
         return isset($_POST[$key]) ? trim($_POST[$key]) : $default;
     }
 
     /**
      * @param string $key
-     * @param mixed $default
-     * @return mixed
+     * @param int|string|array|bool|null $default
+     * @return int|string|array|bool|null
      */
-    public function get(string $key, mixed $default = null): mixed
+    public function get(string $key, int|string|bool $default = null): int|string|array|bool|null
     {
         if (isset($_GET[$key]))
         {
