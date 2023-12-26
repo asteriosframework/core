@@ -82,7 +82,7 @@ class InputService
      * @param int|string|array|bool|null $default
      * @return int|string|array|bool|null
      */
-    public function get(string $key, int|string|bool $default = null): int|string|array|bool|null
+    public function get(string $key, int|string|array|bool|null $default = null): int|string|array|bool|null
     {
         if (isset($_GET[$key]))
         {
