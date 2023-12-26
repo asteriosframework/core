@@ -104,4 +104,22 @@ class JWT implements JWTInterface
     {
         return $this->decodedData;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getBearerToken(?array $headers = null): string|null
+    {
+        if (null === $headers)
+        {
+            $headers = getallheaders();
+        }
+
+        if (isset($headers['Authorization']) && preg_match('/Bearer\s(\S+)/', $headers['Authorization'], $matches))
+        {
+            return $matches[1];
+        }
+
+        return null;
+    }
 }

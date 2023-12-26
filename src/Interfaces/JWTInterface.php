@@ -47,4 +47,10 @@ interface JWTInterface
      * @return array
      */
     public function getDecodedData(): array;
+
+    /**
+     * @param array|null $headers
+     * @return string|null
+     */
+    public function getBearerToken(?array $headers = null): string|null;
 }
