@@ -51,7 +51,8 @@ class JWT implements JWTInterface
             $this->decodedData = (array)FirebaseJWT::decode($token, new Key($this->secretKey, $this->algorithm))->data;
 
             return true;
-        } catch (ExpiredException|Exception)
+        }
+        catch (ExpiredException|Exception)
         {
             return false;
         }
