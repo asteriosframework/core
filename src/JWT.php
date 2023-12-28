@@ -16,6 +16,7 @@ class JWT implements JWTInterface
     protected int|null $issuedAt = null;
     protected int $expire = 3600;
     protected array $decodedData;
+    protected object $decoded;
 
     /**
      * @inheritDoc
@@ -48,10 +49,14 @@ class JWT implements JWTInterface
     {
         try
         {
-            $this->decodedData = (array)FirebaseJWT::decode($token, new Key($this->secretKey, $this->algorithm))->data;
+            $jwt = FirebaseJWT::decode($token, new Key($this->secretKey, $this->algorithm));
+
+            $this->decoded = $jwt;
+            $this->decodedData = (array)$jwt->data;
 
             return true;
-        } catch (ExpiredException|Exception)
+        }
+        catch (ExpiredException|Exception)
         {
             return false;
         }
@@ -121,5 +126,10 @@ class JWT implements JWTInterface
         }
 
         return null;
+    }
+
+    public function getDecoded(): object
+    {
+        return $this->decoded;
     }
 }

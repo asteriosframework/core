@@ -48,17 +48,11 @@ namespace Asterios\Test
          */
         public function generateWithNoIssuedAt(): void
         {
-            try
-            {
-                $actual = $this->testedClass
-                    ->setSecretKey('exampleSecretKey')
-                    ->generate([]);
+            $actual = $this->testedClass
+                ->setSecretKey('exampleSecretKey')
+                ->generate([]);
 
-                self::assertGreaterThanOrEqual(142, $actual);
-            } catch (JWTException)
-            {
-                return;
-            }
+            self::assertGreaterThanOrEqual(142, $actual);
         }
 
         /**
@@ -66,19 +60,14 @@ namespace Asterios\Test
          */
         public function generate(): void
         {
-            try
-            {
-                $actual = $this->testedClass
-                    ->setIssuedAt(0)
-                    ->setSecretKey('exampleSecretKey')
-                    ->generate([]);
 
-                self::assertEquals('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjAsImV4cCI6MzYwMCwiZGF0YSI6W119.8N4FnIowS8ZO3Ul5-9VKSXPFIIXpC0UbFUJeMHrhqHw',
-                    $actual);
-            } catch (JWTException)
-            {
-                return;
-            }
+            $actual = $this->testedClass
+                ->setIssuedAt(0)
+                ->setSecretKey('exampleSecretKey')
+                ->generate([]);
+
+            self::assertEquals('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjAsImV4cCI6MzYwMCwiZGF0YSI6W119.8N4FnIowS8ZO3Ul5-9VKSXPFIIXpC0UbFUJeMHrhqHw',
+                $actual);
         }
 
         /**
@@ -86,20 +75,14 @@ namespace Asterios\Test
          */
         public function generateWithExpire(): void
         {
-            try
-            {
-                $actual = $this->testedClass
-                    ->setSecretKey('exampleSecretKey')
-                    ->setIssuedAt(0)
-                    ->setExpire(300)
-                    ->generate([]);
+            $actual = $this->testedClass
+                ->setSecretKey('exampleSecretKey')
+                ->setIssuedAt(0)
+                ->setExpire(300)
+                ->generate([]);
 
-                self::assertEquals('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjAsImV4cCI6MzAwLCJkYXRhIjpbXX0.5O1cZCZwxI3_MmTCDEh5bepygLhB2uicYfq20gO_iwA',
-                    $actual);
-            } catch (JWTException)
-            {
-                return;
-            }
+            self::assertEquals('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjAsImV4cCI6MzAwLCJkYXRhIjpbXX0.5O1cZCZwxI3_MmTCDEh5bepygLhB2uicYfq20gO_iwA',
+                $actual);
         }
 
         /**
@@ -107,20 +90,14 @@ namespace Asterios\Test
          */
         public function generateWithDifferentHashMac512(): void
         {
-            try
-            {
-                $actual = $this->testedClass
-                    ->setSecretKey('exampleSecretKey')
-                    ->setIssuedAt(0)
-                    ->setAlgorithm('HS512')
-                    ->generate([]);
+            $actual = $this->testedClass
+                ->setSecretKey('exampleSecretKey')
+                ->setIssuedAt(0)
+                ->setAlgorithm('HS512')
+                ->generate([]);
 
-                self::assertEquals('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjAsImV4cCI6MzYwMCwiZGF0YSI6W119.tB14Q44Z1fQr4YbwJA7BSypt5QjRBNOkOK_mZRuIPhUmJvcUR_SN04lQpjN-hGxYX0p0WSXxYc-Ttsi_VDZtpA',
-                    $actual);
-            } catch (JWTException)
-            {
-                return;
-            }
+            self::assertEquals('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjAsImV4cCI6MzYwMCwiZGF0YSI6W119.tB14Q44Z1fQr4YbwJA7BSypt5QjRBNOkOK_mZRuIPhUmJvcUR_SN04lQpjN-hGxYX0p0WSXxYc-Ttsi_VDZtpA',
+                $actual);
         }
 
         /**
@@ -128,19 +105,13 @@ namespace Asterios\Test
          */
         public function validateFalse(): void
         {
-            try
-            {
-                $token = $this->testedClass
-                    ->setSecretKey('exampleSecretKey')
-                    ->setExpire(0)
-                    ->generate([]);
+            $token = $this->testedClass
+                ->setSecretKey('exampleSecretKey')
+                ->setExpire(0)
+                ->generate([]);
 
-                $actual = $this->testedClass->validate($token);
-                self::assertFalse($actual);
-            } catch (JWTException)
-            {
-                return;
-            }
+            $actual = $this->testedClass->validate($token);
+            self::assertFalse($actual);
         }
 
         /**
@@ -148,19 +119,13 @@ namespace Asterios\Test
          */
         public function validate(): void
         {
-            try
-            {
-                $token = $this->testedClass
-                    ->setSecretKey('exampleSecretKey')
-                    ->setExpire(3600)
-                    ->generate([]);
+            $token = $this->testedClass
+                ->setSecretKey('exampleSecretKey')
+                ->setExpire(3600)
+                ->generate([]);
 
-                $actual = $this->testedClass->validate($token);
-                self::assertTrue($actual);
-            } catch (JWTException)
-            {
-                return;
-            }
+            $actual = $this->testedClass->validate($token);
+            self::assertTrue($actual);
         }
 
         /**
@@ -172,21 +137,16 @@ namespace Asterios\Test
                 'username' => 'john.doe',
             ];
 
-            try
-            {
-                $token = $this->testedClass
-                    ->setSecretKey('exampleSecretKey')
-                    ->setExpire(3600)
-                    ->generate($data);
+            $token = $this->testedClass
+                ->setSecretKey('exampleSecretKey')
+                ->setExpire(3600)
+                ->generate($data);
 
-                $this->testedClass->validate($token);
+            $this->testedClass->validate($token);
 
-                $actual = $this->testedClass->getDecodedData();
-                self::assertEquals(['username' => 'john.doe'], $actual);
-            } catch (JWTException)
-            {
-                return;
-            }
+            $actual = $this->testedClass->getDecodedData();
+            self::assertEquals(['username' => 'john.doe'], $actual);
+
         }
 
         /**
@@ -225,6 +185,32 @@ namespace Asterios\Test
             $actual = $this->testedClass->getBearerToken($headers);
 
             self::assertNull($actual);
+        }
+
+        /**
+         * @test
+         */
+        public function getDecoded(): void
+        {
+            $data = [
+                'username' => 'john.doe',
+            ];
+
+            $iat = time();
+            $exp = $iat + 3600;
+
+            $token = $this->testedClass
+                ->setSecretKey('exampleSecretKey')
+                ->setExpire(3600)
+                ->generate($data);
+
+            $this->testedClass->validate($token);
+
+            $actual = $this->testedClass->getDecoded();
+
+            self::assertEquals($iat, $actual->iat);
+            self::assertEquals($exp, $actual->exp);
+            self::assertEquals($data, (array)$actual->data);
         }
     }
 }
