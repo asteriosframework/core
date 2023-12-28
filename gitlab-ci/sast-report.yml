@@ -27,6 +27,14 @@ nodejs-scan-sast-convert:
   needs: ['nodejs-scan-sast']
   script:
     - if [[ -f gl-sast-nodejs-scan-report.json ]]; then ss2ju sast gl-sast-nodejs-scan-report.json gl-sast-nodejs-scan-report.xml; fi
+  rules:
+    - if: "$SAST_DISABLED == 'true' || $SAST_DISABLED == '1'"
+      when: never
+    - if: "$SAST_EXCLUDED_ANALYZERS =~ /nodejs-scan/"
+      when: never
+    - if: "$CI_COMMIT_BRANCH"
+      exists:
+      - "**/package.json"
   artifacts:
     reports:
       junit: gl-sast-nodejs-scan-report.xml
@@ -40,6 +48,14 @@ phpcs-security-audit-sast-convert:
   needs: ['phpcs-security-audit-sast']
   script:
     - if [[ -f gl-sast-phpcs-security-audit-report.json ]]; then ss2ju sast gl-sast-phpcs-security-audit-report.json gl-sast-phpcs-security-audit-report.xml; fi
+  rules:
+  - if: "$SAST_DISABLED == 'true' || $SAST_DISABLED == '1'"
+    when: never
+  - if: "$SAST_EXCLUDED_ANALYZERS =~ /phpcs-security-audit/"
+    when: never
+  - if: "$CI_COMMIT_BRANCH"
+    exists:
+    - "**/*.php"
   artifacts:
     reports:
       junit: gl-sast-phpcs-security-audit-report.xml
