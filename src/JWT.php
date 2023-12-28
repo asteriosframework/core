@@ -128,6 +128,9 @@ class JWT implements JWTInterface
         return null;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function getDecoded(): object
     {
         return $this->decoded;
