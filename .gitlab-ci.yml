@@ -13,7 +13,7 @@ default:
     - asteriosphp
 
 variables:
-  DOCKER_IMAGE: registry.gitlab.com/jfheinrich-eu/docker/laravel:php82
+  DOCKER_IMAGE: registry.gitlab.com/asteriosframework/docker-images/asterios-build-image:latest
   DOCKER_SEC_IMAGE: "angrymeir/secscanner2junit:latest"
   SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, vendor, node_modules, resources/static/abc2svg"
   #SAST_EXCLUDED_ANALYZERS: "phpcs-security-audit"
