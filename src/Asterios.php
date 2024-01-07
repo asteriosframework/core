@@ -89,7 +89,7 @@ class Asterios
         {
             // @codeCoverageIgnoreStart
             Logger::info('Warning: Using your application without input filtering is a security risk!');
-        // @codeCoverageIgnoreEnd
+            // @codeCoverageIgnoreEnd
         }
         else
         {
