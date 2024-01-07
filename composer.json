@@ -36,7 +36,8 @@
     "vanilla/htmlawed": "2.2.15",
     "mobiledetect/mobiledetectlib": "3.74.3",
     "ext-mysqli": "*",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "firebase/php-jwt": "^6.10"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
