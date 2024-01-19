@@ -30,7 +30,7 @@
         "@semantic-release/git": "^10.0.1",
         "semantic-release-license": "^1.0.3",
         "@semantic-release/commit-analyzer": "11.1.0",
-        "@semantic-release/gitlab": "12.1.1",
+        "@semantic-release/gitlab": "13.0.2",
         "@semantic-release/release-notes-generator": "12.1.0",
         "semantic-release": "22.0.12"
     },
