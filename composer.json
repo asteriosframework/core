@@ -43,7 +43,7 @@
     "roave/security-advisories": "dev-latest",
     "phpunit/phpunit": "10.5.5",
     "mockery/mockery": "1.6.7",
-    "phpstan/phpstan": "1.10.48",
+    "phpstan/phpstan": "1.10.56",
     "friendsofphp/php-cs-fixer": "^3.40"
   },
   "scripts": {
