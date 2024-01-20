@@ -4,7 +4,6 @@ namespace Asterios\Core\Interfaces;
 
 use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvItemNotFoundException;
-use Asterios\Core\Exception\EnvVariablesOrderNotAvailableException;
 
 interface EnvInterface
 {
@@ -33,7 +32,6 @@ interface EnvInterface
      * @param string $prefix
      * @return string[]
      * @throws EnvException
-     * @throws EnvVariablesOrderNotAvailableException
      */
     public function getArrayPrefixed(string $prefix): array;
 }
