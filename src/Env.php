@@ -20,7 +20,7 @@ class Env implements EnvInterface
     {
         if (empty($envFile))
         {
-            throw new EnvException('.Parameter should not be empty!');
+            throw new EnvException('Parameter should not be empty!');
         }
 
         if (!is_file($envFile))
