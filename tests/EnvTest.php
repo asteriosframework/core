@@ -40,7 +40,7 @@ namespace Asterios\Test
         protected function setUp(): void
         {
             parent::setUp();
-            $this->testedClass = (new Env('tests/testdata/.env'));
+            $this->testedClass = (new Env('tests/testdata/.env.test'));
         }
 
         protected function tearDown(): void
