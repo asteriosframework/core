@@ -460,7 +460,12 @@ class File
      * Read data from file
      *
      * @param string $file
-     * @return  false|string
+     * @return  false|resource
+     */
+
+    /**
+     * @param string $file
+     * @return false|string
      */
     public function read(string $file)
     {
@@ -477,6 +482,31 @@ class File
         @fclose($file_hander);
 
         return false;
+    }
+
+    /**
+     * @param string $file
+     * @param string $options
+     * @return false|resource
+     */
+    public function open(string $file, string $options = 'rb')
+    {
+        return @fopen($file, $options);
+    }
+
+    /**
+     * @param $stream
+     * @param int|null $length
+     * @return false|string
+     */
+    public function gets($stream, ?int $length = null): false|string
+    {
+        return fgets($stream, $length);
+    }
+
+    public function isReadable(string $file): bool
+    {
+        return is_readable($file);
     }
 
     /**

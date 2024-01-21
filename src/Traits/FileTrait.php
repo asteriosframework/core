@@ -7,7 +7,7 @@ use Asterios\Core\File;
 trait FileTrait
 {
     /** @var File|null */
-    protected $file;
+    protected File|null $file;
 
     public function setFile(File $file): self
     {
