@@ -6,43 +6,60 @@ use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvItemNotFoundException;
 use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Interfaces\EnvInterface;
+use Asterios\Core\Traits\FileTrait;
 
 class Env implements EnvInterface
 {
-    private array $tmpEnv;
+    use FileTrait;
+
+    protected string $envFile;
 
     /**
      * @param string $envFile
-     * @throws EnvException
-     * @throws EnvLoadException
      */
     public function __construct(string $envFile = '.env')
     {
-        if (empty($envFile))
+        $this->envFile = $envFile;
+    }
+
+    /**
+     * @return void
+     * @throws EnvException
+     * @throws EnvLoadException
+     */
+    protected function load(): void
+    {
+        if (empty($this->envFile))
         {
             throw new EnvException('Parameter should not be empty!');
         }
 
-        if (!is_file($envFile))
+        $file = $this->getFile();
+
+        $isFile = $file->is_file($this->envFile);
+
+        if (false === $isFile)
         {
-            throw new EnvLoadException('Environment file "' . $envFile . '" is missing.');
+            throw new EnvLoadException('Environment file "' . $this->envFile . '" is missing.');
         }
 
-        if (!is_readable($envFile))
+        $isEnvFileReadable = $file->isReadable($this->envFile);
+
+        if (false === $isEnvFileReadable)
         {
-            throw new EnvLoadException('Permission denied for "' . (realpath($envFile)) . '".');
+            throw new EnvLoadException('Permission denied for "' . (realpath($this->envFile)) . '".');
         }
 
-        $envFileContent = fopen(realpath($envFile), 'rb');
+        $envFileContent = $file->open(realpath($this->envFile));
 
-        if (!$envFileContent)
+        if (false === $envFileContent)
         {
-            throw new EnvLoadException('fopen failed to open ' . (realpath($envFile)) . '!');
+            throw new EnvLoadException('File::class failed to open ' . (realpath($this->envFile)) . '!');
         }
 
-        $this->tmpEnv = [];
+        $tmpEnv = [];
 
-        while (($line = fgets($envFileContent)) !== false)
+        while (($line = $file->gets($envFileContent)) !== false)
         {
             $isLineComment = str_starts_with(trim($line), '#');
 
@@ -56,17 +73,12 @@ class Env implements EnvInterface
             $envName = trim($envEx[0]);
             $envValue = $envEx[1] ?? '';
 
-            $this->tmpEnv[$envName] = $envValue;
+            $tmpEnv[$envName] = $envValue;
         }
 
         fclose($envFileContent);
 
-        $this->load();
-    }
-
-    protected function load(): void
-    {
-        foreach ($this->tmpEnv as $name => $value)
+        foreach ($tmpEnv as $name => $value)
         {
             putenv("$name=$value");
 
@@ -79,6 +91,8 @@ class Env implements EnvInterface
      */
     public function get(string $item, string|int|bool|array|null $default = null): string|int|bool|array|null
     {
+        $this->load();
+
         $itemValue = getenv($item);
 
         if (!$itemValue)
@@ -118,6 +132,8 @@ class Env implements EnvInterface
      */
     public function getRequired(string $item): string|int|bool|array|null
     {
+        $this->load();
+
         $itemValue = $this->get($item, false);
 
         if (false === $itemValue)
@@ -133,6 +149,8 @@ class Env implements EnvInterface
      */
     public function getArray(string $item, array $default = []): array
     {
+        $this->load();
+
         $itemValue = $this->get($item);
 
         if (null === $itemValue)
@@ -148,6 +166,8 @@ class Env implements EnvInterface
      */
     public function getArrayPrefixed(string $prefix): array
     {
+        $this->load();
+
         if (empty($prefix))
         {
             throw new EnvException('You must provide a non-empty prefix to search for.');

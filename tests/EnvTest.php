@@ -1,28 +1,5 @@
 <?php declare(strict_types=1);
 
-namespace Asterios\Core
-{
-    function is_readable(string $filename): bool
-    {
-        if (strpos($filename, 'unreadable'))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    function fopen(string $filename)
-    {
-        if (strpos($filename, 'fopenFailed'))
-        {
-            return false;
-        }
-
-        return \fopen($filename, 'rb');
-    }
-}
-
 namespace Asterios\Test
 {
 
@@ -30,6 +7,7 @@ namespace Asterios\Test
     use Asterios\Core\Exception\EnvException;
     use Asterios\Core\Exception\EnvItemNotFoundException;
     use Asterios\Core\Exception\EnvLoadException;
+    use Asterios\Core\File;
     use Mockery as m;
     use Mockery\Adapter\Phpunit\MockeryTestCase;
 
@@ -50,51 +28,77 @@ namespace Asterios\Test
 
         /**
          * @test
-         * @runInSeparateProcess
          */
         public function loadEnvWithEmptyNameException(): void
         {
             $this->expectException(EnvException::class);
 
-            (new Env(''));
+            (new Env(''))->get('EXAMPLE');
         }
 
         /**
          * @test
-         * @runInSeparateProcess
          */
-        public function loadEnvException(): void
+        public function EnvFileIsNoFileException(): void
         {
+            $envFile = 'tests/testdata/.env.example';
+
+            $fileMock = m::mock(File::class);
+            $fileMock->shouldReceive('is_file')
+                ->with($envFile)
+                ->andReturnFalse();
+
             $this->expectException(EnvLoadException::class);
 
-            (new Env('tests/testdata/.env.example'));
+            (new Env($envFile))->setFile($fileMock)
+                ->get('EXAMPLE');
         }
 
         /**
          * @test
-         * @runInSeparateProcess
          */
-        public function unreadableEnvFileException(): void
+        public function EnvFileNotReadableException(): void
         {
+            $envFile = 'tests/testdata/.env.unreadable';
+
+            $fileMock = m::mock(File::class);
+            $fileMock->shouldReceive('is_file')
+                ->with($envFile)
+                ->andReturnTrue();
+            $fileMock->shouldReceive('isReadable')
+                ->with($envFile)
+                ->andReturnFalse();
+
             $this->expectException(EnvLoadException::class);
 
-            (new Env('tests/testdata/.env.unreadable'));
+            (new Env($envFile))->setFile($fileMock)
+                ->get('EXAMPLE');
         }
 
         /**
          * @test
-         * @runInSeparateProcess
          */
         public function fopenFailedOnEnvFileException(): void
         {
+            $envFile = 'tests/testdata/.env.fopenFailed';
+
+            $fileMock = m::mock(File::class);
+            $fileMock->shouldReceive('is_file')
+                ->with($envFile)
+                ->andReturnTrue();
+            $fileMock->shouldReceive('isReadable')
+                ->andReturnTrue();
+            $fileMock->shouldReceive('open')
+                ->andReturnFalse();
+
             $this->expectException(EnvLoadException::class);
 
-            (new Env('tests/testdata/.env.fopenFailed'));
+            (new Env($envFile))->setFile($fileMock)
+                ->get('EXAMPLE');
         }
 
         /**
          * @test
-         * @runInSeparateProcess
          * @dataProvider getProvider
          */
         public function get(string $item, string|int|bool|array|null $default, string|int|bool|array|null $expected): void
@@ -106,7 +110,6 @@ namespace Asterios\Test
 
         /**
          * @test
-         * @runInSeparateProcess
          */
         public function getRequiredException(): void
         {
@@ -117,7 +120,6 @@ namespace Asterios\Test
 
         /**
          * @test
-         * @runInSeparateProcess
          */
         public function getRequired(): void
         {
@@ -130,7 +132,6 @@ namespace Asterios\Test
 
         /**
          * @test
-         * @runInSeparateProcess
          */
         public function getArrayWithDefaultArray(): void
         {
@@ -141,7 +142,6 @@ namespace Asterios\Test
 
         /**
          * @test
-         * @runInSeparateProcess
          * @dataProvider getArrayProvider
          */
         public function getArray(string $item, array $expected): void
@@ -153,7 +153,6 @@ namespace Asterios\Test
 
         /**
          * @test
-         * @runInSeparateProcess
          */
         public function getArrayPrefixedWithoutPrefixException(): void
         {
@@ -164,7 +163,6 @@ namespace Asterios\Test
 
         /**
          * @test
-         * @runInSeparateProcess
          */
         public function getArrayFromPrefixed(): void
         {
