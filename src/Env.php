@@ -173,8 +173,7 @@ class Env implements EnvInterface
 
         foreach (array_keys($_ENV) as $name)
         {
-            if (Str::getInstance()
-                ->startsWith($name, $prefix))
+            if (str_starts_with($name, $prefix))
             {
                 $nameAfterPrefix = substr($name, strlen($prefix));
                 $results[$nameAfterPrefix] = $this->get($name);
