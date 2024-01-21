@@ -132,8 +132,6 @@ class Env implements EnvInterface
      */
     public function getRequired(string $item): string|int|bool|array|null
     {
-        $this->load();
-
         $itemValue = $this->get($item, false);
 
         if (false === $itemValue)
@@ -149,8 +147,6 @@ class Env implements EnvInterface
      */
     public function getArray(string $item, array $default = []): array
     {
-        $this->load();
-
         $itemValue = $this->get($item);
 
         if (null === $itemValue)
@@ -166,18 +162,19 @@ class Env implements EnvInterface
      */
     public function getArrayPrefixed(string $prefix): array
     {
-        $this->load();
-
         if (empty($prefix))
         {
             throw new EnvException('You must provide a non-empty prefix to search for.');
         }
 
+        $this->load();
+
         $results = [];
 
         foreach (array_keys($_ENV) as $name)
         {
-            if ($this->startsWith($name, $prefix))
+            if (Str::getInstance()
+                ->startsWith($name, $prefix))
             {
                 $nameAfterPrefix = substr($name, strlen($prefix));
                 $results[$nameAfterPrefix] = $this->get($name);
@@ -185,10 +182,5 @@ class Env implements EnvInterface
         }
 
         return $results;
-    }
-
-    private function startsWith($haystack, $needle): bool
-    {
-        return (strpos($haystack, $needle) === 0);
     }
 }
