@@ -208,6 +208,121 @@ class Db
         return $return_data;
     }
 
+    /**
+     * @param string $table
+     * @param array $foreignKeys
+     * @param bool $dropTable
+     * @param null|string $migrationPath
+     * @return bool
+     * @throws Exception\ConfigLoadException
+     */
+    public function migrate(string $table, array $foreignKeys = [], bool $dropTable = false, null|string $migrationPath = null): bool
+    {
+        if (null === $migrationPath)
+        {
+            return false;
+        }
+
+        $hasTable = self::forge()
+                ->get_connection()
+                ->query('SHOW TABLES LIKE "' . $table . '"')->num_rows === 1;
+
+        if ($dropTable)
+        {
+            if ($hasTable)
+            {
+                foreach ($foreignKeys as $referenceTable => $values)
+                {
+                    foreach ($values as $foreignKey)
+                    {
+                        self::forge()
+                            ->get_connection()
+                            ->query('ALTER TABLE ' . $referenceTable . ' DROP FOREIGN KEY IF EXISTS ' . $foreignKey);
+                    }
+                }
+            }
+
+            self::forge()
+                ->get_connection()
+                ->query('DROP TABLE IF EXISTS ' . $table);
+        }
+
+        $sqlFile = $migrationPath . $table . '.sql';
+
+        $sqlScript = file_get_contents($sqlFile);
+
+        self::forge()
+            ->get_connection()
+            ->multi_query($sqlScript);
+
+        $count = 1;
+
+        while (self::forge()
+            ->get_connection()
+            ->next_result())
+        {
+            ++$count;
+        }
+
+        return $count !== 0;
+    }
+
+    /**
+     * @param string $table
+     * @param bool $truncate
+     * @param null|string $seederPath
+     * @return bool
+     * @throws Exception\ConfigLoadException
+     */
+    public function seed(string $table, bool $truncate = true, string $seederPath = null): bool
+    {
+        if (null === $seederPath)
+        {
+            return false;
+        }
+
+        $hasTable = self::forge()
+                ->get_connection()
+                ->query('SHOW TABLES LIKE "' . $table . '"')->num_rows === 1;
+
+        if ($hasTable)
+        {
+            if ($truncate)
+            {
+                self::forge()
+                    ->get_connection()
+                    ->query('SET FOREIGN_KEY_CHECKS = 0');
+                self::forge()
+                    ->get_connection()
+                    ->query('TRUNCATE TABLE ' . $table);
+                self::forge()
+                    ->get_connection()
+                    ->query('SET FOREIGN_KEY_CHECKS = 1');
+            }
+
+            $sqlFile = $seederPath . $table . '.sql';
+
+            $sqlScript = file_get_contents($sqlFile);
+
+            self::forge()
+                ->get_connection()
+                ->multi_query($sqlScript);
+
+            $count = 1;
+
+            while (self::forge()
+                ->get_connection()
+                ->next_result())
+            {
+                ++$count;
+            }
+
+            return $count !== 0;
+        }
+
+        return false;
+    }
+
     private function set_host(string $host): void
     {
         $this->host = $host;
