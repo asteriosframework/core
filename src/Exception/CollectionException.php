@@ -4,5 +4,4 @@ namespace Asterios\Core\Exception;
 
 class CollectionException extends AsteriosException
 {
-
 }
