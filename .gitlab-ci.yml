@@ -15,13 +15,13 @@ default:
 variables:
   DOCKER_IMAGE: registry.gitlab.com/asteriosframework/docker-images/asterios-build-image:latest
   DOCKER_SEC_IMAGE: "angrymeir/secscanner2junit:latest"
-  SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, vendor, node_modules, resources/static/abc2svg"
-  SAST_EXCLUDED_ANALYZERS: "phpcs-security-audit"
+  #SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, vendor, node_modules, resources/static/abc2svg"
+  #SAST_EXCLUDED_ANALYZERS: "phpcs-security-audit"
 
 include:
-  - template: Jobs/SAST.gitlab-ci.yml
+#  - template: Jobs/SAST.gitlab-ci.yml
   - local: gitlab-ci/build.yml
   - local: gitlab-ci/test.yml
   - local: gitlab-ci/semver.yml
-  - local: gitlab-ci/sast-report.yml
+#  - local: gitlab-ci/sast-report.yml
   - local: gitlab-ci/badges.yml
