@@ -44,7 +44,7 @@ class Cast implements CastInterface
      */
     public function double(mixed $value): float
     {
-        return (double)$value;
+        return (float)$value;
     }
 
     /**
