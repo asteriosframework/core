@@ -1,3 +1,11 @@
+## [1.1.0-rc.3](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.2...1.1.0-rc.3) (8/17/2024)
+
+
+### Features
+
+* add Cast class ([bfd0953](https://gitlab.com/asteriosframework/core/commit/bfd0953553b200a77aa0beeb165c0164b0c7e361))
+* add Cast class ([cf074a0](https://gitlab.com/asteriosframework/core/commit/cf074a0c547c6394ecb8dffcb9f386bd93c25f30))
+
 ## [1.1.0-rc.2](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.1...1.1.0-rc.2) (8/17/2024)
 
 
