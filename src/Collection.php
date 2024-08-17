@@ -124,4 +124,38 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     {
         return $this->items;
     }
+
+    public function isEmpty(): bool
+    {
+        return empty($this->items);
+    }
+
+    public function flip(): array
+    {
+        return array_flip($this->items);
+    }
+
+    public function sum(): int
+    {
+        return array_sum($this->items);
+    }
+
+    public function reverse(bool $preserveKeys = false): array
+    {
+        return array_reverse($this->items, $preserveKeys);
+    }
+
+    public function avg(bool $withoutDecimal = false): float|int
+    {
+        $average = 0;
+
+        $totalEntries = $this->count();
+
+        if ($this->count() > 0)
+        {
+            $average = $this->sum() / $totalEntries;
+        }
+
+        return ($withoutDecimal) ? (int)$average : $average;
+    }
 }

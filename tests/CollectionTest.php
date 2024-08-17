@@ -176,7 +176,7 @@ class CollectionTest extends MockeryTestCase
 
         self::assertInstanceOf(\ArrayIterator::class, $actual);
     }
-    
+
     public function testToJson(): void
     {
         $data = [12345 => ['username' => 'john'], 67890 => ['username' => 'jim']];
@@ -209,6 +209,61 @@ class CollectionTest extends MockeryTestCase
         $actual = $this->testedClass->toArray();
 
         self::assertEquals([12345, 67890], $actual);
+    }
+
+    public function testIsEmpty(): void
+    {
+        $data = [];
+
+        $this->testedClass = Collection::forge($data);
+
+        $actual = $this->testedClass->isEmpty();
+
+        self::assertTrue($actual);
+    }
+
+    public function testFlip(): void
+    {
+        $data = [1 => 'John', 2 => 'Jim'];
+
+        $this->testedClass = Collection::forge($data);
+
+        $actual = $this->testedClass->flip();
+
+        self::assertEquals(['John' => 1, 'Jim' => 2], $actual);
+    }
+
+    public function testSum(): void
+    {
+        $data = [10, 50, 40];
+
+        $this->testedClass = Collection::forge($data);
+
+        $actual = $this->testedClass->sum();
+
+        self::assertEquals(100, $actual);
+    }
+
+    public function testAvgAsFloat(): void
+    {
+        $data = [3, 4, 2, 2, 1, 4];
+
+        $this->testedClass = Collection::forge($data);
+
+        $actual = $this->testedClass->avg();
+
+        self::assertEquals(2.6666666666666665, $actual);
+    }
+
+    public function testAvgWithoutDecimal(): void
+    {
+        $data = [3, 4, 2, 2, 1, 4];
+
+        $this->testedClass = Collection::forge($data);
+
+        $actual = $this->testedClass->avg(true);
+
+        self::assertEquals(2, $actual);
     }
 
 }
