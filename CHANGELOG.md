@@ -1,3 +1,10 @@
+## [1.1.0-rc.2](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.1...1.1.0-rc.2) (8/17/2024)
+
+
+### Features
+
+* add more functions to collection ([1c6d812](https://gitlab.com/asteriosframework/core/commit/1c6d8122075e79bfbbb00295fd21d23ee6a4993c))
+
 ## [1.1.0-rc.1](https://gitlab.com/asteriosframework/core/compare/1.0.1-rc.1...1.1.0-rc.1) (8/16/2024)
 
 
