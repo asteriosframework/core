@@ -244,6 +244,28 @@ class CollectionTest extends MockeryTestCase
         self::assertEquals(100, $actual);
     }
 
+    public function testReverse(): void
+    {
+        $data = [1 => 'John', 2 => 'Jim'];
+
+        $this->testedClass = Collection::forge($data);
+
+        $actual = $this->testedClass->reverse();
+
+        self::assertEquals([0 => 'Jim', 1 => 'John'], $actual);
+    }
+
+    public function testReverseWithPreserveKeys(): void
+    {
+        $data = [0 => 'John', 1 => 'Jim'];
+
+        $this->testedClass = Collection::forge($data, true);
+
+        $actual = $this->testedClass->reverse();
+
+        self::assertEquals([1 => 'John', 0 => 'Jim'], $actual);
+    }
+
     public function testAvgAsFloat(): void
     {
         $data = [3, 4, 2, 2, 1, 4];
@@ -266,4 +288,25 @@ class CollectionTest extends MockeryTestCase
         self::assertEquals(2, $actual);
     }
 
+    public function testHasItemsSuccess(): void
+    {
+        $data = [0 => 'a'];
+
+        $this->testedClass = Collection::forge($data);
+
+        $actual = $this->testedClass->hasItems();
+
+        self::assertTrue($actual);
+    }
+
+    public function testHasItemsFalse(): void
+    {
+        $data = [];
+
+        $this->testedClass = Collection::forge($data);
+
+        $actual = $this->testedClass->hasItems();
+
+        self::assertFalse($actual);
+    }
 }
