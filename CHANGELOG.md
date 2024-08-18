@@ -1,3 +1,10 @@
+## [1.1.0-rc.4](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.3...1.1.0-rc.4) (8/18/2024)
+
+
+### Features
+
+* add hasItems function ([7ee5eb7](https://gitlab.com/asteriosframework/core/commit/7ee5eb7b2edaaf881cfda1142cd9b14273ca2c1d))
+
 ## [1.1.0-rc.3](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.2...1.1.0-rc.3) (8/17/2024)
 
 
