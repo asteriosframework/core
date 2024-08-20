@@ -109,14 +109,7 @@ class Env implements EnvInterface
             return $default;
         }
 
-        if (!ctype_upper($trimmedItemValue))
-        {
-            $sanitizedItemValue = strtolower($trimmedItemValue);
-        }
-        else
-        {
-            $sanitizedItemValue = $trimmedItemValue;
-        }
+        $sanitizedItemValue = $trimmedItemValue;
 
         return match ($sanitizedItemValue)
         {
