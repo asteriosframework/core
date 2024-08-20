@@ -191,6 +191,7 @@ namespace Asterios\Test
                 ['EXAMPLE_NULL', null, null],
                 ['EXAMPLE_LOWERCASE', null, 'abcdef'],
                 ['EXAMPLE_UPPERCASE', null, 'ABCDEF'],
+                ['EXAMPLE_WITH_UPPER_AND_LOWERCASE_VALUE', null, 'JiM'],
             ];
         }
 
