@@ -1,3 +1,10 @@
+## [1.1.0-rc.5](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.4...1.1.0-rc.5) (8/20/2024)
+
+
+### Bug Fixes
+
+* Bug in reading .env values that are upper and lowercase strings ([da3f690](https://gitlab.com/asteriosframework/core/commit/da3f690b6fd7781d6e273c014c11629443b05c00))
+
 ## [1.1.0-rc.4](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.3...1.1.0-rc.4) (8/18/2024)
 
 
