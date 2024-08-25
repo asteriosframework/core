@@ -2,64 +2,66 @@
 
 namespace Asterios\Core;
 
-use RuntimeException;
-
 class Logger
 {
-    protected static $log_file;
+    protected $file;
 
-    protected static $file;
-
-    protected static $options = [
+    protected array $options = [
         'dateFormat' => 'Ymd',
         'logFormat' => 'Y-m-d H:i:s',
+        'logDirectory' => null,
+        'logFilename' => null,
     ];
 
-    /**
-     * @throws RuntimeException
-     */
-    public static function create_log_directory(): void
+    public function __construct(string $logFileName = null, string $logDirectory = null)
     {
-        $log_dir = Config::get('default', 'logger.log_dir');
-
-        if (!File::forge()
-            ->directory_exists($log_dir))
+        if (null !== $logFileName)
         {
-            File::forge()
-                ->create_directory($log_dir);
+            $this->setOptions(['logFilename' => $logFileName]);
+        }
+
+        if (null !== $logDirectory)
+        {
+            $this->setOptions(['logDirectory' => $logDirectory]);
         }
     }
 
-    /**
-     * Set logging options (optional)
-     * @param array $options Array of settable options
-     *
-     * Options:
-     *  [
-     *      'dateFormat' => 'value of the date format the .txt file should be saved int'
-     *      'logFormat' => 'value of the date format each log event should be saved int'
-     *  ]
-     */
-    public static function set_options($options = []): void
+    public static function forge(string $logfileName = null, string $logDirectory = null): self
     {
-        static::$options = array_merge(static::$options, $options);
+        return new self($logfileName, $logDirectory);
     }
 
-    /**
-     * Info method (write info message)
-     *
-     * Used for e.g.: "The user example123 has created a post".
-     *
-     * @param string $message Descriptive text of the debug
-     * @param array $context Array to expend the message's meaning
-     * @return void
-     * @throws RuntimeException
-     */
-    public static function info(string $message, array $context = []): void
+    public function createLogDirectory(string $directory = null): self
+    {
+        $logDirectory = $this->options['logDirectory'];
+
+        if (null === $logDirectory)
+        {
+            $logDirectory = Config::get('default', 'logger.log_dir');
+        }
+
+        if (!File::forge()
+            ->directory_exists($logDirectory))
+        {
+            File::forge()
+                ->create_directory($logDirectory);
+        }
+
+        return $this;
+    }
+
+    public function setOptions(array $options): self
+    {
+        $this->options = array_merge($this->options, $options);
+
+        return $this;
+    }
+
+    public function info(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
-        static::write_log([
+        $this->writeLog([
             'message' => $message,
             'bt' => $bt,
             'severity' => 'INFO',
@@ -67,21 +69,11 @@ class Logger
         ]);
     }
 
-    /**
-     * Notice method (write notice message)
-     *
-     * Used for e.g.: "The user example123 has created a post".
-     *
-     * @param string $message Descriptive text of the debug
-     * @param array $context Array to expend the message's meaning
-     * @return void
-     * @throws RuntimeException
-     */
-    public static function notice(string $message, array $context = []): void
+    public function notice(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
-        static::write_log([
+        $this->writeLog([
             'message' => $message,
             'bt' => $bt,
             'severity' => 'NOTICE',
@@ -89,21 +81,11 @@ class Logger
         ]);
     }
 
-    /**
-     * Debug method (write debug message)
-     *
-     * Used for debugging, could be used instead of echo values
-     *
-     * @param string $message Descriptive text of the debug
-     * @param array $context Array to expend the message's meaning
-     * @return void
-     * @throws RuntimeException
-     */
-    public static function debug(string $message, array $context = []): void
+    public function debug(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
-        static::write_log([
+        $this->writeLog([
             'message' => $message,
             'bt' => $bt,
             'severity' => 'DEBUG',
@@ -111,21 +93,11 @@ class Logger
         ]);
     }
 
-    /**
-     * Warning method (write warning message)
-     *
-     * Used for warnings which is not fatal to the current operation
-     *
-     * @param string $message Descriptive text of the warning
-     * @param array $context Array to expend the message's meaning
-     * @return void
-     * @throws RuntimeException
-     */
-    public static function warning(string $message, array $context = []): void
+    public function warning(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
-        static::write_log([
+        $this->writeLog([
             'message' => $message,
             'bt' => $bt,
             'severity' => 'WARNING',
@@ -133,21 +105,11 @@ class Logger
         ]);
     }
 
-    /**
-     * Error method (write error message)
-     *
-     * Used for e.g. file not found
-     *
-     * @param string $message Descriptive text of the error
-     * @param array $context Array to expend the message's meaning
-     * @return void
-     * @throws RuntimeException
-     */
-    public static function error(string $message, array $context = []): void
+    public function error(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
-        static::write_log([
+        $this->writeLog([
             'message' => $message,
             'bt' => $bt,
             'severity' => 'ERROR',
@@ -155,21 +117,11 @@ class Logger
         ]);
     }
 
-    /**
-     * Fatal method (write fatal message)
-     *
-     * Used for e.g. database unavailable, system shutdown
-     *
-     * @param string $message Descriptive text of the error
-     * @param array $context Array to expend the message's meaning
-     * @return void
-     * @throws RuntimeException
-     */
-    public static function fatal(string $message, array $context = []): void
+    public function fatal(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
-        static::write_log([
+        $this->writeLog([
             'message' => $message,
             'bt' => $bt,
             'severity' => 'FATAL',
@@ -177,77 +129,70 @@ class Logger
         ]);
     }
 
-    /**
-     * Write to log file
-     * @param array $args Array of message (for log file), line (of log method execution), severity (for log file) and displayMessage (to display on frontend for the used)
-     * @return void
-     * @throws Exception\ConfigLoadException
-     */
-    public static function write_log(array $args = []): void
+    public function critical(string $message, array $context = []): void
     {
-        static::create_log_directory();
+        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
 
-        $handle = self::open_log();
+        $this->writeLog([
+            'message' => $message,
+            'bt' => $bt,
+            'severity' => 'CRITICAL',
+            'context' => $context,
+        ]);
+    }
 
-        if (!$handle)
+    public function writeLog(array $args = []): void
+    {
+        $this->createLogDirectory();
+
+        $this->file = $this->openLog();
+
+        if (!$this->file)
         {
             return;
         }
-
         /** @var false|string $time */
-        $time = date(static::$options['logFormat']);
+        $time = date($this->options['logFormat']);
 
-        $context = json_encode($args['context']);
+        $context = json_encode($args['context'], JSON_THROW_ON_ERROR);
+
+        $currentEnv = strtolower(Asterios::getEnvironment());
 
         $timeLog = (false === $time) ? "[N/A] " : "[{$time}] ";
-        $severityLog = is_null($args['severity']) ? "[N/A]" : "[{$args['severity']}]";
+        $severityLog = $currentEnv . '.';
+        $severityLog .= is_null($args['severity']) ? 'N/A' : $args['severity'];
         $messageLog = is_null($args['message']) ? "N/A" : (string)($args['message']);
         $contextLog = empty($args['context']) ? "" : (string)($context);
 
-        fwrite($handle, "{$timeLog}{$severityLog} - {$messageLog} {$contextLog}" . PHP_EOL);
+        fwrite($this->file, "{$timeLog}{$severityLog}: {$messageLog} {$contextLog}" . PHP_EOL);
 
-        static::close_file();
+        $this->closeFile();
     }
 
-    /**
-     * Open log file
-     * @return false|resource
-     * @throws Exception\ConfigLoadException
-     */
-    private static function open_log()
+    private function openLog()
     {
-        $open_file = static::get_logfile_name();
+        $openFile = $this->getLogfileName();
 
-        $handle = fopen($open_file, 'ab');
+        $handle = fopen($openFile, 'ab');
 
         if (!$handle)
         {
             /** @noinspection ForgottenDebugOutputInspection */
-            error_log('Could not create/open log file ' . $open_file);
+            error_log('Could not create/open log file ' . $openFile);
         }
 
         return $handle;
     }
 
-    /**
-     *  Close file stream
-     */
-    public static function close_file(): void
+    public function closeFile(): void
     {
-        if (static::$file)
+        if ($this->file)
         {
-            fclose(static::$file);
+            fclose($this->file);
         }
     }
 
-    /**
-     * Convert absolute path to relative url (using UNIX directory separators)
-     *
-     * E.g.:
-     *      Input:      D:\development\htdocs\public\todo-list\index.php
-     *      Output:     localhost/todo-list/index.php
-     */
-    public static function abs_to_real_path(string $pathToConvert): string
+    public function absToRealPath(string $pathToConvert): string
     {
         $pathAbs = str_replace(['/', '\\'], '/', $pathToConvert);
         $documentRoot = str_replace(['/', '\\'], '/', $_SERVER['DOCUMENT_ROOT']);
@@ -255,17 +200,25 @@ class Logger
         return $_SERVER['SERVER_NAME'] . str_replace($documentRoot, '', $pathAbs);
     }
 
-    /**
-     * @throws Exception\ConfigLoadException
-     */
-    protected static function get_logfile_name(): string
+    protected function getLogfileName(): string
     {
         $config = Config::get('default', 'logger');
-        $log_dir = $config->log_dir;
-        $log_file = $config->log_file;
 
-        $time = date(static::$options['dateFormat']);
+        $logDirectory = $this->options['logDirectory'];
+        $logFile = $this->options['logFilename'];
 
-        return $log_dir . DIRECTORY_SEPARATOR . $log_file . '-' . $time . '.log';
+        if (null === $logDirectory)
+        {
+            $logDirectory = $config->log_dir;
+        }
+
+        if (null === $logFile)
+        {
+            $logFile = $config->log_file;
+        }
+
+        $time = date($this->options['dateFormat']);
+
+        return $logDirectory . DIRECTORY_SEPARATOR . $logFile . '-' . $time . '.log';
     }
 }
