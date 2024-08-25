@@ -1,3 +1,10 @@
+## [1.1.0-rc.6](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.5...1.1.0-rc.6) (8/25/2024)
+
+
+### Features
+
+* refactor logger class ([baa4489](https://gitlab.com/asteriosframework/core/commit/baa4489cc47975077b3fa2615dffe5ca79bb0b53))
+
 ## [1.1.0-rc.5](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.4...1.1.0-rc.5) (8/20/2024)
 
 
