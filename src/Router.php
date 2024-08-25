@@ -345,7 +345,7 @@ class Router
                 $params = array_map(static function ($match, $index) use ($matches) {
                     if (isset($matches[$index + 1][0]) && is_array($matches[$index + 1][0]))
                     {
-                        return trim(substr($match[0][0], 0, (int) ($matches[$index + 1][0][1] - $match[0][1])), '/');
+                        return trim(substr($match[0][0], 0, (int)($matches[$index + 1][0][1] - $match[0][1])), '/');
                     }
 
                     return isset($match[0][0]) ? trim($match[0][0], '/') : null;
@@ -408,7 +408,8 @@ class Router
             }
             else
             {
-                Logger::fatal('Controller class does not exists.', ['name' => $controller]);
+                Logger::forge()
+                    ->fatal('Controller class does not exists.', ['name' => $controller]);
             }
         }
     }
