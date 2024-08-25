@@ -88,7 +88,8 @@ class Asterios
         if (empty($security_check) && self::getEnvironment() === self::DEVELOPMENT)
         {
             // @codeCoverageIgnoreStart
-            Logger::info('Warning: Using your application without input filtering is a security risk!');
+            Logger::forge()
+                ->info('Warning: Using your application without input filtering is a security risk!');
             // @codeCoverageIgnoreEnd
         }
         else
