@@ -1,3 +1,9 @@
+## [1.1.0-rc.7](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.6...1.1.0-rc.7) (2024-08-26)
+
+### Bug Fixes
+
+* **deps:** update dependency conventional-changelog-conventionalcommits to v8 ([d7232d1](https://gitlab.com/asteriosframework/core/commit/d7232d12bc71196fabc8badd72f504698312297e))
+
 ## [1.1.0-rc.6](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.5...1.1.0-rc.6) (8/25/2024)
 
 
