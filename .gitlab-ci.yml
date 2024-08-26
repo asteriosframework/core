@@ -23,5 +23,5 @@ include:
   - local: gitlab-ci/build.yml
   - local: gitlab-ci/test.yml
   - local: gitlab-ci/semver.yml
-  - local: gitlab-ci/sast-report.yml
+  # - local: gitlab-ci/sast-report.yml
   - local: gitlab-ci/badges.yml
