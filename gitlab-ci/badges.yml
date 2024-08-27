@@ -1,5 +1,5 @@
 badges:
-  image: python:3.9@sha256:8e0fd8e1bd3caa6ea74d1c408ad5a854c6b8f0e32c2ef9886d27d4d1bb9caeac
+  image: python:3.12@sha256:e3d5b6f95ce66923b5e48a06ee5755abb097de96a8617c3f2f7d431d48e63d35
   stage: badges
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
