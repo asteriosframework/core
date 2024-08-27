@@ -1,3 +1,9 @@
+## [1.1.0-rc.8](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.7...1.1.0-rc.8) (2024-08-27)
+
+### Bug Fixes
+
+* **deps:** update dependency firebase/php-jwt to v6.10.1 ([b48472d](https://gitlab.com/asteriosframework/core/commit/b48472d02ce58293594682435f6d508bc7a06df8))
+
 ## [1.1.0-rc.7](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.6...1.1.0-rc.7) (2024-08-26)
 
 ### Bug Fixes
