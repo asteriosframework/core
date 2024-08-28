@@ -13,7 +13,7 @@ test:
   image: ${DOCKER_IMAGE}
   needs: ['build']
   services:
-    - name: mariadb:10.4@sha256:22edfe1c78349f8cae88bbb5c2873b7e6c515be767c91c691308ce57445806f3
+    - name: mariadb:10.11@sha256:5e07c0d90fe1421e9b0b0114a7236eb519fdd873679bdb2ecc771d3c226c1f4e
       alias: db
       variables:
         MARIADB_USER: db
