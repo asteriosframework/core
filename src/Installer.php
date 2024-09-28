@@ -52,9 +52,6 @@ class Installer implements InstallerInterface
             return false;
         }
 
-        Logger::forge()
-            ->info('Install application ...');
-
         return File::forge()
             ->write($this->getInstalledFile(),
                 Cast::forge()
@@ -103,7 +100,7 @@ class Installer implements InstallerInterface
                 ->create_directory($mediaFolder);
 
             Logger::forge()
-                ->info('Created media directory "' . $mediaImagesFolder . '"');
+                ->info('Created media directory "' . $mediaImagesFolder . '".');
         }
 
         if (!$file->directory_exists($mediaImagesFolder))
@@ -112,7 +109,7 @@ class Installer implements InstallerInterface
                 ->create_directory($mediaImagesFolder);
 
             Logger::forge()
-                ->info('Created media images directory "' . $mediaImagesFolder . '"');
+                ->info('Created media images directory "' . $mediaImagesFolder . '".');
         }
 
         if (!$file->directory_exists($mediaGalleryFolder))
@@ -121,7 +118,7 @@ class Installer implements InstallerInterface
                 ->create_directory($mediaGalleryFolder);
 
             Logger::forge()
-                ->info('Created media gallery directory "' . $mediaImagesFolder . '"');
+                ->info('Created media gallery directory "' . $mediaImagesFolder . '".');
         }
 
         if (!$file->directory_exists($mediaDocumentsFolder))
@@ -130,7 +127,7 @@ class Installer implements InstallerInterface
                 ->create_directory($mediaDocumentsFolder);
 
             Logger::forge()
-                ->info('Created media files directory ' . $mediaImagesFolder . '"');
+                ->info('Created media files directory ' . $mediaImagesFolder . '".');
         }
 
         return $this;
@@ -155,7 +152,7 @@ class Installer implements InstallerInterface
         $do = 'database';
 
         Logger::forge()
-            ->info('Migrating database...');
+            ->info('Migrating database ...');
 
         if ($do !== 'database')
         {
@@ -173,7 +170,7 @@ class Installer implements InstallerInterface
     {
 
         Logger::forge()
-            ->info('Seeding database...');
+            ->info('Seeding database ...');
 
         $do = 'seeder';
 
@@ -191,6 +188,8 @@ class Installer implements InstallerInterface
 
     public function run(bool $createMediaFolders = false, bool $runDbMigration = false, bool $runDbSeeder = false): bool
     {
+        Logger::forge()
+            ->info('Install application ...');
         if ($createMediaFolders)
         {
             $this->createMediaFolders();
