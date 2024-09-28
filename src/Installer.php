@@ -9,9 +9,7 @@ class Installer implements InstallerInterface
 {
     private string $installedFile = '.installed';
     protected string $envFile = '.env';
-
     protected bool $runDatabaseSeeder = false;
-
     protected bool $runDatabaseMigrations = false;
 
     protected DbMigrationDto|null $dto;
@@ -190,6 +188,7 @@ class Installer implements InstallerInterface
     {
         Logger::forge()
             ->info('Install application ...');
+
         if ($createMediaFolders)
         {
             $this->createMediaFolders();
