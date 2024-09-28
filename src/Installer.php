@@ -189,9 +189,13 @@ class Installer implements InstallerInterface
         Logger::forge()
             ->info('Install application ...');
 
+        usleep(1000);
+
         if ($createMediaFolders)
         {
             $this->createMediaFolders();
+
+            usleep(1000);
         }
 
         $this->setRunDatabaseMigrations($runDbMigration);
@@ -199,6 +203,8 @@ class Installer implements InstallerInterface
         if ($this->runDatabaseMigrations)
         {
             $this->runDbMigrations();
+
+            usleep(1000);
         }
 
         $this->setRunDatabaseSeeder($runDbSeeder);
@@ -206,6 +212,8 @@ class Installer implements InstallerInterface
         if ($this->runDatabaseSeeder)
         {
             $this->runDbSeeders();
+
+            usleep(1000);
         }
 
         if ($this->errors !== [])
@@ -214,6 +222,8 @@ class Installer implements InstallerInterface
         }
 
         $this->setIsInstalled();
+
+        usleep(1000);
 
         if (!$this->isInstalled())
         {
