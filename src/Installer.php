@@ -98,7 +98,7 @@ class Installer implements InstallerInterface
                 ->create_directory($mediaFolder);
 
             Logger::forge()
-                ->info('Created media directory "' . $mediaImagesFolder . '".');
+                ->info('Created media directory "' . $mediaFolder . '".');
         }
 
         if (!$file->directory_exists($mediaImagesFolder))
@@ -116,7 +116,7 @@ class Installer implements InstallerInterface
                 ->create_directory($mediaGalleryFolder);
 
             Logger::forge()
-                ->info('Created media gallery directory "' . $mediaImagesFolder . '".');
+                ->info('Created media gallery directory "' . $mediaGalleryFolder . '".');
         }
 
         if (!$file->directory_exists($mediaDocumentsFolder))
@@ -125,7 +125,7 @@ class Installer implements InstallerInterface
                 ->create_directory($mediaDocumentsFolder);
 
             Logger::forge()
-                ->info('Created media files directory ' . $mediaImagesFolder . '".');
+                ->info('Created media files directory ' . $mediaDocumentsFolder . '".');
         }
 
         return $this;
