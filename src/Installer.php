@@ -64,6 +64,8 @@ class Installer
         {
             Logger::forge()
                 ->fatal('Could not load MEDIA_ env variables!', ['exception' => $e->getTraceAsString()]);
+
+            return $this;
         }
 
         $file = File::forge();
