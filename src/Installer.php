@@ -158,11 +158,27 @@ class Installer implements InstallerInterface
 
     public function runDbMigrations(): self
     {
+        $do = 'database';
+
+        if ($do !== 'database')
+        {
+            Logger::forge()
+                ->error('unknown error');
+        }
+
         return $this;
     }
 
     public function runDbSeeders(): self
     {
+
+        $do = 'seeder';
+
+        if ($do !== 'seeder')
+        {
+            Logger::forge()
+                ->error('unknown error');
+        }
 
         return $this;
     }
@@ -174,12 +190,16 @@ class Installer implements InstallerInterface
             $this->createMediaFolders();
         }
 
-        if ($runDbMigration)
+        $this->setRunDatabaseMigrations($runDbMigration);
+
+        if ($this->runDatabaseMigrations)
         {
             $this->runDbMigrations();
         }
 
-        if ($runDbSeeder)
+        $this->setRunDatabaseSeeder($runDbSeeder);
+
+        if ($this->runDatabaseSeeder)
         {
             $this->runDbSeeders();
         }
