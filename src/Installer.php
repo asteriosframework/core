@@ -8,9 +8,14 @@ class Installer
     protected string $envFile = '.env';
 
     /**
-     * @var bool $runSeeder
+     * @var bool $runDatabaseSeeder
      */
-    protected bool $runSeeder = false;
+    protected bool $runDatabaseSeeder = false;
+
+    /**
+     * @var bool $runDatabaseMigrations
+     */
+    protected bool $runDatabaseMigrations = false;
 
     /**
      * @var string[] $errors
@@ -50,10 +55,10 @@ class Installer
         Logger::forge()
             ->info('Install application ...');
 
-        if ($this->runSeeder)
+        if ($this->runDatabaseSeeder)
         {
             Logger::forge()
-                ->info('Initial application run with fresh migration and seeder.', ['timestamp' => $timestamp]);
+                ->info('Initial application run with fresh database seeder.', ['timestamp' => $timestamp]);
         }
 
         return File::forge()
@@ -137,11 +142,23 @@ class Installer
         return $this;
     }
 
-    /**
-     * @return string
-     */
+    public function setRunDatabaseSeeder(bool $value): self
+    {
+        $this->runDatabaseSeeder = $value;
+
+        return $this;
+    }
+
+    public function setRunDatabaseMigrations(bool $value): self
+    {
+        $this->runDatabaseMigrations = $value;
+
+        return $this;
+    }
+
     private function getDocumentRoot(): string
     {
         return $_SERVER['DOCUMENT_ROOT'];
     }
+
 }
