@@ -50,14 +50,21 @@ class Installer
         return $protectedDirectory . DIRECTORY_SEPARATOR . $this->installedFile;
     }
 
-    /**
-     * @throws Exception\EnvException
-     * @throws Exception\EnvLoadException
-     */
     public function createMediaFolders(): self
     {
         $env = (new Env($this->envFile));
-        $mediaPaths = $env->getArrayPrefixed('MEDIA_');
+
+        $mediaPaths = [];
+
+        try
+        {
+            $mediaPaths = $env->getArrayPrefixed('MEDIA_');
+        }
+        catch (Exception\EnvException|Exception\EnvLoadException $e)
+        {
+            Logger::forge()
+                ->fatal('Could not load MEDIA_ env variables!', ['exception' => $e->getTraceAsString()]);
+        }
 
         $file = File::forge();
 
