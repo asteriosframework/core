@@ -7,6 +7,8 @@ class Installer
     private string $installedFile = '.installed';
     protected string $envFile = '.env';
 
+    protected array $errors = [];
+
     public static function forge(string $env = '.env'): self
     {
         return new static($env);
@@ -26,6 +28,16 @@ class Installer
     public function setIsInstalled(): bool
     {
         $timestamp = time();
+
+        if ($this->errors !== [])
+        {
+            Logger::forge()
+                ->error("Install errors: " . implode(", ", $this->errors));
+            Logger::forge()
+                ->error('Installation aborted!');
+
+            return false;
+        }
 
         Logger::forge()
             ->info('Install application ...');
@@ -54,8 +66,6 @@ class Installer
     {
         $env = (new Env($this->envFile));
 
-        $mediaPaths = [];
-
         try
         {
             $mediaPaths = $env->getArrayPrefixed('MEDIA_');
@@ -63,7 +73,9 @@ class Installer
         catch (Exception\EnvException|Exception\EnvLoadException $e)
         {
             Logger::forge()
-                ->fatal('Could not load MEDIA_ env variables!', ['exception' => $e->getTraceAsString()]);
+                ->error('Could not load MEDIA_ env variables!', ['exception' => $e->getTraceAsString()]);
+
+            $this->errors[] = 'Could not load MEDIA_ variables from env file!';
 
             return $this;
         }
