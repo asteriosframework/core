@@ -167,6 +167,41 @@ class Installer implements InstallerInterface
         return $this;
     }
 
+    public function run(bool $createMediaFolders = false, bool $runDbMigration = false, bool $runDbSeeder = false): bool
+    {
+        if ($createMediaFolders)
+        {
+            $this->createMediaFolders();
+        }
+
+        if ($runDbMigration)
+        {
+            $this->runDbMigrations();
+        }
+
+        if ($runDbSeeder)
+        {
+            $this->runDbSeeders();
+        }
+
+        if ($this->errors !== [])
+        {
+            return false;
+        }
+
+        $this->setIsInstalled();
+
+        if (!$this->isInstalled())
+        {
+            Logger::forge()
+                ->error("Install errors: " . implode(', ', $this->errors));
+
+            return false;
+        }
+
+        return true;
+    }
+
     private function getDocumentRoot(): string
     {
         return $_SERVER['DOCUMENT_ROOT'];
