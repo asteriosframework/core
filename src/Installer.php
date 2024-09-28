@@ -75,7 +75,7 @@ class Installer
             Logger::forge()
                 ->error('Could not load MEDIA_ env variables!', ['exception' => $e->getTraceAsString()]);
 
-            $this->errors[] = 'Could not load MEDIA_ variables from env file!';
+            $this->errors[] = 'Could not load MEDIA_ variables from env file "' . $this->envFile . '"!';
 
             return $this;
         }
