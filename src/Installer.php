@@ -2,34 +2,34 @@
 
 namespace Asterios\Core;
 
-class Installer
+use Asterios\Core\Dto\DbMigrationDto;
+use Asterios\Core\Interfaces\InstallerInterface;
+
+class Installer implements InstallerInterface
 {
     private string $installedFile = '.installed';
     protected string $envFile = '.env';
 
-    /**
-     * @var bool $runDatabaseSeeder
-     */
     protected bool $runDatabaseSeeder = false;
 
-    /**
-     * @var bool $runDatabaseMigrations
-     */
     protected bool $runDatabaseMigrations = false;
+
+    protected DbMigrationDto|null $dto;
 
     /**
      * @var string[] $errors
      */
     protected array $errors = [];
 
-    public static function forge(string $env = '.env'): self
+    public static function forge(string $env = '.env', DbMigrationDto $dto = null): self
     {
         return new static($env);
     }
 
-    final public function __construct(string $env = '.env')
+    final public function __construct(string $env = '.env', DbMigrationDto $dto = null)
     {
         $this->envFile = $env;
+        $this->dto = $dto;
     }
 
     public function isInstalled(): bool
@@ -45,7 +45,7 @@ class Installer
         if ($this->errors !== [])
         {
             Logger::forge()
-                ->error("Install errors: " . implode(", ", $this->errors));
+                ->error("Install errors: " . implode(', ', $this->errors));
             Logger::forge()
                 ->error('Installation aborted!');
 
@@ -136,7 +136,7 @@ class Installer
                 ->create_directory($mediaDocumentsFolder);
 
             Logger::forge()
-                ->info('Created media files directory ' . $mediaImagesFolder) . '"';
+                ->info('Created media files directory ' . $mediaImagesFolder . '"');
         }
 
         return $this;
@@ -156,9 +156,19 @@ class Installer
         return $this;
     }
 
+    public function runDbMigrations(): self
+    {
+        return $this;
+    }
+
+    public function runDbSeeders(): self
+    {
+
+        return $this;
+    }
+
     private function getDocumentRoot(): string
     {
         return $_SERVER['DOCUMENT_ROOT'];
     }
-
 }
