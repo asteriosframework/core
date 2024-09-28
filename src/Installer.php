@@ -55,12 +55,6 @@ class Installer implements InstallerInterface
         Logger::forge()
             ->info('Install application ...');
 
-        if ($this->runDatabaseSeeder)
-        {
-            Logger::forge()
-                ->info('Initial application run with fresh database seeder.', ['timestamp' => $timestamp]);
-        }
-
         return File::forge()
             ->write($this->getInstalledFile(),
                 Cast::forge()
@@ -160,17 +154,26 @@ class Installer implements InstallerInterface
     {
         $do = 'database';
 
+        Logger::forge()
+            ->info('Migrating database...');
+
         if ($do !== 'database')
         {
             Logger::forge()
                 ->error('unknown error');
         }
 
+        Logger::forge()
+            ->info('Done!');
+
         return $this;
     }
 
     public function runDbSeeders(): self
     {
+
+        Logger::forge()
+            ->info('Seeding database...');
 
         $do = 'seeder';
 
@@ -179,6 +182,9 @@ class Installer implements InstallerInterface
             Logger::forge()
                 ->error('unknown error');
         }
+
+        Logger::forge()
+            ->info('Done!');
 
         return $this;
     }
@@ -218,6 +224,9 @@ class Installer implements InstallerInterface
 
             return false;
         }
+
+        Logger::forge()
+            ->info('Installation complete!');
 
         return true;
     }
