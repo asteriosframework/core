@@ -148,14 +148,14 @@ class Installer implements InstallerInterface
 
     public function runDbMigrations(): self
     {
-        $migration = (new Migration($this->envFile));
-
-        $result = $migration->migrate($this->dto);
-
         Logger::forge()
             ->info('Starting database migration ...');
 
         usleep(1000);
+
+        $migration = (new Migration($this->envFile));
+
+        $result = $migration->migrate($this->dto);
 
         if (!$result)
         {
