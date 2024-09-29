@@ -55,6 +55,10 @@ class Migration
             {
                 Db::forge()
                     ->migrate($table, $foreignKeys, $dto->dropTables(), $migrationPath);
+
+                Logger::forge()
+                    ->info('Migrated table "' . $table . '"');
+
             }
             catch (ConfigLoadException $e)
             {
@@ -90,6 +94,9 @@ class Migration
             {
                 Db::forge()
                     ->seed($table, $dto->truncateTables(), $seederPath);
+
+                Logger::forge()
+                    ->info('Seeded data from "' . $seederPath . '" for table "' . $table . '"');
             }
             catch (ConfigLoadException $e)
             {
