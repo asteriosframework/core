@@ -135,13 +135,18 @@ class Migration
     {
         $migrationPath = $this->getPathsFromEnv('DATABASE_MIGRATION_PATH');
 
-        return Asterios::getDocumentRoot() . $migrationPath ?? null;
+        return $this->getProtectedPath() . $migrationPath ?? null;
     }
 
     protected function getSeederPath(): string|null
     {
         $seederPath = $this->getPathsFromEnv('DATABASE_SEEDER_PATH');
 
-        return Asterios::getDocumentRoot() . $seederPath ?? null;
+        return $this->getProtectedPath() . $seederPath ?? null;
+    }
+
+    protected function getProtectedPath(): string
+    {
+        return str_replace('/public', '', Asterios::getDocumentRoot());
     }
 }
