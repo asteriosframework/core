@@ -59,6 +59,8 @@ class Migration
                 Logger::forge()
                     ->info('Migrated table "' . $table . '"');
 
+                usleep(1000);
+
             }
             catch (ConfigLoadException $e)
             {
@@ -96,7 +98,9 @@ class Migration
                     ->seed($table, $dto->truncateTables(), $seederPath);
 
                 Logger::forge()
-                    ->info('Seeded data from "' . $seederPath . '" for table "' . $table . '"');
+                    ->info('Seeded data for table "' . $table . '"');
+
+                usleep(1000);
             }
             catch (ConfigLoadException $e)
             {

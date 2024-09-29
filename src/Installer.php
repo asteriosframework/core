@@ -155,6 +155,8 @@ class Installer implements InstallerInterface
         Logger::forge()
             ->info('Starting database migration ...');
 
+        usleep(1000);
+
         if (!$result)
         {
             Logger::forge()
@@ -162,6 +164,8 @@ class Installer implements InstallerInterface
 
             return $this;
         }
+
+        usleep(1000);
 
         Logger::forge()
             ->info('Database migration complete!');
@@ -175,6 +179,8 @@ class Installer implements InstallerInterface
         Logger::forge()
             ->info('Starting database seeding ...');
 
+        usleep(1000);
+
         $migration = (new Migration($this->envFile));
 
         $result = $migration->seed($this->dto);
@@ -186,6 +192,8 @@ class Installer implements InstallerInterface
 
             return $this;
         }
+
+        usleep(1000);
 
         Logger::forge()
             ->info('Database seeding complete!');
