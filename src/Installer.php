@@ -148,7 +148,7 @@ class Installer implements InstallerInterface
 
     public function runDbMigrations(): self
     {
-        $migration = (new Migration);
+        $migration = (new Migration($this->envFile));
 
         $result = $migration->migrate($this->dto);
 
@@ -175,7 +175,7 @@ class Installer implements InstallerInterface
         Logger::forge()
             ->info('Starting database seeding ...');
 
-        $migration = (new Migration);
+        $migration = (new Migration($this->envFile));
 
         $result = $migration->seed($this->dto);
 
