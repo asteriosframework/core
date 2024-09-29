@@ -175,4 +175,9 @@ class Asterios
     {
         return self::$environment === self::DEVELOPMENT;
     }
+
+    public static function getDocumentRoot(): string
+    {
+        return $_SERVER['DOCUMENT_ROOT'];
+    }
 }

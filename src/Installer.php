@@ -2,6 +2,7 @@
 
 namespace Asterios\Core;
 
+use Asterios\Core\Db\Migration;
 use Asterios\Core\Dto\DbMigrationDto;
 use Asterios\Core\Interfaces\InstallerInterface;
 
@@ -19,14 +20,14 @@ class Installer implements InstallerInterface
      */
     protected array $errors = [];
 
-    public static function forge(string $env = '.env', DbMigrationDto $dto = null): self
+    public static function forge(string $envFile = '.env', DbMigrationDto $dto = null): self
     {
-        return new static($env);
+        return new static($envFile, $dto);
     }
 
-    final public function __construct(string $env = '.env', DbMigrationDto $dto = null)
+    final public function __construct(string $envFile = '.env', DbMigrationDto $dto = null)
     {
-        $this->envFile = $env;
+        $this->envFile = $envFile;
         $this->dto = $dto;
     }
 
@@ -61,7 +62,7 @@ class Installer implements InstallerInterface
      */
     public function getInstalledFile(): string
     {
-        $protectedDirectory = str_replace('/public', '', $this->getDocumentRoot());
+        $protectedDirectory = str_replace('/public', '', Asterios::getDocumentRoot());
 
         return $protectedDirectory . DIRECTORY_SEPARATOR . $this->installedFile;
     }
@@ -86,7 +87,7 @@ class Installer implements InstallerInterface
 
         $file = File::forge();
 
-        $baseDirectory = $this->getDocumentRoot() . DIRECTORY_SEPARATOR;
+        $baseDirectory = Asterios::getDocumentRoot() . DIRECTORY_SEPARATOR;
         $mediaFolder = $baseDirectory . $mediaPaths['BASE_PATH'];
         $mediaImagesFolder = $baseDirectory . $mediaPaths['IMAGE_PATH'];
         $mediaGalleryFolder = $baseDirectory . $mediaPaths['GALLERY_PATH'];
@@ -147,19 +148,23 @@ class Installer implements InstallerInterface
 
     public function runDbMigrations(): self
     {
-        $do = 'database';
+        $migration = (new Migration);
+
+        $result = $migration->migrate($this->dto);
 
         Logger::forge()
-            ->info('Migrating database ...');
+            ->info('Starting database migration ...');
 
-        if ($do !== 'database')
+        if (!$result)
         {
             Logger::forge()
-                ->error('unknown error');
+                ->error('Database migration failed.', ['error' => $migration->getErrors()]);
+
+            return $this;
         }
 
         Logger::forge()
-            ->info('Done!');
+            ->info('Database migration complete!');
 
         return $this;
     }
@@ -168,18 +173,22 @@ class Installer implements InstallerInterface
     {
 
         Logger::forge()
-            ->info('Seeding database ...');
+            ->info('Starting database seeding ...');
 
-        $do = 'seeder';
+        $migration = (new Migration);
 
-        if ($do !== 'seeder')
+        $result = $migration->seed($this->dto);
+
+        if (!$result)
         {
             Logger::forge()
-                ->error('unknown error');
+                ->error('Database seeding failed.', ['error' => $migration->getErrors()]);
+
+            return $this;
         }
 
         Logger::forge()
-            ->info('Done!');
+            ->info('Database seeding complete!');
 
         return $this;
     }
@@ -237,10 +246,5 @@ class Installer implements InstallerInterface
             ->info('Installation complete!');
 
         return true;
-    }
-
-    private function getDocumentRoot(): string
-    {
-        return $_SERVER['DOCUMENT_ROOT'];
     }
 }
