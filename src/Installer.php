@@ -4,6 +4,7 @@ namespace Asterios\Core;
 
 use Asterios\Core\Db\Migration;
 use Asterios\Core\Dto\DbMigrationDto;
+use Asterios\Core\Enum\MediaEnum;
 use Asterios\Core\Interfaces\InstallerInterface;
 
 class Installer implements InstallerInterface
@@ -85,49 +86,16 @@ class Installer implements InstallerInterface
             return $this;
         }
 
-        $file = File::forge();
-
         $baseDirectory = Asterios::getDocumentRoot() . DIRECTORY_SEPARATOR;
         $mediaFolder = $baseDirectory . $mediaPaths['BASE_PATH'];
         $mediaImagesFolder = $baseDirectory . $mediaPaths['IMAGE_PATH'];
         $mediaGalleryFolder = $baseDirectory . $mediaPaths['GALLERY_PATH'];
         $mediaDocumentsFolder = $baseDirectory . $mediaPaths['FILES_PATH'];
 
-        if (!$file->directory_exists($mediaFolder))
-        {
-            File::forge()
-                ->create_directory($mediaFolder);
-
-            Logger::forge()
-                ->info('Created media directory "' . $mediaFolder . '".');
-        }
-
-        if (!$file->directory_exists($mediaImagesFolder))
-        {
-            File::forge()
-                ->create_directory($mediaImagesFolder);
-
-            Logger::forge()
-                ->info('Created media images directory "' . $mediaImagesFolder . '".');
-        }
-
-        if (!$file->directory_exists($mediaGalleryFolder))
-        {
-            File::forge()
-                ->create_directory($mediaGalleryFolder);
-
-            Logger::forge()
-                ->info('Created media gallery directory "' . $mediaGalleryFolder . '".');
-        }
-
-        if (!$file->directory_exists($mediaDocumentsFolder))
-        {
-            File::forge()
-                ->create_directory($mediaDocumentsFolder);
-
-            Logger::forge()
-                ->info('Created media files directory ' . $mediaDocumentsFolder . '".');
-        }
+        $this->createMediaFolder($mediaFolder, MediaEnum::BASE);
+        $this->createMediaFolder($mediaImagesFolder, MediaEnum::IMAGE);
+        $this->createMediaFolder($mediaGalleryFolder, MediaEnum::GALLERY);
+        $this->createMediaFolder($mediaDocumentsFolder, MediaEnum::DOCUMENT);
 
         return $this;
     }
@@ -252,6 +220,31 @@ class Installer implements InstallerInterface
 
         Logger::forge()
             ->info('Installation complete!');
+
+        return true;
+    }
+
+    public function createMediaFolder(string $mediaFolder, MediaEnum $type): bool
+    {
+        $file = File::forge();
+
+        if (!$file->directory_exists($mediaFolder))
+        {
+            $success = $file->create_directory($mediaFolder);
+
+            if (!$success)
+            {
+                Logger::forge()
+                    ->error('Could not create  media ' . $type->type() . ' directory "' . $mediaFolder . '"!');
+
+                $this->errors[] = 'Could not create  media ' . $type->type() . ' directory "' . $mediaFolder . '"!';
+
+                return false;
+            }
+
+            Logger::forge()
+                ->info('Created media ' . $type->type() . ' directory "' . $mediaFolder . '".');
+        }
 
         return true;
     }

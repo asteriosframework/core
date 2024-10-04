@@ -2,6 +2,8 @@
 
 namespace Asterios\Core\Interfaces;
 
+use Asterios\Core\Enum\MediaEnum;
+
 interface InstallerInterface
 {
     public function isInstalled(): bool;
@@ -13,4 +15,12 @@ interface InstallerInterface
     public function setRunDatabaseSeeder(bool $value): self;
 
     public function setRunDatabaseMigrations(bool $value): self;
+
+    public function runDbMigrations(): self;
+
+    public function runDbSeeders(): self;
+
+    public function run(bool $createMediaFolders = false, bool $runDbMigration = false, bool $runDbSeeder = false): bool;
+
+    public function createMediaFolder(string $mediaFolder, MediaEnum $type): bool;
 }
