@@ -10,6 +10,9 @@ enum MediaModeEnum
     case DOCUMENT;
     case STUDIO;
 
+    /**
+     * @return string
+     */
     public function mode(): string
     {
         return match ($this)
@@ -20,5 +23,18 @@ enum MediaModeEnum
             self::DOCUMENT => 'document',
             self::STUDIO => 'studio',
         };
+    }
+
+    /**
+     * @return string[]
+     */
+    public function availableModes(): array
+    {
+        return [
+            self::IMAGE->mode(),
+            self::GALLERY->mode(),
+            self::DOCUMENT->mode(),
+            self::STUDIO->mode(),
+        ];
     }
 }
