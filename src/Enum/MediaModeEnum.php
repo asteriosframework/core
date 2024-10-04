@@ -18,9 +18,9 @@ enum MediaModeEnum
         return match ($this)
         {
             self::BASE => 'base',
-            self::IMAGE => 'image',
+            self::IMAGE => 'images',
             self::GALLERY => 'gallery',
-            self::DOCUMENT => 'document',
+            self::DOCUMENT => 'documents',
             self::STUDIO => 'studio',
         };
     }
