@@ -8,6 +8,7 @@ enum MediaEnum
     case IMAGE;
     case GALLERY;
     case DOCUMENT;
+    case STUDIO;
 
     public function type(): string
     {
@@ -17,6 +18,7 @@ enum MediaEnum
             self::IMAGE => 'image',
             self::GALLERY => 'gallery',
             self::DOCUMENT => 'document',
+            self::STUDIO => 'studio',
         };
     }
 }
