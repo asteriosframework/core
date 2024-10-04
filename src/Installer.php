@@ -4,7 +4,7 @@ namespace Asterios\Core;
 
 use Asterios\Core\Db\Migration;
 use Asterios\Core\Dto\DbMigrationDto;
-use Asterios\Core\Enum\MediaEnum;
+use Asterios\Core\Enum\MediaModeEnum;
 use Asterios\Core\Interfaces\InstallerInterface;
 
 class Installer implements InstallerInterface
@@ -92,10 +92,10 @@ class Installer implements InstallerInterface
         $mediaGalleryFolder = $baseDirectory . $mediaPaths['GALLERY_PATH'];
         $mediaDocumentsFolder = $baseDirectory . $mediaPaths['FILES_PATH'];
 
-        $this->createMediaFolder($mediaFolder, MediaEnum::BASE);
-        $this->createMediaFolder($mediaImagesFolder, MediaEnum::IMAGE);
-        $this->createMediaFolder($mediaGalleryFolder, MediaEnum::GALLERY);
-        $this->createMediaFolder($mediaDocumentsFolder, MediaEnum::DOCUMENT);
+        $this->createMediaFolder($mediaFolder, MediaModeEnum::BASE);
+        $this->createMediaFolder($mediaImagesFolder, MediaModeEnum::IMAGE);
+        $this->createMediaFolder($mediaGalleryFolder, MediaModeEnum::GALLERY);
+        $this->createMediaFolder($mediaDocumentsFolder, MediaModeEnum::DOCUMENT);
 
         return $this;
     }
@@ -224,7 +224,7 @@ class Installer implements InstallerInterface
         return true;
     }
 
-    public function createMediaFolder(string $mediaFolder, MediaEnum $type): bool
+    public function createMediaFolder(string $mediaFolder, MediaModeEnum $type): bool
     {
         $file = File::forge();
 
@@ -235,15 +235,15 @@ class Installer implements InstallerInterface
             if (!$success)
             {
                 Logger::forge()
-                    ->error('Could not create  media ' . $type->type() . ' directory "' . $mediaFolder . '"!');
+                    ->error('Could not create  media ' . $type->mode() . ' directory "' . $mediaFolder . '"!');
 
-                $this->errors[] = 'Could not create  media ' . $type->type() . ' directory "' . $mediaFolder . '"!';
+                $this->errors[] = 'Could not create  media ' . $type->mode() . ' directory "' . $mediaFolder . '"!';
 
                 return false;
             }
 
             Logger::forge()
-                ->info('Created media ' . $type->type() . ' directory "' . $mediaFolder . '".');
+                ->info('Created media ' . $type->mode() . ' directory "' . $mediaFolder . '".');
         }
 
         return true;

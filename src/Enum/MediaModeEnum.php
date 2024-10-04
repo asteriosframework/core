@@ -2,7 +2,7 @@
 
 namespace Asterios\Core\Enum;
 
-enum MediaEnum
+enum MediaModeEnum
 {
     case BASE;
     case IMAGE;
@@ -10,7 +10,7 @@ enum MediaEnum
     case DOCUMENT;
     case STUDIO;
 
-    public function type(): string
+    public function mode(): string
     {
         return match ($this)
         {
