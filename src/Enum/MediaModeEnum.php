@@ -24,33 +24,4 @@ enum MediaModeEnum
             self::STUDIO => 'studio',
         };
     }
-
-    /**
-     * @param string $language
-     * @return string
-     */
-    public function translate(string $language = 'de'): string
-    {
-        if ($language === 'de')
-        {
-            return match ($this)
-            {
-                self::BASE => 'Basis',
-                self::IMAGE => 'Bilder',
-                self::GALLERY => 'Galerie',
-                self::DOCUMENT => 'Dokumente',
-                self::STUDIO => 'Studio',
-            };
-        }
-
-        return match ($this)
-        {
-            self::BASE => 'Base',
-            self::IMAGE => 'Images',
-            self::GALLERY => 'Gallery',
-            self::DOCUMENT => 'Documents',
-            self::STUDIO => 'Studio',
-        };
-
-    }
 }
