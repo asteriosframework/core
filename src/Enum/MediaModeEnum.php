@@ -24,17 +24,4 @@ enum MediaModeEnum
             self::STUDIO => 'studio',
         };
     }
-
-    /**
-     * @return string[]
-     */
-    public function availableModes(): array
-    {
-        return [
-            self::IMAGE->mode(),
-            self::GALLERY->mode(),
-            self::DOCUMENT->mode(),
-            self::STUDIO->mode(),
-        ];
-    }
 }
