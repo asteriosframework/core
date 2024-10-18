@@ -1066,6 +1066,13 @@ class Model
 
         foreach ($array as $key => $value)
         {
+            if ($value === null)
+            {
+                $columns .= ' ' . $this->backticks(preg_replace('/[^a-z_A-Z0-9]/', '', $key)) . ' = NULL,';
+
+                continue;
+            }
+
             $columns .= ' ' . $this->backticks(preg_replace('/[^a-z_A-Z0-9]/', '', $key)) . ' = \'' . $this->escape($value) . '\',';
         }
 
@@ -1135,6 +1142,14 @@ class Model
         foreach ($array as $key => $value)
         {
             $columns .= $this->backticks($key) . ',';
+
+            if ($value === null)
+            {
+                $columns_data .= 'NULL,';
+
+                continue;
+            }
+
             $columns_data .= '"' . $this->escape($value) . '",';
         }
 
