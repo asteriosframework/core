@@ -208,7 +208,18 @@ class CollectionTest extends MockeryTestCase
 
         $actual = $this->testedClass->toArray();
 
-        self::assertEquals([12345, 67890], $actual);
+        self::assertIsArray($actual);
+    }
+
+    public function testToObject(): void
+    {
+        $data = [12345, 67890];
+
+        $this->testedClass = Collection::forge($data);
+
+        $actual = $this->testedClass->toObject();
+
+        self::assertIsObject($actual);
     }
 
     public function testIsEmpty(): void

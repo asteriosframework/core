@@ -56,6 +56,11 @@ interface CollectionInterface
     public function toArray(): array;
 
     /**
+     * @return object
+     */
+    public function toObject(): object;
+
+    /**
      * @return bool
      */
     public function isEmpty(): bool;
