@@ -1,3 +1,9 @@
+## [1.1.0-rc.9](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.8...1.1.0-rc.9) (2024-10-26)
+
+### Features
+
+* model insert & update allow null value ([2b6f452](https://gitlab.com/asteriosframework/core/commit/2b6f452a205170c53fd7ad00cefb814892aca201))
+
 ## [1.1.0-rc.8](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.7...1.1.0-rc.8) (2024-08-27)
 
 ### Bug Fixes
