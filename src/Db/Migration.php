@@ -146,14 +146,24 @@ class Migration
     {
         $migrationPath = $this->getPathsFromEnv('DATABASE_MIGRATION_PATH');
 
-        return $this->getProtectedPath() . $migrationPath ?? null;
+        if (null === $migrationPath)
+        {
+            return null;
+        }
+
+        return $this->getProtectedPath() . $migrationPath;
     }
 
     protected function getSeederPath(): string|null
     {
         $seederPath = $this->getPathsFromEnv('DATABASE_SEEDER_PATH');
 
-        return $this->getProtectedPath() . $seederPath ?? null;
+        if (null === $seederPath)
+        {
+            return null;
+        }
+
+        return $this->getProtectedPath() . $seederPath;
     }
 
     protected function getProtectedPath(): string
