@@ -14,16 +14,12 @@ class Schema
 
         $sql = $blueprint->toSql();
 
-        Db::forge()
-            ->pdo()
-            ->exec($sql);
+        Db::write($sql);
     }
 
     public static function drop(string $table): void
     {
         $sql = "DROP TABLE IF EXISTS `$table`";
-        Db::forge()
-            ->pdo()
-            ->exec($sql);
+        Db::write($sql);
     }
 }
