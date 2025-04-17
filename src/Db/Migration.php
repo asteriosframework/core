@@ -13,61 +13,88 @@ use Asterios\Core\Logger;
 
 class Migration
 {
-    /**
-     * @var string[] $errors
-     */
     protected array $errors = [];
     protected string $envFile = '.env';
-
-    protected Env|null $env;
+    protected ?Env $env;
 
     public function __construct(string $envFile = '.env')
     {
         $this->envFile = $envFile;
-
-        $this->env = (new Env($this->envFile));
+        $this->env = new Env($this->envFile);
     }
 
-    public function migrate(DbMigrationDto $dto): bool
+    public function migrate(): bool
     {
         $migrationPath = $this->getMigrationsPath();
 
-        if (null === $migrationPath)
+        if (!$migrationPath || !is_dir($migrationPath))
         {
-            Logger::forge()
-                ->error('Database migration failed: Could not load migration path.');
-
-            $this->errors[] = 'Database migration failed!';
+            $this->logError('Could not load migration path: ' . $migrationPath);
 
             return false;
         }
 
-        foreach ($dto->getTablesToMigrate() as $table)
+        $files = glob($migrationPath . '/*.php');
+        sort($files);
+
+        foreach ($files as $file)
         {
-            $foreignKeys = [];
-
-            if (array_key_exists($table, $dto->getForeignKeysToMigrate()))
-            {
-                $foreignKeys[$table] = $dto->getForeignKeysToMigrate()[$table];
-            }
-
             try
             {
-                Db::forge()
-                    ->migrate($table, $foreignKeys, $dto->dropTables(), $migrationPath);
-
-                Logger::forge()
-                    ->info('Migrated table "' . $table . '"');
-
-                usleep(1000);
-
-            }
-            catch (ConfigLoadException $e)
+                $migration = require $file;
+                if (method_exists($migration, 'up'))
+                {
+                    $migration->up();
+                    Logger::forge()
+                        ->info('Run migration: ' . basename($file));
+                }
+                else
+                {
+                    throw new \RuntimeException('Missing method "up" in migration:' . basename($file));
+                }
+            } catch (\Throwable $e)
             {
-                Logger::forge()
-                    ->error('Database migration failed: ' . $e->getMessage());
+                $this->logError('Migration failed: ' . basename($file) . ' - ' . $e->getMessage());
 
-                $this->errors[] = 'Database seeder failed! Check logfile for details.';
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function rollback(): bool
+    {
+        $migrationPath = $this->getMigrationsPath();
+
+        if (!$migrationPath || !is_dir($migrationPath))
+        {
+            $this->logError('Could not load migration path: ' . $migrationPath);
+
+            return false;
+        }
+
+        $files = glob($migrationPath . '/*.php');
+        rsort($files);
+
+        foreach ($files as $file)
+        {
+            try
+            {
+                $migration = require $file;
+                if (method_exists($migration, 'down'))
+                {
+                    $migration->down();
+                    Logger::forge()
+                        ->info('Rollback migration: ' . basename($file));
+                }
+                else
+                {
+                    throw new \RuntimeException('Missing method "down" fehlt in Migration: ' . basename($file));
+                }
+            } catch (\Throwable $e)
+            {
+                $this->logError('Rollback failed: ' . basename($file) . ' ' . $e->getMessage());
 
                 return false;
             }
@@ -82,10 +109,7 @@ class Migration
 
         if (null === $seederPath)
         {
-            Logger::forge()
-                ->error('Database seeder failed: Could not load seeder path.');
-
-            $this->errors[] = 'Database seeder failed!';
+            $this->logError('Could not load seeder path.');
 
             return false;
         }
@@ -96,18 +120,12 @@ class Migration
             {
                 Db::forge()
                     ->seed($table, $dto->truncateTables(), $seederPath);
-
                 Logger::forge()
-                    ->info('Seeded data for table "' . $table . '"');
-
+                    ->info("Seeded: $table");
                 usleep(1000);
-            }
-            catch (ConfigLoadException $e)
+            } catch (ConfigLoadException $e)
             {
-                Logger::forge()
-                    ->error('Database seeder failed: ' . $e->getMessage());
-
-                $this->errors[] = 'Database seeder failed! Check logfile for details.';
+                $this->logError("Seeder fehlgeschlagen für $table: " . $e->getMessage());
 
                 return false;
             }
@@ -116,54 +134,43 @@ class Migration
         return true;
     }
 
-    /**
-     * @return string[]
-     */
     public function getErrors(): array
     {
         return $this->errors;
     }
 
-    protected function getPathsFromEnv(string $key): string|null
+    protected function logError(string $msg): void
+    {
+        Logger::forge()
+            ->error($msg);
+        $this->errors[] = $msg;
+    }
+
+    protected function getPathsFromEnv(string $key): ?string
     {
         try
         {
             return $this->env->get($key);
-        }
-        catch (EnvException|EnvLoadException $e)
+        } catch (EnvException|EnvLoadException $e)
         {
-
-            Logger::forge()
-                ->error('Could not load variable "' . $key . '" from env file!', ['envFile' => $this->envFile, 'exception' => $e->getMessage()]);
-
-            $this->errors[] = 'Could not load variable "' . $key . '" from env file "' . $this->envFile . '"!';
+            $this->logError("Env-Fehler [$key]: " . $e->getMessage());
 
             return null;
         }
     }
 
-    protected function getMigrationsPath(): string|null
+    protected function getMigrationsPath(): ?string
     {
         $migrationPath = $this->getPathsFromEnv('DATABASE_MIGRATION_PATH');
 
-        if (null === $migrationPath)
-        {
-            return null;
-        }
-
-        return $this->getProtectedPath() . $migrationPath;
+        return $migrationPath ? $this->getProtectedPath() . $migrationPath : null;
     }
 
-    protected function getSeederPath(): string|null
+    protected function getSeederPath(): ?string
     {
         $seederPath = $this->getPathsFromEnv('DATABASE_SEEDER_PATH');
 
-        if (null === $seederPath)
-        {
-            return null;
-        }
-
-        return $this->getProtectedPath() . $seederPath;
+        return $seederPath ? $this->getProtectedPath() . $seederPath : null;
     }
 
     protected function getProtectedPath(): string
