@@ -6,6 +6,7 @@ use Asterios\Core\Db;
 use Asterios\Core\Db\Builder\SchemaBuilder;
 use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\MigrationException;
+use Asterios\Core\Logger;
 use Closure;
 
 class Schema
@@ -22,6 +23,9 @@ class Schema
         $callback($blueprint);
 
         $sql = $blueprint->toSql();
+
+        Logger::forge()
+            ->info($sql);
 
         try
         {
