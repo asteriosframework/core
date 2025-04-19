@@ -6,7 +6,6 @@ use Asterios\Core\Db;
 use Asterios\Core\Db\Builder\SchemaBuilder;
 use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\MigrationException;
-use Asterios\Core\Logger;
 use Closure;
 
 class Schema
@@ -32,9 +31,7 @@ class Schema
         $sqlStatements = implode(",\n", $indented);
 
         $sql = "CREATE TABLE `$table` (\n" . $sqlStatements . "\n) ENGINE=$engine DEFAULT CHARSET=$charSet;";
-
-        Logger::forge()
-            ->info($sql);
+        
         try
         {
             Db::write($sql);
