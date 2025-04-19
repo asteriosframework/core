@@ -13,15 +13,18 @@ class SchemaBuilder
         $this->table = $table;
     }
 
-    public function id(string $name = 'id', bool $autoIncrement = true): self
+    public function id(string $name = 'id', bool $autoIncrement = true, bool $bigInt = true, bool $unsigned = true): self
     {
+        $sqlDataType = (true === $bigInt ? 'BIGINT' : 'INT');
         $sqlAutoIncrement = (true === $autoIncrement) ? 'AUTO_INCREMENT' : '';
-        $this->columns[] = '`' . $name . '` INT UNSIGNED ' . $sqlAutoIncrement . ' PRIMARY KEY';
+        $sqlUnsigned = (true === $unsigned) ? ' UNSIGNED' : '';
+
+        $this->columns[] = '`' . $name . '` ' . $sqlDataType . ' ' . $sqlUnsigned . ' ' . $sqlAutoIncrement . ' PRIMARY KEY';
 
         return $this;
     }
 
-    public function bigInt(string $name, $unsigned = true): self
+    public function bigInt(string $name, bool $unsigned = true): self
     {
         $sqlUnsigned = (true === $unsigned) ? ' UNSIGNED' : '';
         $this->columns[] = '`' . $name . '` BIGINT' . $sqlUnsigned;
