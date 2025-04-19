@@ -13,9 +13,10 @@ class SchemaBuilder
         $this->table = $table;
     }
 
-    public function id(string $name = 'id'): self
+    public function id(string $name = 'id', bool $autoIncrement = true): self
     {
-        $this->columns[] = '`' . $name . '` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY';
+        $sqlAutoIncrement = (true === $autoIncrement) ? 'AUTO_INCREMENT' : '';
+        $this->columns[] = '`' . $name . '` INT UNSIGNED ' . $sqlAutoIncrement . ' PRIMARY KEY';
 
         return $this;
     }
@@ -48,5 +49,13 @@ class SchemaBuilder
     public function build(): array
     {
         return [$this->columns, $this->foreignKeys];
+    }
+
+    public function timestamps(): self
+    {
+        $this->columns[] = "`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
+        $this->columns[] = "`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
+
+        return $this;
     }
 }
