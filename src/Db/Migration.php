@@ -9,9 +9,10 @@ use Asterios\Core\Env;
 use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvLoadException;
+use Asterios\Core\Interfaces\MigrationInterface;
 use Asterios\Core\Logger;
 
-class Migration
+class Migration implements MigrationInterface
 {
     protected array $errors = [];
     protected string $envFile = '.env';
@@ -23,6 +24,9 @@ class Migration
         $this->env = new Env($this->envFile);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function migrate(): bool
     {
         $migrationPath = $this->getMigrationsPath();
@@ -63,6 +67,9 @@ class Migration
         return true;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function rollback(): bool
     {
         $migrationPath = $this->getMigrationsPath();

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Asterios\Core\Db;
+namespace Asterios\Core\Db\Migration;
 
 class TableBluePrint
 {
@@ -12,9 +12,10 @@ class TableBluePrint
         $this->table = $table;
     }
 
-    public function id(string $name = 'id'): void
+    public function id(string $name = 'id', bool $autoIncrement = true): void
     {
-        $this->columns[] = "`$name` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY";
+        $sqlAutoIncrement = (true === $autoIncrement) ? 'AUTO_INCREMENT' : '';
+        $this->columns[] = '`' . $name . '` INT UNSIGNED ' . $sqlAutoIncrement . ' PRIMARY KEY';
     }
 
     public function string(string $name, int $length = 255): void
@@ -22,21 +23,31 @@ class TableBluePrint
         $this->columns[] = "`$name` VARCHAR($length) NOT NULL";
     }
 
-    public function integer(string $name, bool $unsigned = true): void
+    public function integer(string $name, bool $unsigned = true, bool $notNull = true): void
     {
         $type = $unsigned ? 'INT UNSIGNED' : 'INT';
-        $this->columns[] = "`$name` $type NOT NULL";
+        $this->columns[] = '`' . $name . '` ' . $type . $this->setNotNull($notNull);
     }
 
-    public function boolean(string $name): void
+    public function int(string $name, bool $unsigned = true, bool $notNull = true): void
     {
-        $this->columns[] = "`$name` TINYINT(1) NOT NULL";
+        $this->integer($name, $unsigned, $notNull);
+    }
+
+    public function boolean(string $name, bool $notNull = true): void
+    {
+        $this->columns[] = '`' . $name . '` TINYINT(1)' . $this->setNotNull($notNull);
     }
 
     public function timestamps(): void
     {
         $this->columns[] = "`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
         $this->columns[] = "`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
+    }
+
+    protected function setNotNull(bool $setNull = true): string
+    {
+        return (true === $setNull) ? ' NOT NULL' : '';
     }
 
     public function toSql(): string
