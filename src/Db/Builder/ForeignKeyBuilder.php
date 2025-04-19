@@ -10,6 +10,8 @@ class ForeignKeyBuilder
     protected string $references;
     protected string $on;
     protected string $onDelete = '';
+    protected string $onUpdate = '';
+
     protected SchemaBuilder $builder;
 
     public function __construct(SchemaBuilder $builder, string $column)
@@ -32,15 +34,14 @@ class ForeignKeyBuilder
         return $this;
     }
 
-    public function onUpdate(string $action): self
+    public function onUpdate(string $action = 'CASCADE'): self
     {
         $this->onDelete = 'ON UPDATE ' . strtoupper($action);
-        $this->finalize();
 
         return $this;
     }
 
-    public function onDelete(string $action): self
+    public function onDelete(string $action = 'CASCADE'): self
     {
         $this->onDelete = 'ON DELETE ' . strtoupper($action);
         $this->finalize();
