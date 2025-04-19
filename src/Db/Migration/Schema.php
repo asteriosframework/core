@@ -17,12 +17,16 @@ class Schema
      * @return void
      * @throws MigrationException
      */
-    public static function create(string $table, Closure $callback): void
+    public static function create(string $table, Closure $callback, string $engine = 'InnoDB', string $charSet = 'utf8mb4'): void
     {
-        $blueprint = new SchemaBuilder($table);
-        $callback($blueprint);
+        $schemaBuilder = new SchemaBuilder($table);
+        $callback($schemaBuilder);
 
-        $sql = $blueprint->toSql();
+        [$columns, $foreignKeys] = $schemaBuilder->build();
+
+        $sql = "CREATE TABLE `$table` (\n" .
+            implode(",\n", array_merge($columns, $foreignKeys)) .
+            "\n) ENGINE=$engine DEFAULT CHARSET=$charSet;";
 
         Logger::forge()
             ->info($sql);
