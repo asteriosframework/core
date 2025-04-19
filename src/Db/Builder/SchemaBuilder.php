@@ -59,7 +59,8 @@ class SchemaBuilder
 
     public function enum(string $columnName, array $values, string|int|null $default = null, bool $notNull = true): self
     {
-        $enumValues = implode(', ', $values);
+        $quotedValues = array_map(static fn($val) => "'" . addslashes($val) . "'", $values);
+        $enumValues = implode(', ', $quotedValues);
 
         $this->columns[] = '`' . $columnName . '` ENUM(' . $enumValues . ')' . $this->setNotNull($notNull) . $this->setDefault($default);
 
