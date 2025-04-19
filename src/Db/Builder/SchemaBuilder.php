@@ -97,7 +97,7 @@ class SchemaBuilder
 
     protected function setNotNull(bool $setNotNull = true): string
     {
-        return (true === $setNotNull) ? ' NOT NULL' : 'NULL';
+        return (true === $setNotNull) ? ' NOT NULL' : ' NULL';
     }
 
     protected function setDefault(string|int|null $value): string
