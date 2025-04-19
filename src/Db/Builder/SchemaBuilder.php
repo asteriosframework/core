@@ -73,6 +73,13 @@ class SchemaBuilder
         return $this;
     }
 
+    protected function unique(string $columnName): self
+    {
+        $this->columns[] = 'CONSTRAINT `' . $columnName . '` UNIQUE `' . $columnName . '`';
+
+        return $this;
+    }
+
     public function foreign(string $columnName): ForeignKeyBuilder
     {
         return new ForeignKeyBuilder($this, $columnName);
