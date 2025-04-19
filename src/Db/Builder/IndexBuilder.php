@@ -18,14 +18,14 @@ class IndexBuilder
 
     public function unique(): self
     {
-        $this->type = 'UNIQUE';
+        $this->type = 'UNIQUE INDEX';
 
         return $this;
     }
 
     public function fulltext(): self
     {
-        $this->type = 'FULLTEXT';
+        $this->type = 'FULLTEXT INDEX';
 
         return $this;
     }
@@ -42,7 +42,7 @@ class IndexBuilder
         $name = $this->name ?? $this->generateName();
         $columns = implode('`, `', $this->columns);
 
-        $sql = $this->type . ' INDEX `' . $name . '` (`' . $columns . '`)';
+        $sql = $this->type . ' `' . $name . '` (`' . $columns . '`)';
 
         $this->builder->addIndex($sql);
     }
