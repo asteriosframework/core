@@ -26,7 +26,9 @@ class Schema
         [$columns, $foreignKeys, $indexes] = $schemaBuilder->build();
 
         $definitionParts = array_filter(array_merge($columns, $foreignKeys, $indexes));
-        $sqlStatements = implode(",\n", $definitionParts);
+
+        $indented = array_map(static fn($line) => '    ' . $line, $definitionParts);
+        $sqlStatements = implode(",\n", $indented);
 
         $sql = "CREATE TABLE `$table` (\n" . $sqlStatements . "\n) ENGINE=$engine DEFAULT CHARSET=$charSet;";
 
