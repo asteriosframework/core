@@ -13,35 +13,69 @@ class SchemaBuilder
         $this->table = $table;
     }
 
-    public function id(string $name = 'id', bool $autoIncrement = true, bool $bigInt = true, bool $unsigned = true): self
+    public function id(string $columnName = 'id', bool $autoIncrement = true, bool $bigInt = true, bool $unsigned = true): self
     {
         $sqlDataType = (true === $bigInt ? 'BIGINT' : 'INT');
         $sqlAutoIncrement = (true === $autoIncrement) ? 'AUTO_INCREMENT' : '';
         $sqlUnsigned = (true === $unsigned) ? ' UNSIGNED' : '';
 
-        $this->columns[] = '`' . $name . '` ' . $sqlDataType . ' ' . $sqlUnsigned . ' ' . $sqlAutoIncrement . ' PRIMARY KEY';
+        $this->columns[] = '`' . $columnName . '` ' . $sqlDataType . ' ' . $sqlUnsigned . ' ' . $sqlAutoIncrement . ' PRIMARY KEY';
 
         return $this;
     }
 
-    public function bigInt(string $name, bool $unsigned = true): self
+    public function smallInt(string $columnName, bool $unsigned = true, bool $notNull = true, string|int|null $default = null): void
+    {
+        $type = $unsigned ? 'SMALLINT UNSIGNED' : 'INT';
+        $this->columns[] = '`' . $columnName . '` ' . $type . $this->setNotNull($notNull) . $this->setDefault($default);
+    }
+
+    public function int(string $columnName, bool $unsigned = true, bool $notNull = true, string|int|null $default = null): void
+    {
+        $type = $unsigned ? 'INT UNSIGNED' : 'INT';
+        $this->columns[] = '`' . $columnName . '` ' . $type . $this->setNotNull($notNull) . $this->setDefault($default);
+    }
+
+    public function bigInt(string $columnName, bool $unsigned = true, bool $notNull = true, string|int|null $default = null): self
     {
         $sqlUnsigned = (true === $unsigned) ? ' UNSIGNED' : '';
-        $this->columns[] = '`' . $name . '` BIGINT' . $sqlUnsigned;
+        $this->columns[] = '`' . $columnName . '` BIGINT' . $sqlUnsigned . $this->setNotNull($notNull) . $this->setDefault($default);
 
         return $this;
     }
 
-    public function string(string $name, int $length = 255): self
+    public function varChar(string $columnName, int $length = 255, bool $notNull = true, string|int|null $default = null): self
     {
-        $this->columns[] = '`' . $name . '` VARCHAR(' . $length . ')';
+        $this->columns[] = '`' . $columnName . '` VARCHAR(' . $length . ')' . $this->setNotNull($notNull) . $this->setDefault($default);
 
         return $this;
     }
 
-    public function foreign(string $column): ForeignKeyBuilder
+    public function boolean(string $columnName, bool $notNull = true, string|int|null $default = null): void
     {
-        return new ForeignKeyBuilder($this, $column);
+        $this->columns[] = '`' . $columnName . '` TINYINT(1)' . $this->setNotNull($notNull) . $this->setDefault($default);
+    }
+
+    public function enum(string $columnName, array $values, string|int|null $default = null, bool $notNull = true): self
+    {
+        $enumValues = implode(', ', $values);
+
+        $this->columns[] = '`' . $columnName . '` ENUM(' . $enumValues . ')' . $this->setNotNull($notNull) . $this->setDefault($default);
+
+        return $this;
+    }
+
+    public function timestamps(): self
+    {
+        $this->columns[] = '`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP';
+        $this->columns[] = '`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
+
+        return $this;
+    }
+
+    public function foreign(string $columnName): ForeignKeyBuilder
+    {
+        return new ForeignKeyBuilder($this, $columnName);
     }
 
     public function addForeignKey(string $sql): void
@@ -54,18 +88,13 @@ class SchemaBuilder
         return [$this->columns, $this->foreignKeys];
     }
 
-    public function timestamps(): self
+    protected function setNotNull(bool $setNotNull = true): string
     {
-        $this->columns[] = "`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
-        $this->columns[] = "`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
-
-        return $this;
+        return (true === $setNotNull) ? ' NOT NULL' : 'NULL';
     }
 
-    public function toSql(): string
+    protected function setDefault(string|int|null $value): string
     {
-        $columns = implode(",\n  ", $this->columns);
-
-        return "CREATE TABLE IF NOT EXISTS `$this->table` (\n  $columns\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+        return (null !== $value) ? ' DEFAULT \'' . $value . '\'' : '';
     }
 }
