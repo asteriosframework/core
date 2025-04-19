@@ -73,7 +73,7 @@ class SchemaBuilder
         return $this;
     }
 
-    protected function unique(string $columnName): self
+    public function unique(string $columnName): self
     {
         $this->columns[] = 'CONSTRAINT `' . $columnName . '` UNIQUE `' . $columnName . '`';
 
