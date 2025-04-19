@@ -14,6 +14,8 @@ class Schema
     /**
      * @param string $table
      * @param Closure $callback
+     * @param string $engine
+     * @param string $charSet
      * @return void
      * @throws MigrationException
      */
