@@ -6,7 +6,6 @@ use Asterios\Core\Db;
 use Asterios\Core\Db\Builder\SchemaBuilder;
 use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\MigrationException;
-use Asterios\Core\Logger;
 use Closure;
 
 class Schema
@@ -24,12 +23,9 @@ class Schema
 
         [$columns, $foreignKeys] = $schemaBuilder->build();
 
-        $sql = "CREATE TABLE `$table` (\n" .
-            implode(",\n", array_merge($columns, $foreignKeys)) .
-            "\n) ENGINE=$engine DEFAULT CHARSET=$charSet;";
+        $sqlStatements = implode(",\n", array_merge($columns, $foreignKeys));
 
-        Logger::forge()
-            ->info($sql);
+        $sql = "CREATE TABLE `$table` (\n" . $sqlStatements . "\n) ENGINE=$engine DEFAULT CHARSET=$charSet;";
 
         try
         {
