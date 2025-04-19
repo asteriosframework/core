@@ -3,6 +3,7 @@
 namespace Asterios\Core\Db\Migration;
 
 use Asterios\Core\Db;
+use Asterios\Core\Db\Builder\SchemaBuilder;
 use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\MigrationException;
 use Closure;
@@ -17,7 +18,7 @@ class Schema
      */
     public static function create(string $table, Closure $callback): void
     {
-        $blueprint = new TableBluePrint($table);
+        $blueprint = new SchemaBuilder($table);
         $callback($blueprint);
 
         $sql = $blueprint->toSql();

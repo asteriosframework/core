@@ -58,4 +58,11 @@ class SchemaBuilder
 
         return $this;
     }
+
+    public function toSql(): string
+    {
+        $columns = implode(",\n  ", $this->columns);
+
+        return "CREATE TABLE IF NOT EXISTS `$this->table` (\n  $columns\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
 }
