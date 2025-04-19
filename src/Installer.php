@@ -75,8 +75,7 @@ class Installer implements InstallerInterface
         try
         {
             $mediaPaths = $env->getArrayPrefixed('MEDIA_');
-        }
-        catch (Exception\EnvException|Exception\EnvLoadException $e)
+        } catch (Exception\EnvException|Exception\EnvLoadException $e)
         {
             Logger::forge()
                 ->error('Could not load MEDIA_ env variables!', ['exception' => $e->getTraceAsString()]);
@@ -123,7 +122,7 @@ class Installer implements InstallerInterface
 
         $migration = (new Migration($this->envFile));
 
-        $result = $migration->migrate($this->dto);
+        $result = $migration->migrate();
 
         if (!$result)
         {

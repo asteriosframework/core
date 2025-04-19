@@ -1,0 +1,51 @@
+<?php declare(strict_types=1);
+
+namespace Asterios\Core\Cli\Commands;
+
+use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
+use Asterios\Core\Interfaces\CommandInterface;
+
+class MakeModelCommand implements CommandInterface
+{
+    use CommandsBuilderTrait;
+
+    public function handle(?string $argument): void
+    {
+        $this->printHeader();
+        
+        if (!$argument)
+        {
+            $this->printError('Missing model name.');
+            echo "Example: asterios make:model Users\n";
+
+            return;
+        }
+
+        $protectedDirectory = str_replace('/public', '', $_SERVER['DOCUMENT_ROOT']);
+        $appModelDirectory = $protectedDirectory . 'app/Models/';
+
+        if (!is_dir($appModelDirectory) && !mkdir($appModelDirectory, 0755, true) && !is_dir($appModelDirectory))
+        {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $appModelDirectory));
+        }
+
+        $filename = $appModelDirectory . $argument . '.php';
+
+        if (file_exists($filename))
+        {
+            echo "Model '{$argument}' already exists.\n";
+
+            return;
+        }
+
+        file_put_contents($filename,
+            "<?php declare(strict_types=1);\n\nnamespace Models;\n\nuse Asterios\Core\Model;\n\nclass {$argument} extends Model\n{\n\n}\n");
+
+        echo "Model '{$argument}' created.\n";
+    }
+
+    public static function description(): string
+    {
+        return 'Create a new Model in app\models directory';
+    }
+}
