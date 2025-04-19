@@ -31,10 +31,10 @@ class Schema
         $indented = array_map(static fn($line) => '    ' . $line, $definitionParts);
         $sqlStatements = implode(",\n", $indented);
 
-        Logger::forge()
-            ->info($sqlStatements);
         $sql = "CREATE TABLE `$table` (\n" . $sqlStatements . "\n) ENGINE=$engine DEFAULT CHARSET=$charSet;";
 
+        Logger::forge()
+            ->info($sql);
         try
         {
             Db::write($sql);
