@@ -24,7 +24,8 @@ class Schema
 
         [$columns, $foreignKeys, $indexes] = $schemaBuilder->build();
 
-        $sqlStatements = implode(",\n", array_merge($columns, $foreignKeys, $indexes));
+        $definitionParts = array_filter(array_merge($columns, $foreignKeys, $indexes));
+        $sqlStatements = implode(",\n", $definitionParts);
 
         $sql = "CREATE TABLE `$table` (\n" . $sqlStatements . "\n) ENGINE=$engine DEFAULT CHARSET=$charSet;";
 
