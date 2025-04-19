@@ -22,9 +22,9 @@ class Schema
         $schemaBuilder = new SchemaBuilder($table);
         $callback($schemaBuilder);
 
-        [$columns, $foreignKeys] = $schemaBuilder->build();
+        [$columns, $foreignKeys, $indexes] = $schemaBuilder->build();
 
-        $sqlStatements = implode(",\n", array_merge($columns, $foreignKeys));
+        $sqlStatements = implode(",\n", array_merge($columns, $foreignKeys, $indexes));
 
         $sql = "CREATE TABLE `$table` (\n" . $sqlStatements . "\n) ENGINE=$engine DEFAULT CHARSET=$charSet;";
 

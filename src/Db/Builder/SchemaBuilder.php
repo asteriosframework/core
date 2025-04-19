@@ -7,6 +7,7 @@ class SchemaBuilder
     protected string $table;
     protected array $columns = [];
     protected array $foreignKeys = [];
+    protected array $indexes = [];
 
     public function __construct(string $table)
     {
@@ -73,11 +74,14 @@ class SchemaBuilder
         return $this;
     }
 
-    public function unique(string $columnName): self
+    public function index(string|array $columns): IndexBuilder
     {
-        $this->columns[] = 'CONSTRAINT `' . $columnName . '` UNIQUE `' . $columnName . '`';
+        return new IndexBuilder($this, $columns);
+    }
 
-        return $this;
+    public function addIndex(string $sql): void
+    {
+        $this->indexes[] = $sql;
     }
 
     public function foreign(string $columnName): ForeignKeyBuilder
@@ -92,7 +96,7 @@ class SchemaBuilder
 
     public function build(): array
     {
-        return [$this->columns, $this->foreignKeys];
+        return [$this->columns, $this->foreignKeys, $this->indexes];
     }
 
     protected function setNotNull(bool $setNotNull = true): string
