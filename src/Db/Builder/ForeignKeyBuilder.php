@@ -32,6 +32,14 @@ class ForeignKeyBuilder
         return $this;
     }
 
+    public function onUpdate(string $action): self
+    {
+        $this->onDelete = 'ON UPDATE ' . strtoupper($action);
+        $this->finalize();
+
+        return $this;
+    }
+
     public function onDelete(string $action): self
     {
         $this->onDelete = 'ON DELETE ' . strtoupper($action);
