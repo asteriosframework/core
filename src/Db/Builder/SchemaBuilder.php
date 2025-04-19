@@ -31,7 +31,7 @@ class SchemaBuilder
 
     public function string(string $name, int $length = 255): self
     {
-        $this->columns[] = "`$name` VARCHAR(\$length)";
+        $this->columns[] = '`$name` VARCHAR(' . $length . ')';
 
         return $this;
     }
