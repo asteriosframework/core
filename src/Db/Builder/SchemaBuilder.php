@@ -14,65 +14,115 @@ class SchemaBuilder
         $this->table = $table;
     }
 
-    public function id(string $columnName = 'id', bool $autoIncrement = true, bool $bigInt = true, bool $unsigned = true): self
+    public function id(string $name = 'id'): ColumnDefinitionBuilder
     {
-        $columnType = $bigInt ? 'BIGINT UNSIGNED' : 'INT UNSIGNED';
-        $column = new ColumnDefinitionBuilder($columnName, $columnType);
-        $column->notNull()
-            ->default(null); // Typically, ID is not nullable, and it defaults to null.
-        $this->columns[] = $column->build() . ' AUTO_INCREMENT PRIMARY KEY';
-
-        return $this;
+        return $this->column($name, 'BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY');
     }
 
-    public function string(string $columnName, int $length = 255): self
+    public function string(string $name, int $length = 255): ColumnDefinitionBuilder
     {
-        $column = new ColumnDefinitionBuilder($columnName, "VARCHAR($length)");
-        $this->columns[] = $column->build();
-
-        return $this;
+        return $this->column($name, "VARCHAR($length)");
     }
 
-    public function smallInt(string $columnName): self
+    public function int(string $name, bool $unsigned = true): ColumnDefinitionBuilder
     {
-        $column = new ColumnDefinitionBuilder($columnName, 'SMALLINT');
-        $this->columns[] = $column->build();
+        $type = $unsigned ? 'INT UNSIGNED' : 'INT';
 
-        return $this;
+        return $this->column($name, $type);
     }
 
-    public function enum(string $columnName, array $values, string|int|null $default = null): self
+    public function smallInt(string $name, bool $unsigned = true): ColumnDefinitionBuilder
     {
-        $enumValues = implode("', '", $values);
-        $column = new ColumnDefinitionBuilder($columnName, "ENUM('$enumValues')");
-        $this->columns[] = $column->default($default)
-            ->build();
+        $type = $unsigned ? 'SMALLINT UNSIGNED' : 'SMALLINT';
 
-        return $this;
+        return $this->column($name, $type);
     }
 
-    public function int(string $columnName): self
+    public function bigInt(string $name, bool $unsigned = true): ColumnDefinitionBuilder
     {
-        $column = new ColumnDefinitionBuilder($columnName, 'INT');
-        $this->columns[] = $column->build();
+        $type = $unsigned ? 'BIGINT UNSIGNED' : 'BIGINT';
 
-        return $this;
+        return $this->column($name, $type);
+    }
+
+    public function boolean(string $name): ColumnDefinitionBuilder
+    {
+        return $this->column($name, 'TINYINT(1)');
+    }
+
+    public function enum(string $name, array $values): ColumnDefinitionBuilder
+    {
+        $quoted = array_map(static fn($v) => "'" . addslashes($v) . "'", $values);
+        $type = 'ENUM(' . implode(', ', $quoted) . ')';
+
+        return $this->column($name, $type);
+    }
+
+    public function text(string $name): ColumnDefinitionBuilder
+    {
+        return $this->column($name, 'TEXT');
+    }
+
+    public function mediumText(string $name): ColumnDefinitionBuilder
+    {
+        return $this->column($name, 'MEDIUMTEXT');
+    }
+
+    public function json(string $name): ColumnDefinitionBuilder
+    {
+        return $this->column($name, 'JSON');
+    }
+
+    public function char(string $name, int $length = 1): ColumnDefinitionBuilder
+    {
+        return $this->column($name, "CHAR($length)");
+    }
+
+    public function dateTime(string $name): ColumnDefinitionBuilder
+    {
+        return $this->column($name, 'DATETIME');
     }
 
     public function timestamps(): self
     {
-        $this->columns[] = "`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
-        $this->columns[] = "`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
+        $this->columns[] = '`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP';
+        $this->columns[] = '`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
 
         return $this;
     }
 
+    public function column(string $name, string $type): ColumnDefinitionBuilder
+    {
+        return new ColumnDefinitionBuilder($this, $name, $type);
+    }
+
+    public function addColumn(string $sql): void
+    {
+        $this->columns[] = $sql;
+    }
+
+    public function index(string|array $columns): IndexBuilder
+    {
+        return new IndexBuilder($this, $columns);
+    }
+
+    public function addIndex(string $sql): void
+    {
+        $this->indexes[] = $sql;
+    }
+
+    public function foreign(string $column): ForeignKeyBuilder
+    {
+        return new ForeignKeyBuilder($this, $column);
+    }
+
+    public function addForeignKey(string $sql): void
+    {
+        $this->foreignKeys[] = $sql;
+    }
+
     public function build(): array
     {
-        return [
-            'columns' => $this->columns, // Alle Spalten
-            'foreignKeys' => $this->foreignKeys,
-            'indexes' => $this->indexes,
-        ];
+        return [$this->columns, $this->foreignKeys, $this->indexes];
     }
 }

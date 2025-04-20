@@ -1,18 +1,15 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Asterios\Core\Db\Builder;
 
 class ForeignKeyBuilder
 {
+    protected SchemaBuilder $builder;
     protected string $column;
-    protected string $references;
-    protected string $on;
+    protected string $referenceTable = '';
+    protected string $referenceColumn = 'id';
     protected string $onDelete = '';
     protected string $onUpdate = '';
-
-    protected SchemaBuilder $builder;
 
     public function __construct(SchemaBuilder $builder, string $column)
     {
@@ -20,39 +17,40 @@ class ForeignKeyBuilder
         $this->column = $column;
     }
 
-    public function references(string $ref): self
+    public function references(string $table, string $column = 'id'): self
     {
-        $this->references = $ref;
+        $this->referenceTable = $table;
+        $this->referenceColumn = $column;
 
         return $this;
     }
 
-    public function on(string $table): self
+    public function onDelete(string $action): self
     {
-        $this->on = $table;
+        $this->onDelete = $action;
 
         return $this;
     }
 
-    public function onUpdate(string $action = 'CASCADE'): self
+    public function onUpdate(string $action): self
     {
-        $this->onDelete = 'ON UPDATE ' . strtoupper($action);
+        $this->onUpdate = $action;
 
         return $this;
     }
 
-    public function onDelete(string $action = 'CASCADE'): self
+    public function add(): void
     {
-        $this->onDelete = 'ON DELETE ' . strtoupper($action);
-        $this->finalize();
+        $sql = "FOREIGN KEY (`{$this->column}`) REFERENCES `{$this->referenceTable}`(`{$this->referenceColumn}`)";
+        if ($this->onDelete)
+        {
+            $sql .= " ON DELETE {$this->onDelete}";
+        }
+        if ($this->onUpdate)
+        {
+            $sql .= " ON UPDATE {$this->onUpdate}";
+        }
 
-        return $this;
-    }
-
-    protected function finalize(): void
-    {
-        $fkName = "fk_{$this->column}";
-        $sql = "CONSTRAINT `{$fkName}` FOREIGN KEY (`{$this->column}`) REFERENCES `{$this->on}`(`{$this->references}`) {$this->onDelete}";
         $this->builder->addForeignKey($sql);
     }
 }
