@@ -95,19 +95,25 @@ class SchemaBuilder
         return new ForeignKeyBuilder($this, $column);
     }
 
-    public function index(string|array $columns): IndexBuilder
-    {
-        return new IndexBuilder($this, $columns);
-    }
-
     public function addColumn(string $definition): void
     {
         $this->columns[] = $definition;
     }
 
-    public function addIndex(string $definition): void
+    public function index(string|array $columns): IndexBuilder
     {
-        $this->indexes[] = $definition;
+        return new IndexBuilder($this, $columns);
+    }
+
+    public function addIndex(string $sql): void
+    {
+        $this->indexes[] = $sql;
+    }
+
+    public function unique(string|array $columns): IndexBuilder
+    {
+        return $this->index($columns)
+            ->unique();
     }
 
     public function addForeignKey(string $definition): void
@@ -117,6 +123,10 @@ class SchemaBuilder
 
     public function build(): array
     {
-        return [$this->columns, $this->foreignKeys, $this->indexes];
+        $columnsSql = array_map(static fn($column) => "    " . $column, $this->columns);
+        $foreignKeysSql = array_map(static fn($foreignKey) => "    " . $foreignKey, $this->foreignKeys);
+        $indexesSql = array_map(static fn($index) => "    " . $index, $this->indexes);
+
+        return [$columnsSql, $foreignKeysSql, $indexesSql];
     }
 }
