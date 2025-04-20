@@ -6,18 +6,14 @@ use Asterios\Core\Db;
 use Asterios\Core\Db\Builder\SchemaBuilder;
 use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\MigrationException;
-use Asterios\Core\Logger;
+use Asterios\Core\Interfaces\SchemaInterface;
 use Closure;
 
-class Schema
+class Schema implements SchemaInterface
 {
+
     /**
-     * @param string $table
-     * @param Closure $callback
-     * @param string $engine
-     * @param string $charSet
-     * @return void
-     * @throws MigrationException
+     * @inheritDoc
      */
     public static function create(string $table, Closure $callback, string $engine = 'InnoDB', string $charSet = 'utf8mb4'): void
     {
@@ -33,8 +29,6 @@ class Schema
 
         $sql = "CREATE TABLE `$table` (\n" . $sqlStatements . "\n) ENGINE=$engine DEFAULT CHARSET=$charSet;";
 
-        Logger::forge()
-            ->info($sql);
         try
         {
             Db::write($sql);
@@ -45,9 +39,7 @@ class Schema
     }
 
     /**
-     * @param string $table
-     * @return void
-     * @throws MigrationException
+     * @inheritDoc
      */
     public static function drop(string $table): void
     {

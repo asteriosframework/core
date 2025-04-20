@@ -2,7 +2,9 @@
 
 namespace Asterios\Core\Db\Builder;
 
-class ForeignKeyBuilder
+use Asterios\Core\Interfaces\ForeignKeyBuilderInterface;
+
+class ForeignKeyBuilder implements ForeignKeyBuilderInterface
 {
     protected SchemaBuilder $builder;
     protected string $column;
@@ -17,6 +19,9 @@ class ForeignKeyBuilder
         $this->column = $column;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function references(string $table, string $column = 'id'): self
     {
         $this->referenceTable = $table;
@@ -25,6 +30,9 @@ class ForeignKeyBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function onDelete(string $action): self
     {
         $this->onDelete = $action;
@@ -32,6 +40,9 @@ class ForeignKeyBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function onUpdate(string $action): self
     {
         $this->onUpdate = $action;
@@ -39,6 +50,9 @@ class ForeignKeyBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function add(): void
     {
         $sql = "FOREIGN KEY (`{$this->column}`) REFERENCES `{$this->referenceTable}`(`{$this->referenceColumn}`)";

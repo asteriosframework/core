@@ -2,7 +2,9 @@
 
 namespace Asterios\Core\Db\Builder;
 
-class ColumnDefinitionBuilder
+use Asterios\Core\Interfaces\ColumnDefinitionBuilderInterface;
+
+class ColumnDefinitionBuilder implements ColumnDefinitionBuilderInterface
 {
     protected SchemaBuilder $builder;
     protected string $name;
@@ -19,6 +21,9 @@ class ColumnDefinitionBuilder
         $this->type = $type;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function nullable(): self
     {
         $this->notNull = false;
@@ -27,6 +32,9 @@ class ColumnDefinitionBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function notNull(): self
     {
         $this->notNull = true;
@@ -35,6 +43,9 @@ class ColumnDefinitionBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function default(string|int|null $value): self
     {
         $this->default = $value;
@@ -42,6 +53,9 @@ class ColumnDefinitionBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function unique(): self
     {
         $this->isUnique = true;
@@ -49,6 +63,9 @@ class ColumnDefinitionBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function build(): void
     {
         $sql = '`' . $this->name . '` ' . $this->type;

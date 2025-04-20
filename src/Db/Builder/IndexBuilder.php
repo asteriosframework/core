@@ -2,7 +2,9 @@
 
 namespace Asterios\Core\Db\Builder;
 
-class IndexBuilder
+use Asterios\Core\Interfaces\IndexBuilderInterface;
+
+class IndexBuilder implements IndexBuilderInterface
 {
     protected SchemaBuilder $builder;
     protected array $columns;
@@ -14,13 +16,19 @@ class IndexBuilder
         $this->columns = (array)$columns;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function unique(): self
     {
         $this->isUnique = true;
 
         return $this;
     }
-
+    
+    /**
+     * @inheritDoc
+     */
     public function add(): void
     {
         $indexName = ($this->isUnique ? 'unique index_' : 'index_') . implode('_', $this->columns);
