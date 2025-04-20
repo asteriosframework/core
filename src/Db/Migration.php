@@ -38,17 +38,29 @@ class Migration implements MigrationInterface
             return false;
         }
 
+        $this->ensureMigrationTableExists();
         $files = glob($migrationPath . '/*.php');
         sort($files);
+        $batch = $this->getNextBatchNumber();
 
         foreach ($files as $file)
         {
+            $migrationName = basename($file, '.php');
+
+            if ($this->hasMigrationRun($migrationName))
+            {
+                Logger::forge()
+                    ->info('Skipping already run migration: ' . $migrationName);
+                continue;
+            }
+
             try
             {
                 $migration = require $file;
                 if (method_exists($migration, 'up'))
                 {
                     $migration->up();
+                    $this->markMigrationAsRun($migrationName, $batch);
                     Logger::forge()
                         ->info('Run migration: ' . basename($file));
                 }
@@ -168,12 +180,6 @@ class Migration implements MigrationInterface
         return array_map(static fn($file) => $seederPath . '/' . $file, $orderedFiles);
     }
 
-    /**
-     *
-     * @param array $files
-     * @param array $dependencies
-     * @return array
-     */
     private function sortFilesByDependencies(array $files, array $dependencies): array
     {
         $sorted = [];
@@ -181,9 +187,7 @@ class Migration implements MigrationInterface
 
         $visit = static function ($file) use ($dependencies, &$visited, &$sorted, &$visit) {
             if (isset($visited[$file]))
-            {
                 return;
-            }
 
             $visited[$file] = true;
 
@@ -251,5 +255,38 @@ class Migration implements MigrationInterface
     protected function getProtectedPath(): string
     {
         return str_replace('/public', '', Asterios::getDocumentRoot());
+    }
+
+    protected function ensureMigrationTableExists(): void
+    {
+        $sql = <<<SQL
+CREATE TABLE IF NOT EXISTS `migration` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `migration` VARCHAR(255) NOT NULL UNIQUE,
+    `batch` INT UNSIGNED NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+SQL;
+        Db::write($sql);
+    }
+
+    protected function hasMigrationRun(string $migrationName): bool
+    {
+        $result = Db::read("SELECT COUNT(*) AS count FROM `migration` WHERE `migration` = '" . Db::escape($migrationName) . "'");
+
+        return $result && (int)$result[0]['count'] > 0;
+    }
+
+    protected function markMigrationAsRun(string $migrationName, int $batch): void
+    {
+        $escapedName = Db::escape($migrationName);
+        Db::write("INSERT INTO `migration` (`migration`, `batch`) VALUES ('$escapedName', $batch)");
+    }
+
+    protected function getNextBatchNumber(): int
+    {
+        $result = Db::read("SELECT MAX(`batch`) AS max_batch FROM `migration`");
+
+        return isset($result[0]['max_batch']) ? (int)$result[0]['max_batch'] + 1 : 1;
     }
 }
