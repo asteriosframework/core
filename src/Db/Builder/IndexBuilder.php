@@ -4,13 +4,11 @@ namespace Asterios\Core\Db\Builder;
 
 class IndexBuilder
 {
-    protected string $type = 'INDEX';
-    protected array $columns = [];
-    protected ?string $name = null;
-
     protected SchemaBuilder $builder;
+    protected array|string $columns;
+    protected bool $unique = false;
 
-    public function __construct(SchemaBuilder $builder, array|string $columns)
+    public function __construct(SchemaBuilder $builder, $columns)
     {
         $this->builder = $builder;
         $this->columns = is_array($columns) ? $columns : [$columns];
@@ -18,40 +16,20 @@ class IndexBuilder
 
     public function unique(): self
     {
-        $this->type = 'UNIQUE INDEX';
-
-        return $this;
-    }
-
-    public function fulltext(): self
-    {
-        $this->type = 'FULLTEXT INDEX';
-
-        return $this;
-    }
-
-    public function name(string $name): self
-    {
-        $this->name = $name;
+        $this->unique = true;
 
         return $this;
     }
 
     public function add(): void
     {
-        $name = $this->name ?? $this->generateName();
-        $columns = implode('`, `', $this->columns);
+        $columnsSql = implode('`, `', $this->columns);
 
-        $sql = $this->type . ' `' . $name . '` (`' . $columns . '`)';
+        $indexName = 'index_' . implode('_', $this->columns);
+        $indexName = preg_replace('/[^a-zA-Z0-9_]/', '_', $indexName);
 
-        $this->builder->addIndex($sql);
-    }
-
-    protected function generateName(): string
-    {
-        $type = strtolower($this->type);
-        $columns = implode('_', $this->columns);
-
-        return $type . '_' . $columns;
+        $type = $this->unique ? 'UNIQUE' : 'INDEX';
+        
+        $this->builder->addIndex("{$type} `{$indexName}` (`{$columnsSql}`)");
     }
 }
