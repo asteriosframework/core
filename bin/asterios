@@ -1,0 +1,43 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+
+use Asterios\Core\Cli\CommandRegistry;
+
+require __DIR__ . '/../vendor/autoload.php';
+
+$input = $argv[1] ?? 'list';
+$argument = $argv[2] ?? null;
+
+handleCommand($input, $argument);
+
+/**
+ * @param string $commandName
+ * @param string|null $argument
+ * @return void
+ */
+function handleCommand(string $commandName, ?string $argument = null): void
+{
+    $commandInfo = CommandRegistry::findByNameOrAlias($commandName);
+
+    if (!$commandInfo)
+    {
+        echo "\033[1;31mUnknown command:\033[0m $commandName\n\n";
+
+        $defaultCommand = CommandRegistry::findByNameOrAlias('list');
+
+        if ($defaultCommand)
+        {
+            $commandList = new $defaultCommand['class'];
+            $commandList->handle(null);
+        }
+        else
+        {
+            echo "\033[1;31mFailed to load the default 'list' command.\033[0m\n";
+        }
+
+        exit(1);
+    }
+    
+    $instance = new $commandInfo['class'];
+    $instance->handle($argument);
+}

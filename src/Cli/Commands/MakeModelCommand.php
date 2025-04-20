@@ -2,9 +2,16 @@
 
 namespace Asterios\Core\Cli\Commands;
 
+use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 use Asterios\Core\Interfaces\CommandInterface;
 
+#[Command(
+    name: 'make:model',
+    description: 'Create a new model class',
+    group: 'Make',
+    aliases: ['--mm']
+)]
 class MakeModelCommand implements CommandInterface
 {
     use CommandsBuilderTrait;
@@ -12,7 +19,7 @@ class MakeModelCommand implements CommandInterface
     public function handle(?string $argument): void
     {
         $this->printHeader();
-        
+
         if (!$argument)
         {
             $this->printError('Missing model name.');
@@ -42,10 +49,5 @@ class MakeModelCommand implements CommandInterface
             "<?php declare(strict_types=1);\n\nnamespace Models;\n\nuse Asterios\Core\Model;\n\nclass {$argument} extends Model\n{\n\n}\n");
 
         echo "Model '{$argument}' created.\n";
-    }
-
-    public static function description(): string
-    {
-        return 'Create a new Model in app\models directory';
     }
 }

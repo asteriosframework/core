@@ -10,8 +10,4 @@ interface CommandInterface
      */
     public function handle(?string $argument): void;
 
-    /**
-     * @return string
-     */
-    public static function description(): string;
 }

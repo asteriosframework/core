@@ -2,9 +2,16 @@
 
 namespace Asterios\Core\Cli\Commands;
 
+use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 use Asterios\Core\Interfaces\CommandInterface;
 
+#[Command(
+    name: 'list',
+    description: 'Display all available commands',
+    group: 'System',
+    aliases: ['--list']
+)]
 class ListCommand implements CommandInterface
 {
     use CommandsBuilderTrait;
@@ -15,14 +22,6 @@ class ListCommand implements CommandInterface
     public function handle(?string $argument): void
     {
         $this->printHeader();
-        $this->printTable($this->commands());
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function description(): string
-    {
-        return 'List available commands';
+        $this->printTable();
     }
 }
