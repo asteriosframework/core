@@ -1,4 +1,4 @@
-#!/usr/bin/env php
+#!/usr/bin/php
 <?php declare(strict_types=1);
 
 use Asterios\Core\Cli\CommandRegistry;
@@ -37,7 +37,7 @@ function handleCommand(string $commandName, ?string $argument = null): void
 
         exit(1);
     }
-    
+
     $instance = new $commandInfo['class'];
     $instance->handle($argument);
 }
