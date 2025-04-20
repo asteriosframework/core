@@ -129,8 +129,12 @@ class Migration implements MigrationInterface
             {
                 $table = pathinfo($file, PATHINFO_FILENAME);
 
+                Logger::forge()
+                    ->info("Seeding table >>> $table");
+                Logger::forge()
+                    ->info("Seeding file >>> $file");
                 Db::write("SET FOREIGN_KEY_CHECKS = 0;");
-                Db::write("DELETE FROM `$table`;");
+                //Db::write("DELETE FROM `$table`;");
 
                 Db::forge()
                     ->seedFromFile($file);
