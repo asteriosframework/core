@@ -4,12 +4,13 @@ namespace Asterios\Core\Db;
 
 use Asterios\Core\Asterios;
 use Asterios\Core\Db;
+use Asterios\Core\Dto\DbMigrationDto;
 use Asterios\Core\Env;
+use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Interfaces\MigrationInterface;
 use Asterios\Core\Logger;
-use Throwable;
 
 class Migration implements MigrationInterface
 {
@@ -109,58 +110,39 @@ class Migration implements MigrationInterface
         return true;
     }
 
-    public function seed(array $dependencySeederOrder): bool
+    public function seed(DbMigrationDto $dto): bool
     {
         $seederPath = $this->getSeederPath();
 
-        if (null === $seederPath || !is_dir($seederPath))
+        if (null === $seederPath)
         {
-            $this->logError('Seeder path not found: ' . $seederPath);
+            $this->logError('Could not load seeder path.');
 
             return false;
         }
 
-        $files = $this->getSeederFilesInOrder($dependencySeederOrder, $seederPath);
+        $files = $this->getSeederFilesInOrder($dto->getSeeder(), $seederPath);
 
         foreach ($files as $file)
         {
-            if (!file_exists($file))
-            {
-                Logger::forge()
-                    ->warning("Seeder file not found: $file");
-                continue;
-            }
-
-            $table = basename($file, '.json');
-            $json = file_get_contents($file);
-            $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-
-            if (!is_array($data) || empty($data))
-            {
-                Logger::forge()
-                    ->warning("No data to seed in file: $file");
-                continue;
-            }
-
             try
             {
-                Db::write("TRUNCATE TABLE `$table`");
+                $table = pathinfo($file, PATHINFO_FILENAME);
 
-                foreach ($data as $row)
-                {
-                    $columns = implode('`, `', array_keys($row));
-                    $placeholders = implode(', ', array_fill(0, count($row), '?'));
-                    $values = array_values($row);
+                Db::write("SET FOREIGN_KEY_CHECKS = 0;");
+                Db::write("DELETE FROM `$table`;");
 
-                    $sql = "INSERT INTO `$table` (`$columns`) VALUES ($placeholders)";
-                    Db::write($sql, $values);
-                }
+                Db::forge()
+                    ->seedFromFile($file);
+
+                Db::write("SET FOREIGN_KEY_CHECKS = 1;");
 
                 Logger::forge()
                     ->info("Seeded: $table");
-            } catch (Throwable $e)
+                usleep(1000);
+            } catch (\JsonException|ConfigLoadException $e)
             {
-                $this->logError("Error seeding table $table: " . $e->getMessage());
+                $this->logError("Error Seeder for $file: " . $e->getMessage());
 
                 return false;
             }

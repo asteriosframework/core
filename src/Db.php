@@ -323,6 +323,50 @@ class Db
         return false;
     }
 
+    /**
+     * @param string $filePath
+     * @return void
+     * @throws Exception\ConfigLoadException
+     * @throws \JsonException
+     */
+    public static function seedFromFile(string $filePath): void
+    {
+        if (!file_exists($filePath))
+        {
+            throw new \RuntimeException("Seed file not found: $filePath");
+        }
+
+        $json = file_get_contents($filePath);
+        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
+        if (!is_array($data) || empty($data))
+        {
+            throw new \RuntimeException("Invalid or empty JSON in seed file: $filePath");
+        }
+
+        $table = basename($filePath, '.json');
+
+        foreach ($data as $row)
+        {
+            if (!is_array($row))
+            {
+                continue;
+            }
+
+            $columns = array_map(static fn($col) => '`' . $col . '`', array_keys($row));
+            $values = array_map([self::class, 'quote'], array_values($row));
+
+            $sql = sprintf(
+                'INSERT INTO `%s` (%s) VALUES (%s);',
+                $table,
+                implode(', ', $columns),
+                implode(', ', $values)
+            );
+
+            self::write($sql);
+        }
+    }
+
     private function set_host(string $host): void
     {
         $this->host = $host;

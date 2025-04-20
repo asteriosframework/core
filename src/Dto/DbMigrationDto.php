@@ -4,11 +4,6 @@ namespace Asterios\Core\Dto;
 
 class DbMigrationDto
 {
-    /** @var string[] */
-    protected array $tablesToMigrate = [];
-
-    /** @var array<string, array<int, string>> */
-    protected array $foreignKeysToMigrate = [];
 
     /**
      * @var string[]
@@ -18,30 +13,6 @@ class DbMigrationDto
     protected bool $dropTables = true;
 
     protected bool $truncateTables = true;
-
-    public function setTablesToMigrate(array $tablesToMigrate): DbMigrationDto
-    {
-        $this->tablesToMigrate = $tablesToMigrate;
-
-        return $this;
-    }
-
-    public function getTablesToMigrate(): array
-    {
-        return $this->tablesToMigrate;
-    }
-
-    public function setForeignKeysToMigrate(array $foreignKeysToMigrate): DbMigrationDto
-    {
-        $this->foreignKeysToMigrate = $foreignKeysToMigrate;
-
-        return $this;
-    }
-
-    public function getForeignKeysToMigrate(): array
-    {
-        return $this->foreignKeysToMigrate;
-    }
 
     public function setSeeder(array $seeder): DbMigrationDto
     {
