@@ -1,0 +1,66 @@
+<?php declare(strict_types=1);
+
+namespace Asterios\Core\Cli\Commands;
+
+use Asterios\Core\Cli\Attributes\Command;
+use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
+use Asterios\Core\Interfaces\CommandInterface;
+
+#[Command(
+    name: 'make:migration',
+    description: 'Create a new migration class',
+    group: 'Make',
+    aliases: ['--mmi']
+)]
+class MakeMigrationCommand implements CommandInterface
+{
+    use CommandsBuilderTrait;
+
+    public function handle(?string $argument): void
+    {
+        $this->printHeader();
+
+        if (!$argument)
+        {
+            $this->printError('Missing migration name.');
+            echo "Example: asterios make:migration create_users_table\n";
+
+            return;
+        }
+
+        $protectedDirectory = str_replace('/public', '', $_SERVER['DOCUMENT_ROOT']);
+        $appMigrationDirectory = $protectedDirectory . 'database/migrations/';
+
+        $formattedName = strtolower(preg_replace('/\W+/', '_', $argument));
+        $timestamp = date('Y_m_d_His');
+
+        $filename = "{$timestamp}_{$formattedName}.php";
+
+        if (!is_dir($appMigrationDirectory) && !mkdir($appMigrationDirectory, 0777, true) && !is_dir($appMigrationDirectory))
+        {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $appMigrationDirectory));
+        }
+
+        $filepath = "{$appMigrationDirectory}/{$filename}";
+
+        $content = <<<PHP
+<?php declare(strict_types=1);
+
+return new class {
+    public function up(): void
+    {
+        // TODO: Add migration logic for: $formattedName
+    }
+
+    public function down(): void
+    {
+        // TODO: Revert migration logic for: $formattedName
+    }
+};
+PHP;
+
+        file_put_contents($filepath, $content);
+
+        echo "Migration created: $filepath\n";
+    }
+}
