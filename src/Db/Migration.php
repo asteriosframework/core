@@ -4,13 +4,12 @@ namespace Asterios\Core\Db;
 
 use Asterios\Core\Asterios;
 use Asterios\Core\Db;
-use Asterios\Core\Dto\DbMigrationDto;
 use Asterios\Core\Env;
-use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Interfaces\MigrationInterface;
 use Asterios\Core\Logger;
+use Throwable;
 
 class Migration implements MigrationInterface
 {
@@ -110,29 +109,51 @@ class Migration implements MigrationInterface
         return true;
     }
 
-    public function seed(DbMigrationDto $dto): bool
+    public function seed(): bool
     {
         $seederPath = $this->getSeederPath();
 
-        if (null === $seederPath)
+        if (null === $seederPath || !is_dir($seederPath))
         {
-            $this->logError('Could not load seeder path.');
+            $this->logError('Seeder directory not found!');
 
             return false;
         }
 
-        foreach ($dto->getSeeder() as $table)
+        $files = glob($seederPath . '/*.json');
+
+        foreach ($files as $file)
         {
+            $table = basename($file, '.json');
+            $json = file_get_contents($file);
+            $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
+            if (!is_array($data) || empty($data))
+            {
+                Logger::forge()
+                    ->warning('No data to seed found in file: ' . $file);
+                continue;
+            }
+
             try
             {
-                Db::forge()
-                    ->seed($table, $dto->truncateTables(), $seederPath);
+                Db::write("TRUNCATE TABLE `$table`");
+
+                foreach ($data as $row)
+                {
+                    $columns = implode('`, `', array_keys($row));
+                    $placeholders = implode(', ', array_fill(0, count($row), '?'));
+                    $values = array_values($row);
+
+                    $sql = "INSERT INTO `$table` (`$columns`) VALUES ($placeholders)";
+                    Db::write($sql, $values);
+                }
+
                 Logger::forge()
                     ->info("Seeded: $table");
-                usleep(1000);
-            } catch (ConfigLoadException $e)
+            } catch (Throwable $e)
             {
-                $this->logError("Seeder fehlgeschlagen für $table: " . $e->getMessage());
+                $this->logError('Error seeding table ' . $table . ': ' . $e->getMessage());
 
                 return false;
             }
