@@ -3,7 +3,7 @@
 
 use Asterios\Core\Cli\CommandRegistry;
 
-require __DIR__ . '/../vendor/autoload.php';
+require getcwd() . '/vendor/autoload.php';
 
 $input = $argv[1] ?? 'list';
 $argument = $argv[2] ?? null;
