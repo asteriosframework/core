@@ -129,23 +129,24 @@ class Migration implements MigrationInterface
             {
                 $table = pathinfo($file, PATHINFO_FILENAME);
 
-                Logger::forge()
-                    ->info("Seeding table >>> $table");
+                Db::write('SET FOREIGN_KEY_CHECKS = 0;');
 
-                Db::write("SET FOREIGN_KEY_CHECKS = 0;");
-                //Db::write("DELETE FROM `$table`;");
+                if ($dto->truncateTables())
+                {
+                    Db::write("DELETE FROM `$table`;");
+                }
 
                 Db::forge()
                     ->seedFromFile($file);
 
-                Db::write("SET FOREIGN_KEY_CHECKS = 1;");
+                Db::write('SET FOREIGN_KEY_CHECKS = 1;');
 
                 Logger::forge()
-                    ->info("Seeded: $table");
+                    ->info('Seeded: ' . $table);
                 usleep(1000);
             } catch (\JsonException|ConfigLoadException $e)
             {
-                $this->logError("Error Seeder for $file: " . $e->getMessage());
+                $this->logError('Error Seeder for ' . $file . ':' . $e->getMessage());
 
                 return false;
             }
@@ -168,7 +169,6 @@ class Migration implements MigrationInterface
     }
 
     /**
-     * Sortiert die Seeder-Dateien basierend auf ihren Abhängigkeiten.
      *
      * @param array $files
      * @param array $dependencies

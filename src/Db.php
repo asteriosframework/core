@@ -299,83 +299,27 @@ class Db
     }
 
     /**
-     * @param string $table
-     * @param bool $truncate
-     * @param null|string $seederPath
-     * @return bool
-     * @throws Exception\ConfigLoadException
-     */
-    public function seed(string $table, bool $truncate = true, string $seederPath = null): bool
-    {
-        if (null === $seederPath)
-        {
-            return false;
-        }
-
-        $hasTable = self::forge()
-                ->get_connection()
-                ->query('SHOW TABLES LIKE "' . $table . '"')->num_rows === 1;
-
-        if ($hasTable)
-        {
-            if ($truncate)
-            {
-                self::forge()
-                    ->get_connection()
-                    ->query('SET FOREIGN_KEY_CHECKS = 0');
-                self::forge()
-                    ->get_connection()
-                    ->query('TRUNCATE TABLE ' . $table);
-                self::forge()
-                    ->get_connection()
-                    ->query('SET FOREIGN_KEY_CHECKS = 1');
-            }
-
-            $sqlFile = $seederPath . $table . '.sql';
-
-            $sqlScript = file_get_contents($sqlFile);
-
-            self::forge()
-                ->get_connection()
-                ->multi_query($sqlScript);
-
-            $count = 1;
-
-            while (self::forge()
-                ->get_connection()
-                ->next_result())
-            {
-                ++$count;
-            }
-
-            return $count !== 0;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param string $filePath
+     * @param string $seederFile
      * @return void
      * @throws Exception\ConfigLoadException
      * @throws \JsonException
      */
-    public static function seedFromFile(string $filePath): void
+    public static function seedFromFile(string $seederFile): void
     {
-        if (!file_exists($filePath))
+        if (!file_exists($seederFile))
         {
-            throw new \RuntimeException("Seed file not found: $filePath");
+            throw new \RuntimeException("Seed file not found: $seederFile");
         }
 
-        $json = file_get_contents($filePath);
+        $json = file_get_contents($seederFile);
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 
         if (!is_array($data) || empty($data))
         {
-            throw new \RuntimeException("Invalid or empty JSON in seed file: $filePath");
+            throw new \RuntimeException("Invalid or empty JSON in seed file: $seederFile");
         }
 
-        $table = basename($filePath, '.json');
+        $table = basename($seederFile, '.json');
 
         foreach ($data as $row)
         {
@@ -388,9 +332,6 @@ class Db
             $values = array_map([self::class, 'quote'], array_values($row));
 
             $sql = 'INSERT INTO `' . $table . '` (' . implode(', ', $columns) . ') VALUES (' . implode(', ', $values) . ');';
-
-            Logger::forge()
-                ->info($sql);
 
             self::write($sql);
         }
