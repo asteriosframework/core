@@ -109,21 +109,28 @@ class Migration implements MigrationInterface
         return true;
     }
 
-    public function seed(): bool
+    public function seed(array $dependencySeederOrder): bool
     {
         $seederPath = $this->getSeederPath();
 
         if (null === $seederPath || !is_dir($seederPath))
         {
-            $this->logError('Seeder directory not found!');
+            $this->logError('Seeder path not found: ' . $seederPath);
 
             return false;
         }
 
-        $files = glob($seederPath . '/*.json');
+        $files = $this->getSeederFilesInOrder($dependencySeederOrder, $seederPath);
 
         foreach ($files as $file)
         {
+            if (!file_exists($file))
+            {
+                Logger::forge()
+                    ->warning("Seeder file not found: $file");
+                continue;
+            }
+
             $table = basename($file, '.json');
             $json = file_get_contents($file);
             $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
@@ -131,7 +138,7 @@ class Migration implements MigrationInterface
             if (!is_array($data) || empty($data))
             {
                 Logger::forge()
-                    ->warning('No data to seed found in file: ' . $file);
+                    ->warning("No data to seed in file: $file");
                 continue;
             }
 
@@ -153,13 +160,42 @@ class Migration implements MigrationInterface
                     ->info("Seeded: $table");
             } catch (Throwable $e)
             {
-                $this->logError('Error seeding table ' . $table . ': ' . $e->getMessage());
+                $this->logError("Error seeding table $table: " . $e->getMessage());
 
                 return false;
             }
         }
 
         return true;
+    }
+
+    public function getSeederFilesInOrder(array $dependencySeederOrder, string $seederPath): array
+    {
+        $orderedFiles = [];
+        $seen = [];
+
+        // Die Dateien rekursiv sortieren, um Abhängigkeiten zu berücksichtigen
+        $this->resolveDependencies($dependencySeederOrder, $orderedFiles, $seen);
+
+        // Dateipfade erstellen und zurückgeben
+        return array_map(static fn($file) => $seederPath . '/' . $file, $orderedFiles);
+    }
+
+    private function resolveDependencies(array $dependencySeederOrder, array &$orderedFiles, array &$seen, $currentFile = null): void
+    {
+        if ($currentFile && isset($seen[$currentFile]))
+        {
+            return;
+        }
+
+        $seen[$currentFile] = true;
+
+        foreach ($dependencyOrder[$currentFile] ?? [] as $dependency)
+        {
+            $this->resolveDependencies($dependencySeederOrder, $orderedFiles, $seen, $dependency);
+        }
+
+        $orderedFiles[] = $currentFile;
     }
 
     public function getErrors(): array
