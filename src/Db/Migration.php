@@ -155,33 +155,59 @@ class Migration implements MigrationInterface
         return true;
     }
 
-    public function getSeederFilesInOrder(array $dependencySeederOrder, string $seederPath): array
+    public function getSeederFilesInOrder(array $seederFiles, string $seederPath): array
     {
-        $orderedFiles = [];
-        $seen = [];
+        $files = scandir($seederPath);
 
-        // Die Dateien rekursiv sortieren, um Abhängigkeiten zu berücksichtigen
-        $this->resolveDependencies($dependencySeederOrder, $orderedFiles, $seen);
+        $validFiles = array_filter($files, static function ($file) use ($seederPath) {
+            return $file !== '.' && $file !== '..' && is_file($seederPath . '/' . $file) && pathinfo($file, PATHINFO_EXTENSION) === 'json';
+        });
 
-        // Dateipfade erstellen und zurückgeben
+        $orderedFiles = $this->sortFilesByDependencies($validFiles, $seederFiles);
+
         return array_map(static fn($file) => $seederPath . '/' . $file, $orderedFiles);
     }
 
-    private function resolveDependencies(array $dependencySeederOrder, array &$orderedFiles, array &$seen, $currentFile = null): void
+    /**
+     * Sortiert die Seeder-Dateien basierend auf ihren Abhängigkeiten.
+     *
+     * @param array $files
+     * @param array $dependencies
+     * @return array
+     */
+    private function sortFilesByDependencies(array $files, array $dependencies): array
     {
-        if ($currentFile && isset($seen[$currentFile]))
+        $sorted = [];
+        $visited = [];
+
+        $visit = static function ($file) use ($dependencies, &$visited, &$sorted, &$visit) {
+            if (isset($visited[$file]))
+            {
+                return;
+            }
+
+            $visited[$file] = true;
+
+            if (isset($dependencies[$file]))
+            {
+                foreach ($dependencies[$file] as $dependency)
+                {
+                    if (!isset($visited[$dependency]))
+                    {
+                        $visit($dependency);
+                    }
+                }
+            }
+
+            $sorted[] = $file;
+        };
+
+        foreach ($files as $file)
         {
-            return;
+            $visit($file);
         }
 
-        $seen[$currentFile] = true;
-
-        foreach ($dependencyOrder[$currentFile] ?? [] as $dependency)
-        {
-            $this->resolveDependencies($dependencySeederOrder, $orderedFiles, $seen, $dependency);
-        }
-
-        $orderedFiles[] = $currentFile;
+        return $sorted;
     }
 
     public function getErrors(): array
