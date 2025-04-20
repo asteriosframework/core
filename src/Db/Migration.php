@@ -131,8 +131,7 @@ class Migration implements MigrationInterface
 
                 Logger::forge()
                     ->info("Seeding table >>> $table");
-                Logger::forge()
-                    ->info("Seeding file >>> $file");
+
                 Db::write("SET FOREIGN_KEY_CHECKS = 0;");
                 //Db::write("DELETE FROM `$table`;");
 

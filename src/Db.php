@@ -136,6 +136,37 @@ class Db
     }
 
     /**
+     * Quote a value for use in an SQL statement.
+     *
+     * @param string|int|float|null|bool $value
+     * @param string $config_group
+     * @return string
+     * @throws Exception\ConfigLoadException
+     */
+    public static function quote(string|int|float|null|bool $value, string $config_group = 'default'): string
+    {
+        $connection = self::forge($config_group)
+            ->get_connection();
+
+        if (is_null($value))
+        {
+            return 'NULL';
+        }
+
+        if (is_bool($value))
+        {
+            return $value ? '1' : '0';
+        }
+
+        if (is_int($value) || is_float($value))
+        {
+            return (string)$value;
+        }
+
+        return "'" . $connection->real_escape_string($value) . "'";
+    }
+
+    /**
      * @throws Exception\ConfigLoadException
      */
     public static function write(string $sql, string $config_group = 'default'): bool
@@ -356,12 +387,7 @@ class Db
             $columns = array_map(static fn($col) => '`' . $col . '`', array_keys($row));
             $values = array_map([self::class, 'quote'], array_values($row));
 
-            $sql = sprintf(
-                'INSERT INTO `%s` (%s) VALUES (%s);',
-                $table,
-                implode(', ', $columns),
-                implode(', ', $values)
-            );
+            $sql = 'INSERT INTO `' . $table . '` (' . implode(', ', $columns) . ') VALUES (' . implode(', ', $values) . ');';
 
             Logger::forge()
                 ->info($sql);
