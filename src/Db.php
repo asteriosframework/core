@@ -363,6 +363,9 @@ class Db
                 implode(', ', $values)
             );
 
+            Logger::forge()
+                ->info($sql);
+
             self::write($sql);
         }
     }
