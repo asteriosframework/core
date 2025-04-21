@@ -41,15 +41,30 @@ class MakeMigrationCommand implements CommandInterface
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $appMigrationDirectory));
         }
 
-        $filepath = "{$appMigrationDirectory}/{$filename}";
+        $filepath = $appMigrationDirectory . $filename;
+
+        $schemaAction = $this->getSchemaAction($argument);
+        $tableName = $this->getTableName($argument);
+
+        $schemaBlueprint = match ($schemaAction)
+        {
+            'create' => "Schema::create('sites', static function (SchemaBuilder $tableName) {\n});",
+            'update' => "Schema::table('sites', static function (SchemaBuilder $tableName) {\n});",
+            default => '',
+        };
 
         $content = <<<PHP
 <?php declare(strict_types=1);
 
+use Asterios\Core\Db\Builder\SchemaBuilder;
+use Asterios\Core\Db\Migration\Schema;
+
 return new class {
     public function up(): void
     {
-        // TODO: Add migration logic for: $formattedName
+        $// TODO: Add migration logic for: $formattedName
+        $schemaBlueprint
+        
     }
 
     public function down(): void
@@ -62,5 +77,19 @@ PHP;
         file_put_contents($filepath, $content);
 
         echo "Migration created: $filepath\n";
+    }
+
+    private function getSchemaAction(string $input): string
+    {
+        $parts = explode('_', $input);
+
+        return $parts[0];
+    }
+
+    private function getTableName(string $input): string
+    {
+        $parts = explode('_', $input);
+
+        return $parts[1];
     }
 }
