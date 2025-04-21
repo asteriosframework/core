@@ -76,7 +76,7 @@ PHP;
 
         file_put_contents($filename, $template);
 
-        echo "✅  bModel \033[1;32m{$modelNamespace}\\{$modelName}\033[0m created at \033[0;36m{$filename}\033[0m\n";
+        echo "✅  Model \033[1;32m{$modelNamespace}\\{$modelName}\033[0m created at \033[0;36m{$filename}\033[0m\n";
     }
 
     private function stringToNamespace(string $input): string
