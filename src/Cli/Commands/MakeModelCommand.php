@@ -45,7 +45,7 @@ class MakeModelCommand implements CommandInterface
 
         $modelPath = match ($modelNamespace)
         {
-            'Asterios\Cms\Models' => 'app/Models',
+            'Asterios\Cms\Models' => 'Models',
             default => str_replace(['App\\', '\\'], ['', '/'], $modelNamespace),
         };
 
