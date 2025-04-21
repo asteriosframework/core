@@ -55,7 +55,7 @@ class MakeModelCommand implements CommandInterface
 
         if (file_exists($filename))
         {
-            echo "⚠️ Model '{$modelName}' already exists at \033[0;36m{$filename}\033[0m\n";
+            echo "⚠️  Model '{$modelName}' already exists at \033[0;36m{$filename}\033[0m\n";
 
             return;
         }
@@ -76,7 +76,7 @@ PHP;
 
         file_put_contents($filename, $template);
 
-        echo "✅ Model \033[1;32m{$modelNamespace}\\{$modelName}\033[0m created at \033[0;36m{$filename}\033[0m\n";
+        echo "✅  bModel \033[1;32m{$modelNamespace}\\{$modelName}\033[0m created at \033[0;36m{$filename}\033[0m\n";
     }
 
     private function stringToNamespace(string $input): string
