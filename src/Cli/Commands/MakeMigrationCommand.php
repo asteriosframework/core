@@ -38,7 +38,7 @@ class MakeMigrationCommand implements CommandInterface
 
         if (!is_dir($appMigrationDirectory) && !mkdir($appMigrationDirectory, 0777, true) && !is_dir($appMigrationDirectory))
         {
-            throw new \RuntimeException(sprintf('Directory "%s" was not created', $appMigrationDirectory));
+            throw new \RuntimeException(sprintf('Migration directory "%s" was not created', $appMigrationDirectory));
         }
 
         $filepath = $appMigrationDirectory . $filename;

@@ -28,12 +28,14 @@ class MakeModelCommand implements CommandInterface
             return;
         }
 
+        $modelName = ucfirst($argument);
+
         $protectedDirectory = str_replace('/public', '', $_SERVER['DOCUMENT_ROOT']);
         $appModelDirectory = $protectedDirectory . 'app/Models/';
 
         if (!is_dir($appModelDirectory) && !mkdir($appModelDirectory, 0755, true) && !is_dir($appModelDirectory))
         {
-            throw new \RuntimeException(sprintf('Directory "%s" was not created', $appModelDirectory));
+            throw new \RuntimeException(sprintf('Model directory "%s" was not created', $appModelDirectory));
         }
 
         $filename = $appModelDirectory . $argument . '.php';
@@ -46,7 +48,7 @@ class MakeModelCommand implements CommandInterface
         }
 
         file_put_contents($filename,
-            "<?php declare(strict_types=1);\n\nnamespace Models;\n\nuse Asterios\Core\Model;\n\nclass {$argument} extends Model\n{\n\n}\n");
+            "<?php declare(strict_types=1);\n\nuse Asterios\Core\Model;\n\nclass {$modelName} extends Model\n{\n\n}\n");
 
         echo "Model '{$argument}' created.\n";
     }
