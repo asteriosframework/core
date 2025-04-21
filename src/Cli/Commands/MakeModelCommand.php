@@ -38,11 +38,11 @@ class MakeModelCommand implements CommandInterface
             throw new \RuntimeException(sprintf('Model directory "%s" was not created', $appModelDirectory));
         }
 
-        $filename = $appModelDirectory . $argument . '.php';
+        $filename = $appModelDirectory . $modelName . '.php';
 
         if (file_exists($filename))
         {
-            echo "Model '{$argument}' already exists.\n";
+            echo "Model '{$modelName}' already exists.\n";
 
             return;
         }
@@ -50,6 +50,6 @@ class MakeModelCommand implements CommandInterface
         file_put_contents($filename,
             "<?php declare(strict_types=1);\n\nuse Asterios\Core\Model;\n\nclass {$modelName} extends Model\n{\n\n}\n");
 
-        echo "Model '{$argument}' created.\n";
+        echo "Model '{$modelName}' created.\n";
     }
 }
