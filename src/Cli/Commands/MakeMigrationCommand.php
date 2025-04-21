@@ -48,8 +48,8 @@ class MakeMigrationCommand implements CommandInterface
 
         $schemaBlueprint = match ($schemaAction)
         {
-            'create' => "Schema::create('$tableName', static function (SchemaBuilder " . '$table' . ") {\n       });",
-            'update' => "Schema::table('$tableName', static function (SchemaBuilder " . '$table' . ") {\n        });",
+            'create' => "Schema::create('$tableName', static function (SchemaBuilder " . '$table' . ") {\n\n        });",
+            'update' => "Schema::table('$tableName', static function (SchemaBuilder " . '$table' . ") {\n\n         });",
             default => '',
         };
 
