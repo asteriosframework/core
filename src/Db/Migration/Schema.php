@@ -5,8 +5,8 @@ namespace Asterios\Core\Db\Migration;
 use Asterios\Core\Db;
 use Asterios\Core\Db\Builder\SchemaBuilder;
 use Asterios\Core\Exception\ConfigLoadException;
-use Asterios\Core\Exception\MigrationException;
 use Asterios\Core\Interfaces\SchemaInterface;
+use Asterios\Core\Logger;
 use Closure;
 
 class Schema implements SchemaInterface
@@ -34,7 +34,8 @@ class Schema implements SchemaInterface
             Db::write($sql);
         } catch (ConfigLoadException $e)
         {
-            throw new MigrationException('Create migration for table ' . $table . ' failed: ' . $e->getMessage());
+            Logger::forge()
+                ->fatal('Create migration for table ' . $table . ' failed: ' . $e->getMessage());
         }
     }
 
@@ -50,7 +51,8 @@ class Schema implements SchemaInterface
             Db::write($sql);
         } catch (ConfigLoadException $e)
         {
-            throw new MigrationException('Drop migration for table ' . $table . ' failed: ' . $e->getMessage());
+            Logger::forge()
+                ->fatal('Drop migration for table ' . $table . ' failed: ' . $e->getMessage());
         }
     }
 }
