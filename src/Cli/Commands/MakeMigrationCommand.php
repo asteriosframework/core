@@ -48,8 +48,8 @@ class MakeMigrationCommand implements CommandInterface
 
         $schemaBlueprint = match ($schemaAction)
         {
-            'create' => "Schema::create('sites', static function (SchemaBuilder $tableName) {\n});",
-            'update' => "Schema::table('sites', static function (SchemaBuilder $tableName) {\n});",
+            'create' => "Schema::create('$tableName', static function (SchemaBuilder " . '$table' . ") {\n       });",
+            'update' => "Schema::table('$tableName', static function (SchemaBuilder " . '$table' . ") {\n        });",
             default => '',
         };
 
@@ -62,7 +62,7 @@ use Asterios\Core\Db\Migration\Schema;
 return new class {
     public function up(): void
     {
-        $// TODO: Add migration logic for: $formattedName
+        // TODO: Add migration logic for: $formattedName
         $schemaBlueprint
         
     }
