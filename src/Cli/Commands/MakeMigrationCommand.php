@@ -97,6 +97,13 @@ PHP;
     {
         $parts = explode('_', $input);
 
-        return $parts[1];
+        array_shift($parts);
+
+        if (end($parts) === 'table')
+        {
+            array_pop($parts);
+        }
+
+        return implode('_', $parts);
     }
 }
