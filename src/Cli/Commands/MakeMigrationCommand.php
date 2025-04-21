@@ -46,10 +46,16 @@ class MakeMigrationCommand implements CommandInterface
         $schemaAction = $this->getSchemaAction($argument);
         $tableName = $this->getTableName($argument);
 
-        $schemaBlueprint = match ($schemaAction)
+        $schemaBlueprintUp = match ($schemaAction)
         {
             'create' => "Schema::create('$tableName', static function (SchemaBuilder " . '$table' . ") {\n\n        });",
             'update' => "Schema::table('$tableName', static function (SchemaBuilder " . '$table' . ") {\n\n         });",
+            default => '',
+        };
+
+        $schemaBlueprintDown = match ($schemaAction)
+        {
+            'create' => "Schema::drop('$tableName');",
             default => '',
         };
 
@@ -63,13 +69,14 @@ return new class {
     public function up(): void
     {
         // TODO: Add migration logic for: $formattedName
-        $schemaBlueprint
+        $schemaBlueprintUp
         
     }
 
     public function down(): void
     {
         // TODO: Revert migration logic for: $formattedName
+        $schemaBlueprintDown
     }
 };
 PHP;
