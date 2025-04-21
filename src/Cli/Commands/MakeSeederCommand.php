@@ -42,7 +42,7 @@ class MakeSeederCommand implements CommandInterface
 
         if (file_exists($filename))
         {
-            echo "Seeder '{$seederName}' already exists.\n";
+            echo "⚠️ Seeder '{$seederName}' already exists.\n";
 
             return;
         }
@@ -50,6 +50,6 @@ class MakeSeederCommand implements CommandInterface
         file_put_contents($filename,
             "[]\n");
 
-        echo "Seeder '{$seederName}' created.\n";
+        echo "✅ Seeder '{$seederName}' created.\n";
     }
 }

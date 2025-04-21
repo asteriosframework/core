@@ -83,7 +83,7 @@ PHP;
 
         file_put_contents($filepath, $content);
 
-        echo "Migration created: $filepath\n";
+        echo "✅ Migration created: $filepath\n";
     }
 
     private function getSchemaAction(string $input): string

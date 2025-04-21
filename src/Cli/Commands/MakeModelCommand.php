@@ -38,31 +38,24 @@ class MakeModelCommand implements CommandInterface
         {
             if (str_starts_with($arg, '--namespace='))
             {
-                $modelNamespace = substr($arg, strlen('--namespace='));
+                $modelNamespace = $this->stringToNamespace(substr($arg, strlen('--namespace=')));
                 break;
             }
         }
 
-        $modelPath = match ($modelNamespace)
-        {
-            'Asterios\Cms\Models' => 'Models',
-            default => str_replace(['App\\', '\\'], ['', '/'], $modelNamespace),
-        };
+        $protectedDirectory = str_replace('/public', '', $_SERVER['DOCUMENT_ROOT']);
+        $appModelDirectory = $protectedDirectory . 'app/Models/';
 
-        $relativePath = $modelPath;
-        $basePath = rtrim(str_replace('/public', '', $_SERVER['DOCUMENT_ROOT']), '/') . '/app';
-        $directory = $basePath . '/' . $relativePath;
-
-        if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory))
+        if (!is_dir($appModelDirectory) && !mkdir($appModelDirectory, 0755, true) && !is_dir($appModelDirectory))
         {
-            throw new \RuntimeException(sprintf('Model directory "%s" was not created', $directory));
+            throw new \RuntimeException(sprintf('Model directory "%s" was not created', $appModelDirectory));
         }
 
-        $filename = $directory . '/' . $modelName . '.php';
+        $filename = $appModelDirectory . $modelName . '.php';
 
         if (file_exists($filename))
         {
-            echo "⚠️  Model '{$modelName}' already exists at \033[0;36m{$filename}\033[0m\n";
+            echo "⚠️ Model '{$modelName}' already exists at \033[0;36m{$filename}\033[0m\n";
 
             return;
         }
@@ -84,5 +77,12 @@ PHP;
         file_put_contents($filename, $template);
 
         echo "✅ Model \033[1;32m{$modelNamespace}\\{$modelName}\033[0m created at \033[0;36m{$filename}\033[0m\n";
+    }
+
+    private function stringToNamespace(string $input): string
+    {
+        $parts = preg_split('/(?=[A-Z])/', $input, -1, PREG_SPLIT_NO_EMPTY);
+
+        return implode('\\', $parts);
     }
 }
