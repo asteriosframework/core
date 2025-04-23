@@ -37,4 +37,21 @@ class TimestampColumnBuilder implements SupportsPrecisionInterface
 
         return $this;
     }
+
+    public function nullable(): self
+    {
+        $this->builder->replaceColumnDefinition(
+            $this->column,
+            static function (string $definition): string {
+                if (!preg_match('/\bNULL\b/i', $definition))
+                {
+                    return preg_replace('/(TIMESTAMP(?:\(\d+\))?)/i', '$1 NULL', $definition);
+                }
+
+                return $definition;
+            }
+        );
+
+        return $this;
+    }
 }

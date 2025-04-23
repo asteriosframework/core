@@ -118,16 +118,9 @@ class SchemaBuilder implements SchemaBuilderInterface
     /**
      * @inheritDoc
      */
-    public function timestamps(string $createdAt = 'created_at', string $updatedAt = 'updated_at'): self
+    public function timestamps(string $createdAt = 'created_at', string $updatedAt = 'updated_at'): TimestampsBuilder
     {
-        $createdAtPrecision = $this->getPrecision($createdAt);
-        $updatedAtPrecision = $this->getPrecision($updatedAt);
-
-        $this->columns[] = '`' . $createdAt . '` TIMESTAMP' . $createdAtPrecision . ' DEFAULT CURRENT_TIMESTAMP' . $createdAtPrecision;
-        $this->columns[] = '`' . $updatedAt . '` TIMESTAMP' . $updatedAtPrecision . ' DEFAULT CURRENT_TIMESTAMP' . $updatedAtPrecision . ' ON UPDATE CURRENT_TIMESTAMP'
-            . $updatedAtPrecision;
-
-        return $this;
+        return new TimestampsBuilder($this, $createdAt, $updatedAt);
     }
 
     /**
@@ -172,6 +165,47 @@ class SchemaBuilder implements SchemaBuilderInterface
         $this->columns[] = '`' . $column . '` TIMESTAMP' . $precision . ' NULL DEFAULT NULL AFTER `updated_at`';
 
         return new TimestampColumnBuilder($this, $column);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function removeTimestampColumns(string ...$columns): void
+    {
+        $this->columns = array_filter($this->columns, static function (string $col) use ($columns) {
+            foreach ($columns as $name)
+            {
+                if (str_contains($col, "`$name`"))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTimestampPrecision(string $column): int
+    {
+        return $this->timestampPrecisions[$column] ?? 0;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function replaceColumnDefinition(string $column, callable $callback): void
+    {
+        foreach ($this->columns as $i => $definition)
+        {
+            if (str_starts_with($definition, "`$column`"))
+            {
+                $this->columns[$i] = $callback($definition);
+                break;
+            }
+        }
     }
 
     /**

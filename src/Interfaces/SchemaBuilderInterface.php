@@ -6,6 +6,7 @@ use Asterios\Core\Db\Builder\ColumnDefinitionBuilder;
 use Asterios\Core\Db\Builder\ForeignKeyBuilder;
 use Asterios\Core\Db\Builder\IndexBuilder;
 use Asterios\Core\Db\Builder\TimestampColumnBuilder;
+use Asterios\Core\Db\Builder\TimestampsBuilder;
 
 interface SchemaBuilderInterface
 {
@@ -90,9 +91,9 @@ interface SchemaBuilderInterface
     /**
      * @param string $createdAt
      * @param string $updatedAt
-     * @return self
+     * @return TimestampsBuilder
      */
-    public function timestamps(string $createdAt = 'created_at', string $updatedAt = 'updated_at'): self;
+    public function timestamps(string $createdAt = 'created_at', string $updatedAt = 'updated_at'): TimestampsBuilder;
 
     /**
      * @param string $column
@@ -131,6 +132,25 @@ interface SchemaBuilderInterface
      * @return void
      */
     public function setPrecision(string $column, int $precision): void;
+
+    /**
+     * @param string ...$columns
+     * @return void
+     */
+    public function removeTimestampColumns(string ...$columns): void;
+
+    /**
+     * @param string $column
+     * @return int
+     */
+    public function getTimestampPrecision(string $column): int;
+
+    /**
+     * @param string $column
+     * @param callable $callback
+     * @return void
+     */
+    public function replaceColumnDefinition(string $column, callable $callback): void;
 
     /**
      * @param string $name
