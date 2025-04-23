@@ -5,6 +5,7 @@ namespace Asterios\Core\Interfaces;
 use Asterios\Core\Db\Builder\ColumnDefinitionBuilder;
 use Asterios\Core\Db\Builder\ForeignKeyBuilder;
 use Asterios\Core\Db\Builder\IndexBuilder;
+use Asterios\Core\Db\Builder\TimestampColumnBuilder;
 
 interface SchemaBuilderInterface
 {
@@ -95,33 +96,27 @@ interface SchemaBuilderInterface
 
     /**
      * @param string $column
-     * @return self
+     * @return TimestampColumnBuilder
      */
-    public function createdAt(string $column = 'created_at'): self;
+    public function createdAt(string $column = 'created_at'): TimestampColumnBuilder;
 
     /**
      * @param string $column
-     * @return self
+     * @return TimestampColumnBuilder
      */
-    public function updatedAt(string $column = 'updated_at'): self;
+    public function updatedAt(string $column = 'updated_at'): TimestampColumnBuilder;
 
     /**
      * @param string $column
-     * @return self
+     * @return TimestampColumnBuilder
      */
-    public function deletedAt(string $column = 'deleted_at'): self;
-
-    /**
-     * @param int $value
-     * @return self
-     */
-    public function precision(int $value): self;
+    public function deletedAt(string $column = 'deleted_at'): TimestampColumnBuilder;
 
     /**
      * @param string $column
-     * @return self
+     * @return TimestampColumnBuilder
      */
-    public function softDeletes(string $column = 'deleted_at'): self;
+    public function softDeletes(string $column = 'deleted_at'): TimestampColumnBuilder;
 
     /**
      * @param string $name

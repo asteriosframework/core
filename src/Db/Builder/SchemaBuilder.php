@@ -10,7 +10,7 @@ class SchemaBuilder implements SchemaBuilderInterface
     protected array $columns = [];
     protected array $foreignKeys = [];
     protected array $indexes = [];
-    protected int $timestampPrecision = 0;
+    protected array $timestampPrecisions = [];
 
     public function __construct(string $table)
     {
@@ -30,56 +30,34 @@ class SchemaBuilder implements SchemaBuilderInterface
      */
     public function string(string $name, int $length = 255): ColumnDefinitionBuilder
     {
-        return $this->column($name, 'VARCHAR(' . $length . ')');
+        return $this->column($name, "VARCHAR($length)");
     }
 
-    /**
-     * @inheritDoc
-     */
     public function int(string $name, bool $unsigned = true): ColumnDefinitionBuilder
     {
-        $type = $unsigned ? 'INT UNSIGNED' : 'INT';
-
-        return $this->column($name, $type);
+        return $this->column($name, $unsigned ? 'INT UNSIGNED' : 'INT');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function smallInt(string $name, bool $unsigned = true): ColumnDefinitionBuilder
     {
-        $type = $unsigned ? 'SMALLINT UNSIGNED' : 'SMALLINT';
-
-        return $this->column($name, $type);
+        return $this->column($name, $unsigned ? 'SMALLINT UNSIGNED' : 'SMALLINT');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function bigInt(string $name, bool $unsigned = true): ColumnDefinitionBuilder
     {
-        $type = $unsigned ? 'BIGINT UNSIGNED' : 'BIGINT';
-
-        return $this->column($name, $type);
+        return $this->column($name, $unsigned ? 'BIGINT UNSIGNED' : 'BIGINT');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function boolean(string $name): ColumnDefinitionBuilder
     {
         return $this->column($name, 'TINYINT(1)');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function enum(string $name, array $values): ColumnDefinitionBuilder
     {
         $quoted = array_map(static fn($v) => "'" . addslashes($v) . "'", $values);
-        $type = 'ENUM(' . implode(', ', $quoted) . ')';
 
-        return $this->column($name, $type);
+        return $this->column($name, 'ENUM(' . implode(', ', $quoted) . ')');
     }
 
     public function text(string $name): ColumnDefinitionBuilder
@@ -87,33 +65,21 @@ class SchemaBuilder implements SchemaBuilderInterface
         return $this->column($name, 'TEXT');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function mediumText(string $name): ColumnDefinitionBuilder
     {
         return $this->column($name, 'MEDIUMTEXT');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function json(string $name): ColumnDefinitionBuilder
     {
         return $this->column($name, 'JSON');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function char(string $name, int $length = 1): ColumnDefinitionBuilder
     {
         return $this->column($name, "CHAR($length)");
     }
 
-    /**
-     * @inheritDoc
-     */
     public function dateTime(string $name): ColumnDefinitionBuilder
     {
         return $this->column($name, 'DATETIME');
@@ -124,122 +90,88 @@ class SchemaBuilder implements SchemaBuilderInterface
      */
     public function timestamps(string $createdAt = 'created_at', string $updatedAt = 'updated_at'): self
     {
-        $precision = $this->timestampPrecision > 0 ? "({$this->timestampPrecision})" : '';
-
-        $this->columns[] = "`{$createdAt}` TIMESTAMP{$precision} DEFAULT CURRENT_TIMESTAMP{$precision}";
-        $this->columns[] = "`{$updatedAt}` TIMESTAMP{$precision} DEFAULT CURRENT_TIMESTAMP{$precision} ON UPDATE CURRENT_TIMESTAMP{$precision}";
+        $this->createdAt($createdAt);
+        $this->updatedAt($updatedAt);
 
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function createdAt(string $column = 'created_at'): self
+    public function createdAt(string $column = 'created_at'): TimestampColumnBuilder
     {
-        $precision = $this->timestampPrecision > 0 ? "({$this->timestampPrecision})" : '';
-        $this->columns[] = "`$column` TIMESTAMP$precision DEFAULT CURRENT_TIMESTAMP$precision";
+        $precision = $this->getPrecision($column);
+        $this->columns[] = '`' . $column . '` TIMESTAMP' . $precision . ' DEFAULT CURRENT_TIMESTAMP' . $precision;
 
-        return $this;
+        return new TimestampColumnBuilder($this, $column);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function updatedAt(string $column = 'updated_at'): self
+    public function updatedAt(string $column = 'updated_at'): TimestampColumnBuilder
     {
-        $precision = $this->timestampPrecision > 0 ? "({$this->timestampPrecision})" : '';
-        $this->columns[] = "`$column` TIMESTAMP$precision DEFAULT CURRENT_TIMESTAMP$precision ON UPDATE CURRENT_TIMESTAMP$precision";
+        $precision = $this->getPrecision($column);
+        $this->columns[] = '`' . $column . '` TIMESTAMP' . $precision . ' DEFAULT CURRENT_TIMESTAMP' . $precision . ' ON UPDATE CURRENT_TIMESTAMP' . $precision;
 
-        return $this;
+        return new TimestampColumnBuilder($this, $column);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function deletedAt(string $column = 'deleted_at'): self
+    public function deletedAt(string $column = 'deleted_at'): TimestampColumnBuilder
     {
-        $precision = $this->timestampPrecision > 0 ? "({$this->timestampPrecision})" : '';
-        $this->columns[] = "`$column` TIMESTAMP$precision NULL DEFAULT NULL";
+        $precision = $this->getPrecision($column);
+        $this->columns[] = '`' . $column . '` TIMESTAMP' . $precision . ' NULL DEFAULT NULL';
 
-        return $this;
+        return new TimestampColumnBuilder($this, $column);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function precision(int $value): self
+    public function softDeletes(string $column = 'deleted_at'): TimestampColumnBuilder
     {
-        $this->timestampPrecision = $value;
+        $precision = $this->getPrecision($column);
+        $this->columns[] = '`' . $column . '` TIMESTAMP' . $precision . ' NULL DEFAULT NULL AFTER `updated_at`';
 
-        return $this;
+        return new TimestampColumnBuilder($this, $column);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function softDeletes(string $column = 'deleted_at'): self
-    {
-        $precision = $this->timestampPrecision > 0 ? "({$this->timestampPrecision})" : '';
-
-        $this->columns[] = "`{$column}` TIMESTAMP'.$precision.' NULL DEFAULT NULL AFTER `updated_at`";
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function column(string $name, string $type): ColumnDefinitionBuilder
     {
         return new ColumnDefinitionBuilder($this, $name, $type);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function addColumn(string $sql): void
     {
         $this->columns[] = $sql;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function index(string|array $columns): IndexBuilder
     {
         return new IndexBuilder($this, $columns);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function addIndex(string $sql): void
     {
         $this->indexes[] = $sql;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function foreign(string $column): ForeignKeyBuilder
     {
         return new ForeignKeyBuilder($this, $column);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function addForeignKey(string $sql): void
     {
         $this->foreignKeys[] = $sql;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function build(): array
     {
         return [$this->columns, $this->foreignKeys, $this->indexes];
+    }
+
+    public function setPrecision(string $column, int $precision): void
+    {
+        $this->timestampPrecisions[$column] = $precision;
+    }
+
+    protected function getPrecision(string $column): string
+    {
+        return isset($this->timestampPrecisions[$column]) && $this->timestampPrecisions[$column] > 0
+            ? '(' . $this->timestampPrecisions[$column] . ')'
+            : '';
     }
 }
