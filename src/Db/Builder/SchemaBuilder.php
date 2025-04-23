@@ -88,12 +88,16 @@ class SchemaBuilder implements SchemaBuilderInterface
     /**
      * @inheritDoc
      */
-    public function timestamps(string $createdAt = 'created_at', string $updatedAt = 'updated_at'): TimestampsBuilder
+    public function timestamps(string $createdAt = 'created_at', string $updatedAt = 'updated_at'): self
     {
-        $this->createdAt($createdAt);
-        $this->updatedAt($updatedAt);
+        $createdAtPrecision = $this->getPrecision($createdAt);
+        $updatedAtPrecision = $this->getPrecision($updatedAt);
 
-        return new TimestampsBuilder($this, $createdAt, $updatedAt);
+        $this->columns[] = '`' . $createdAt . '` TIMESTAMP' . $createdAtPrecision . ' DEFAULT CURRENT_TIMESTAMP' . $createdAtPrecision;
+        $this->columns[] = '`' . $updatedAt . '` TIMESTAMP' . $updatedAtPrecision . ' DEFAULT CURRENT_TIMESTAMP' . $updatedAtPrecision . ' ON UPDATE CURRENT_TIMESTAMP'
+            . $updatedAtPrecision;
+
+        return $this;
     }
 
     public function createdAt(string $column = 'created_at'): TimestampColumnBuilder
