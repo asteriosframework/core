@@ -2,11 +2,11 @@
 
 namespace Asterios\Core\Interfaces;
 
-interface TimestampColumnBuilderInterface
+interface SupportsPrecisionInterface
 {
     /**
      * @param int $value
-     * @return self
+     * @return static
      */
-    public function precision(int $value): self;
+    public function precision(int $value): static;
 }

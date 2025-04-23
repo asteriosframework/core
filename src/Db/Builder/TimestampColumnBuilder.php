@@ -2,9 +2,9 @@
 
 namespace Asterios\Core\Db\Builder;
 
-use Asterios\Core\Interfaces\TimestampColumnBuilderInterface;
+use Asterios\Core\Interfaces\SupportsPrecisionInterface;
 
-class TimestampColumnBuilder implements TimestampColumnBuilderInterface
+class TimestampColumnBuilder implements SupportsPrecisionInterface
 {
     protected SchemaBuilder $builder;
     protected string $column;
@@ -27,7 +27,11 @@ class TimestampColumnBuilder implements TimestampColumnBuilderInterface
         return $result;
     }
 
-    public function precision(int $value): self
+    /**
+     * @param int $value
+     * @return $this
+     */
+    public function precision(int $value): static
     {
         $this->builder->setPrecision($this->column, $value);
 
