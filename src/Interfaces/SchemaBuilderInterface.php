@@ -97,6 +97,30 @@ interface SchemaBuilderInterface
      * @param string $column
      * @return self
      */
+    public function createdAt(string $column = 'created_at'): self;
+
+    /**
+     * @param string $column
+     * @return self
+     */
+    public function updatedAt(string $column = 'updated_at'): self;
+
+    /**
+     * @param string $column
+     * @return self
+     */
+    public function deletedAt(string $column = 'deleted_at'): self;
+
+    /**
+     * @param int $value
+     * @return self
+     */
+    public function precision(int $value): self;
+
+    /**
+     * @param string $column
+     * @return self
+     */
     public function softDeletes(string $column = 'deleted_at'): self;
 
     /**

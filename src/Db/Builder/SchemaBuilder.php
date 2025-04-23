@@ -10,6 +10,7 @@ class SchemaBuilder implements SchemaBuilderInterface
     protected array $columns = [];
     protected array $foreignKeys = [];
     protected array $indexes = [];
+    protected int $timestampPrecision = 0;
 
     public function __construct(string $table)
     {
@@ -123,15 +124,65 @@ class SchemaBuilder implements SchemaBuilderInterface
      */
     public function timestamps(string $createdAt = 'created_at', string $updatedAt = 'updated_at'): self
     {
-        $this->columns[] = "`{$createdAt}` TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
-        $this->columns[] = "`{$updatedAt}` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
+        $precision = $this->timestampPrecision > 0 ? "({$this->timestampPrecision})" : '';
+
+        $this->columns[] = "`{$createdAt}` TIMESTAMP{$precision} DEFAULT CURRENT_TIMESTAMP{$precision}";
+        $this->columns[] = "`{$updatedAt}` TIMESTAMP{$precision} DEFAULT CURRENT_TIMESTAMP{$precision} ON UPDATE CURRENT_TIMESTAMP{$precision}";
 
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function createdAt(string $column = 'created_at'): self
+    {
+        $precision = $this->timestampPrecision > 0 ? "({$this->timestampPrecision})" : '';
+        $this->columns[] = "`$column` TIMESTAMP$precision DEFAULT CURRENT_TIMESTAMP$precision";
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function updatedAt(string $column = 'updated_at'): self
+    {
+        $precision = $this->timestampPrecision > 0 ? "({$this->timestampPrecision})" : '';
+        $this->columns[] = "`$column` TIMESTAMP$precision DEFAULT CURRENT_TIMESTAMP$precision ON UPDATE CURRENT_TIMESTAMP$precision";
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function deletedAt(string $column = 'deleted_at'): self
+    {
+        $precision = $this->timestampPrecision > 0 ? "({$this->timestampPrecision})" : '';
+        $this->columns[] = "`$column` TIMESTAMP$precision NULL DEFAULT NULL";
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function precision(int $value): self
+    {
+        $this->timestampPrecision = $value;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function softDeletes(string $column = 'deleted_at'): self
     {
-        $this->columns[] = "`{$column}` TIMESTAMP NULL DEFAULT NULL";
+        $precision = $this->timestampPrecision > 0 ? "({$this->timestampPrecision})" : '';
+
+        $this->columns[] = "`{$column}` TIMESTAMP'.$precision.' NULL DEFAULT NULL AFTER `updated_at`";
 
         return $this;
     }
