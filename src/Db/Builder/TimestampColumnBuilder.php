@@ -2,9 +2,9 @@
 
 namespace Asterios\Core\Db\Builder;
 
-use Asterios\Core\Interfaces\SupportsPrecisionInterface;
+use Asterios\Core\Interfaces\TimestampColumnBuilderInterface;
 
-class TimestampColumnBuilder implements SupportsPrecisionInterface
+class TimestampColumnBuilder implements TimestampColumnBuilderInterface
 {
     protected SchemaBuilder $builder;
     protected string $column;
@@ -28,16 +28,28 @@ class TimestampColumnBuilder implements SupportsPrecisionInterface
     }
 
     /**
-     * @param int $value
-     * @return $this
+     * @inheritDoc
      */
-    public function precision(int $value): static
+    public function precision(int $value): self
     {
         $this->builder->setPrecision($this->column, $value);
+
+        $this->builder->replaceColumnDefinition(
+            $this->column,
+            static function (string $definition) use ($value): string {
+                return preg_replace(
+                    '/TIMESTAMP(?:\(\d+\))?/',
+                    'TIMESTAMP(' . $value . ')',
+                    $definition
+                );
+            });
 
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function nullable(): self
     {
         $this->builder->replaceColumnDefinition(
