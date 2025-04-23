@@ -27,21 +27,21 @@ interface SchemaBuilderInterface
      * @param bool $unsigned
      * @return ColumnDefinitionBuilder
      */
-    public function int(string $name, bool $unsigned = true): ColumnDefinitionBuilder;
+    public function integer(string $name, bool $unsigned = true): ColumnDefinitionBuilder;
 
     /**
      * @param string $name
      * @param bool $unsigned
      * @return ColumnDefinitionBuilder
      */
-    public function smallInt(string $name, bool $unsigned = true): ColumnDefinitionBuilder;
+    public function smallInteger(string $name, bool $unsigned = true): ColumnDefinitionBuilder;
 
     /**
      * @param string $name
      * @param bool $unsigned
      * @return ColumnDefinitionBuilder
      */
-    public function bigInt(string $name, bool $unsigned = true): ColumnDefinitionBuilder;
+    public function bigInteger(string $name, bool $unsigned = true): ColumnDefinitionBuilder;
 
     /**
      * @param string $name
@@ -117,6 +117,20 @@ interface SchemaBuilderInterface
      * @return TimestampColumnBuilder
      */
     public function softDeletes(string $column = 'deleted_at'): TimestampColumnBuilder;
+
+    /**
+     * @param int $value
+     * @param string $column
+     * @return self
+     */
+    public function precision(int $value, string $column = 'created_at'): self;
+
+    /**
+     * @param string $column
+     * @param int $precision
+     * @return void
+     */
+    public function setPrecision(string $column, int $precision): void;
 
     /**
      * @param string $name
