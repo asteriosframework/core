@@ -145,7 +145,7 @@ class Migration implements MigrationInterface
 
                 if ($dto->truncateTables())
                 {
-                    Db::write("DELETE FROM `$table`;");
+                    Db::write("TRUNCATE `$table`;");
                 }
 
                 Db::forge()
