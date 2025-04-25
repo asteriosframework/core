@@ -25,10 +25,12 @@ class Migration implements MigrationInterface
         {
             $documentRoot = $_SERVER['DOCUMENT_ROOT'];
             $protectedDirectory = str_replace('/public', '', $documentRoot);
-            define('ROOT_PATH', $protectedDirectory . DIRECTORY_SEPARATOR);
+            $rootPath = $protectedDirectory . DIRECTORY_SEPARATOR;
 
-            $envFile = ROOT_PATH . $envFile;
+            $envFile = $rootPath . $envFile;
         }
+        var_dump($envFile);
+        die;
         $this->envFile = $envFile;
         $this->env = new Env($this->envFile);
     }
