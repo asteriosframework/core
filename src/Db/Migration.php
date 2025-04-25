@@ -263,7 +263,7 @@ class Migration implements MigrationInterface
 
     protected function getProtectedPath(): string
     {
-        return str_replace('/public', '', Asterios::getDocumentRoot());
+        return Asterios::getBasePath();
     }
 
     protected function ensureMigrationTableExists(): void
