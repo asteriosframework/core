@@ -29,7 +29,7 @@ class Migration implements MigrationInterface
 
             $envFile = $rootPath . $envFile;
         }
-        var_dump($envFile);
+        var_dump($_SERVER['DOCUMENT_ROOT']);
         die;
         $this->envFile = $envFile;
         $this->env = new Env($this->envFile);
