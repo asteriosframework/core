@@ -42,7 +42,7 @@ function handleCommand(string $commandName, ?string $argument = null): void
     {
         function base_path(string $path = ''): string
         {
-            return dirname(__DIR__, 3) . ($path ? DIRECTORY_SEPARATOR . $path : '');
+            return dirname(__DIR__, 4) . ($path ? DIRECTORY_SEPARATOR . $path : '');
         }
     }
 
