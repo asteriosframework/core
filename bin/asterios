@@ -38,14 +38,6 @@ function handleCommand(string $commandName, ?string $argument = null): void
         exit(1);
     }
 
-    if (!function_exists('base_path'))
-    {
-        function base_path(string $path = ''): string
-        {
-            return dirname(__DIR__, 4) . ($path ? DIRECTORY_SEPARATOR . $path : '');
-        }
-    }
-
     $instance = new $commandInfo['class'];
     $instance->handle($argument);
 }

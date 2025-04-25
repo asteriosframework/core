@@ -180,4 +180,9 @@ class Asterios
     {
         return $_SERVER['DOCUMENT_ROOT'];
     }
+
+    public static function getBasePath(string $path = ''): string
+    {
+        return dirname(__DIR__, 4) . ($path ? DIRECTORY_SEPARATOR . $path : '');
+    }
 }
