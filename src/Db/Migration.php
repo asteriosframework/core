@@ -3,6 +3,7 @@
 namespace Asterios\Core\Db;
 
 use Asterios\Core\Asterios;
+use Asterios\Core\Config;
 use Asterios\Core\Db;
 use Asterios\Core\Dto\DbMigrationDto;
 use Asterios\Core\Env;
@@ -21,7 +22,9 @@ class Migration implements MigrationInterface
 
     public function __construct(string $envFile = '.env')
     {
-        $this->envFile = base_path() . '..' . $envFile;
+        $this->envFile = base_path() . $envFile;
+        Config::set_config_path(base_path() . 'config');
+
         $this->env = new Env($this->envFile);
     }
 
