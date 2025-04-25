@@ -15,6 +15,7 @@ use Asterios\Core\Logger;
 class Migration implements MigrationInterface
 {
     protected array $errors = [];
+    protected array $messages = [];
     protected string $envFile = '.env';
     protected ?Env $env;
 
@@ -46,11 +47,12 @@ class Migration implements MigrationInterface
         foreach ($files as $file)
         {
             $migrationName = basename($file, '.php');
-
+            $this->messages[]['name'] = $migrationName;
             if ($this->hasMigrationRun($migrationName))
             {
                 Logger::forge()
                     ->info('Skipping already run migration: ' . $migrationName);
+                $this->messages[]['status'] = 'skipped';
                 continue;
             }
 
@@ -63,13 +65,17 @@ class Migration implements MigrationInterface
                     $this->markMigrationAsRun($migrationName, $batch);
                     Logger::forge()
                         ->info('Run migration: ' . basename($file));
+
+                    $this->messages[]['status'] = 'done';
                 }
                 else
                 {
+                    $this->messages[]['status'] = 'missing';
                     throw new \RuntimeException('Missing method "up" in migration:' . basename($file));
                 }
             } catch (\Throwable $e)
             {
+                $this->messages[]['status'] = 'failed';
                 $this->logError('Migration failed: ' . basename($file) . ' - ' . $e->getMessage());
 
                 return false;
@@ -288,5 +294,10 @@ SQL;
         $result = Db::read("SELECT MAX(`batch`) AS max_batch FROM `migration`");
 
         return isset($result[0]['max_batch']) ? (int)$result[0]['max_batch'] + 1 : 1;
+    }
+
+    public function getMessages(): array
+    {
+        return $this->messages;
     }
 }
