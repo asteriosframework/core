@@ -27,7 +27,7 @@ class MigrateCommand implements CommandInterface
 
         foreach ($messages as $message)
         {
-
+            echo $message . "\n";
             var_dump($message);
         }
 
