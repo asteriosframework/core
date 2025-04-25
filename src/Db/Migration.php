@@ -21,17 +21,7 @@ class Migration implements MigrationInterface
 
     public function __construct(string $envFile = '.env')
     {
-        if ($envFile === '.env')
-        {
-            $documentRoot = $_SERVER['DOCUMENT_ROOT'];
-            $protectedDirectory = str_replace('/public', '', $documentRoot);
-            $rootPath = $protectedDirectory . DIRECTORY_SEPARATOR;
-
-            $envFile = $rootPath . $envFile;
-        }
-        var_dump($_SERVER['DOCUMENT_ROOT']);
-        die;
-        $this->envFile = $envFile;
+        $this->envFile = base_path() . $envFile;
         $this->env = new Env($this->envFile);
     }
 
