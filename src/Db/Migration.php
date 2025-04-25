@@ -22,8 +22,8 @@ class Migration implements MigrationInterface
 
     public function __construct(string $envFile = '.env')
     {
-        $this->envFile = base_path() . $envFile;
-        Config::set_config_path(base_path() . 'config');
+        $this->envFile = base_path() . DIRECTORY_SEPARATOR . $envFile;
+        Config::set_config_path(base_path() . DIRECTORY_SEPARATOR . 'config');
 
         $this->env = new Env($this->envFile);
     }
