@@ -31,7 +31,7 @@ class MigrateStatusCommand implements CommandInterface
         foreach ($allMigrationFiles as $migrationFile)
         {
             $migrationName = pathinfo($migrationFile, PATHINFO_FILENAME);
-            $isRan = in_array($migrationName, $ranMigrations, true);
+            $isRan = $migration->hasMigrated($ranMigrations, $migrationName);
             $statusList[] = [
                 'Migration' => $migrationName,
                 'Status' => $isRan ? CliStatusIcon::Success->icon() . 'Ran' : CliStatusIcon::Pending->icon() . 'Pending',
@@ -44,9 +44,12 @@ class MigrateStatusCommand implements CommandInterface
         }
         else
         {
-            $this->printDataTable([
-                'Database' => ['Migrations' => $statusList],
-            ]);
+            $this->printListTable(
+                'Database Migration Status',
+                $statusList,
+                'Migration',
+                'Status'
+            );
         }
     }
 }

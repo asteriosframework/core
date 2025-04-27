@@ -144,7 +144,7 @@ class Migration implements MigrationInterface
     public function getRanMigrations(): array
     {
         $this->ensureMigrationTableExists();
-        
+
         try
         {
             $migrations = Db::read('SELECT migration FROM migration');
@@ -167,6 +167,19 @@ class Migration implements MigrationInterface
         $files = glob($migrationPath . '/*.php');
 
         return $files ?: [];
+    }
+
+    public function hasMigrated(array $migrationsArray, string $migrationName): bool
+    {
+        foreach ($migrationsArray as $migration)
+        {
+            if (($migration['migration'] ?? '') === $migrationName)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
