@@ -5,11 +5,11 @@ namespace Asterios\Core\Db;
 use Asterios\Core\Asterios;
 use Asterios\Core\Config;
 use Asterios\Core\Db;
-use Asterios\Core\Dto\DbMigrationDto;
 use Asterios\Core\Env;
 use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvLoadException;
+use Asterios\Core\Exception\MigrationException;
 use Asterios\Core\Interfaces\MigrationInterface;
 use Asterios\Core\Logger;
 
@@ -18,6 +18,12 @@ class Migration implements MigrationInterface
     protected array $errors = [];
     protected array $messages = [];
     protected string $envFile = '.env';
+
+    /**
+     * @var array<string, array<int, string>>
+     */
+    protected array $seeder = [];
+
     protected ?Env $env;
 
     public function __construct(string $envFile = '.env')
@@ -131,7 +137,7 @@ class Migration implements MigrationInterface
         return true;
     }
 
-    public function seed(DbMigrationDto $dto): bool
+    public function seed(bool $truncateTables = true): bool
     {
         $seederPath = $this->getSeederPath();
 
@@ -142,7 +148,20 @@ class Migration implements MigrationInterface
             return false;
         }
 
-        $files = $this->getSeederFilesInOrder($dto->getSeeder(), $seederPath);
+        if (empty($this->getSeeder()))
+        {
+            try
+            {
+                $this->getSeederFromConfig();
+            } catch (ConfigLoadException|MigrationException $e)
+            {
+                $this->logError('Error loading seeder config file: ' . $e->getMessage());
+
+                return false;
+            }
+        }
+
+        $files = $this->getSeederFilesInOrder($this->getSeeder(), $seederPath);
 
         foreach ($files as $file)
         {
@@ -302,5 +321,38 @@ SQL;
     public function getMessages(): array
     {
         return $this->messages;
+    }
+
+    /**
+     * @param array<string, array<int, string>> $seeder
+     * @return void
+     */
+    public function setSeeder(array $seeder): void
+    {
+        $this->seeder = $seeder;
+    }
+
+    /**
+     * @return array<string, array<int, string>>
+     */
+    protected function getSeeder(): array
+    {
+        return $this->seeder;
+    }
+
+    /**
+     * @return void
+     * @throws MigrationException|ConfigLoadException
+     */
+    protected function getSeederFromConfig(): void
+    {
+        $seeder = Config::get('seeder');
+
+        if (empty($seeder))
+        {
+            throw new MigrationException('Seeder config file is empty!');
+        }
+
+        $this->setSeeder($seeder);
     }
 }

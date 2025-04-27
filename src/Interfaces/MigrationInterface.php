@@ -13,6 +13,12 @@ interface MigrationInterface
     public function migrate(): bool;
 
     /**
+     * @param bool $truncateTables
+     * @return bool
+     */
+    public function seed(bool $truncateTables = true): bool;
+
+    /**
      * @return bool
      * @throws MigrationException
      */
