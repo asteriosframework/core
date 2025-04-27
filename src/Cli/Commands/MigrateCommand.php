@@ -5,6 +5,7 @@ namespace Asterios\Core\Cli\Commands;
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 use Asterios\Core\Db\Migration;
+use Asterios\Core\Enum\CliStatusIcon;
 use Asterios\Core\Interfaces\CommandInterface;
 
 #[Command(
@@ -21,13 +22,23 @@ class MigrateCommand implements CommandInterface
         $this->printHeader();
 
         $migration = new Migration();
-        $executed = $migration->migrate(); // Gibt hoffentlich ein Array oder Resultat zurück
+        $migration->migrate();
 
         $messages = $migration->getMessages();
 
         foreach ($messages as $message)
         {
-            echo 'Migrated';
+
+            $status = match ($message['status'])
+            {
+                'done' => CliStatusIcon::Success->icon() . 'Migrated',
+                'skipped' => CliStatusIcon::Warning->icon() . 'Skipped migration',
+                'missing' => CliStatusIcon::Danger->icon() . 'Missing method "up" in migration',
+                'failed' => CliStatusIcon::Error->icon() . 'Migration failed',
+                default => CliStatusIcon::Unknown->icon() . 'Migration in unknown state',
+            };
+
+            echo $status . ' ' . $message['name'] . "\n";
         }
 
     }
