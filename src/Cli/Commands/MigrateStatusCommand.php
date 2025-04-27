@@ -11,7 +11,8 @@ use Asterios\Core\Interfaces\CommandInterface;
 #[Command(
     name: 'migrate:status',
     description: 'Show the status of all migrations (ran/pending)',
-    group: 'Database'
+    group: 'Database',
+    aliases: ['--mi']
 )]
 class MigrateStatusCommand implements CommandInterface
 {

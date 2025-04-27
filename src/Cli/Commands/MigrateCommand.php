@@ -11,7 +11,8 @@ use Asterios\Core\Interfaces\CommandInterface;
 #[Command(
     name: 'migrate',
     description: 'Run all outstanding migrations',
-    group: 'Database'
+    group: 'Database',
+    aliases: ['--m']
 )]
 class MigrateCommand implements CommandInterface
 {
