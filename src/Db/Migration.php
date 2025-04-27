@@ -143,6 +143,8 @@ class Migration implements MigrationInterface
 
     public function getRanMigrations(): array
     {
+        $this->ensureMigrationTableExists();
+        
         try
         {
             $migrations = Db::read('SELECT migration FROM migration');
