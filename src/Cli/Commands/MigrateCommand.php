@@ -26,20 +26,21 @@ class MigrateCommand implements CommandInterface
 
         $messages = $migration->getMessages();
 
-        foreach ($messages as $message)
+        foreach ($messages as $migration)
         {
-
-            $status = match ($message['status'])
+            foreach ($migration as $filename => $status)
             {
-                'done' => CliStatusIcon::Success->icon() . 'Migrated',
-                'skipped' => CliStatusIcon::Warning->icon() . 'Skipped migration',
-                'missing' => CliStatusIcon::Danger->icon() . 'Missing method "up" in migration',
-                'failed' => CliStatusIcon::Error->icon() . 'Migration failed',
-                default => CliStatusIcon::Unknown->icon() . 'Migration in unknown state',
-            };
+                $status = match ($status)
+                {
+                    'done' => CliStatusIcon::Success->icon() . 'Migrated',
+                    'skipped' => CliStatusIcon::Warning->icon() . 'Skipped migration',
+                    'missing' => CliStatusIcon::Danger->icon() . 'Missing method "up" in migration',
+                    'failed' => CliStatusIcon::Error->icon() . 'Migration failed',
+                    default => CliStatusIcon::Unknown->icon() . 'Migration in unknown state',
+                };
 
-            echo $status . ' ' . $message['name'] . "\n";
+                echo $status . ' ' . $filename . "\n";
+            }
         }
-
     }
 }

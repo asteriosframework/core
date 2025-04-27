@@ -60,12 +60,12 @@ class Migration implements MigrationInterface
         foreach ($files as $file)
         {
             $migrationName = basename($file, '.php');
-            $this->messages[]['name'] = $migrationName;
+
             if ($this->hasMigrationRun($migrationName))
             {
                 Logger::forge()
                     ->info('Skipping already run migration: ' . $migrationName);
-                $this->messages[]['status'] = 'skipped';
+                $this->messages[$migrationName] = 'skipped';
                 continue;
             }
 
@@ -79,16 +79,16 @@ class Migration implements MigrationInterface
                     Logger::forge()
                         ->info('Run migration: ' . basename($file));
 
-                    $this->messages[]['status'] = 'done';
+                    $this->messages[$migrationName] = 'done';
                 }
                 else
                 {
-                    $this->messages[]['status'] = 'missing';
+                    $this->messages[$migrationName] = 'missing';
                     throw new \RuntimeException('Missing method "up" in migration:' . basename($file));
                 }
             } catch (\Throwable $e)
             {
-                $this->messages[]['status'] = 'failed';
+                $this->messages[$migrationName] = 'failed';
                 $this->logError('Migration failed: ' . basename($file) . ' - ' . $e->getMessage());
 
                 return false;
