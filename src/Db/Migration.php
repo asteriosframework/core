@@ -358,7 +358,7 @@ SQL;
      */
     protected function getSeederFromConfig(): void
     {
-        $seeder = Config::get('seeder');
+        $seeder = (array)Config::get('seeder');
 
         if (empty($seeder))
         {
