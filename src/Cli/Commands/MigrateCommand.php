@@ -39,7 +39,7 @@ class MigrateCommand implements CommandInterface
                     default => CliStatusIcon::Unknown->icon() . 'Migration in unknown state',
                 };
 
-                echo $status . ' ' . $filename . "\n";
+                echo $status . ' ' . $filename . PHP_EOL;
             }
         }
     }

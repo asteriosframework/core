@@ -65,7 +65,7 @@ class Migration implements MigrationInterface
             {
                 Logger::forge()
                     ->info('Skipping already run migration: ' . $migrationName);
-                $this->messages[$migrationName] = 'skipped';
+                $this->messages[][$migrationName] = 'skipped';
                 continue;
             }
 
@@ -79,16 +79,16 @@ class Migration implements MigrationInterface
                     Logger::forge()
                         ->info('Run migration: ' . basename($file));
 
-                    $this->messages[$migrationName] = 'done';
+                    $this->messages[][$migrationName] = 'done';
                 }
                 else
                 {
-                    $this->messages[$migrationName] = 'missing';
+                    $this->messages[][$migrationName] = 'missing';
                     throw new \RuntimeException('Missing method "up" in migration:' . basename($file));
                 }
             } catch (\Throwable $e)
             {
-                $this->messages[$migrationName] = 'failed';
+                $this->messages[][$migrationName] = 'failed';
                 $this->logError('Migration failed: ' . basename($file) . ' - ' . $e->getMessage());
 
                 return false;
@@ -139,6 +139,26 @@ class Migration implements MigrationInterface
         }
 
         return true;
+    }
+
+    public function getRanMigrations(): array
+    {
+        $migrations = Db::read('SELECT migration FROM migration');
+
+        if (is_array($migrations))
+        {
+            return $migrations;
+        }
+
+        return [];
+    }
+
+    public function getAllMigrationFiles(): array
+    {
+        $migrationPath = $this->getMigrationsPath();
+        $files = glob($migrationPath . '/*.php');
+
+        return $files ?: [];
     }
 
     /**
