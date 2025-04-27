@@ -44,7 +44,9 @@ class MigrateStatusCommand implements CommandInterface
         }
         else
         {
-            $this->printDataTable(['Migrations' => $statusList]);
+            $this->printDataTable([
+                'Database' => ['Migrations' => $statusList],
+            ]);
         }
     }
 }

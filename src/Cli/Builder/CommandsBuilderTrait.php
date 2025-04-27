@@ -30,7 +30,6 @@ trait CommandsBuilderTrait
             $grouped[$group][] = $cmd;
         }
 
-        // 2. Alphabetisch sortieren (innerhalb jeder Gruppe)
         foreach ($grouped as &$cmds)
         {
             usort($cmds, fn($a, $b) => strcmp($a['name'], $b['name']));
@@ -49,7 +48,7 @@ trait CommandsBuilderTrait
                 $this->printPrettyCommand($fullCommand, $cmd['description'] ?? '');
             }
 
-            echo "\n";
+            echo PHP_EOL;
         }
     }
 
@@ -64,8 +63,6 @@ trait CommandsBuilderTrait
     }
 
     /**
-     * Gibt ein strukturiertes Info-Array fancy aus.
-     *
      * @param array<string, array<string, string|int|float|bool|null>> $groups
      */
     public function printDataTable(array $groups): void
@@ -85,9 +82,6 @@ trait CommandsBuilderTrait
         }
     }
 
-    /**
-     * Gibt eine einzelne Zeile hübsch aus
-     */
     private function printPrettyRow(string $label, string $value): void
     {
         $label = trim($label);
@@ -96,9 +90,6 @@ trait CommandsBuilderTrait
         echo "  \033[1;33m$label\033[0m $dots $value\n";
     }
 
-    /**
-     * Wandelt Werte in lesbare Fancy-Strings um
-     */
     private function formatFancyValue(mixed $value): string
     {
         return match (true)
@@ -135,5 +126,36 @@ trait CommandsBuilderTrait
         $totalWidth = 40;
         $dots = str_repeat('.', max(1, $totalWidth - strlen($command)));
         echo "  \033[1;32m$command\033[0m $dots $description\n";
+    }
+
+    public function printListTable(string $title, array $items, string $keyField, string $valueField): void
+    {
+        echo "\033[1;36m$title:\033[0m\n";
+
+        $maxKeyLength = 0;
+
+        foreach ($items as $item)
+        {
+            if (isset($item[$keyField]))
+            {
+                $length = mb_strlen((string)$item[$keyField]);
+                if ($length > $maxKeyLength)
+                {
+                    $maxKeyLength = $length;
+                }
+            }
+        }
+
+        $totalWidth = $maxKeyLength + 10;
+
+        foreach ($items as $item)
+        {
+            $key = $item[$keyField] ?? '';
+            $value = $item[$valueField] ?? '';
+            $dots = str_repeat('.', max(1, $totalWidth - mb_strlen($key)));
+            echo "  \033[1;33m$key\033[0m $dots $value\n";
+        }
+
+        echo PHP_EOL;
     }
 }
