@@ -24,14 +24,18 @@ class Migration implements MigrationInterface
      */
     protected array $seeder = [];
 
-    protected ?Env $env;
+    protected ?Env $env = null;
 
     public function __construct(string $envFile = '.env')
     {
         $this->envFile = Asterios::getBasePath() . DIRECTORY_SEPARATOR . $envFile;
         Config::set_config_path(Asterios::getBasePath() . DIRECTORY_SEPARATOR . 'config');
 
-        $this->env = new Env($this->envFile);
+        if (null === $this->env)
+        {
+            $this->env = new Env($this->envFile);
+        }
+
     }
 
     /**
