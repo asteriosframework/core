@@ -189,7 +189,7 @@ class Migration implements MigrationInterface
                 Db::write('SET FOREIGN_KEY_CHECKS = 1;');
 
                 Logger::forge()
-                    ->info('Seeded: ' . $table);
+                    ->info('Seeded: ' . $table . '.json');
                 usleep(1000);
             } catch (\JsonException|ConfigLoadException $e)
             {
