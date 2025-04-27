@@ -4,6 +4,7 @@ namespace Asterios\Core\Enum;
 
 enum CliStatusIcon: string
 {
+    case Pending = '⏳';
     case Success = '✅';
     case Warning = '⚠️';
     case Danger = '❗';
