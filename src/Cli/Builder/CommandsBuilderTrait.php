@@ -29,7 +29,7 @@ trait CommandsBuilderTrait
 
         foreach ($registeredCommands as $registeredCommand)
         {
-            $group = $cmd['group'] ?? 'General';
+            $group = $registeredCommand['group'] ?? 'General';
             $grouped[$group][] = $registeredCommand;
         }
 
