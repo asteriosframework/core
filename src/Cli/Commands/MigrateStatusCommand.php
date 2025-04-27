@@ -32,8 +32,9 @@ class MigrateStatusCommand implements CommandInterface
         {
             $migrationName = pathinfo($migrationFile, PATHINFO_FILENAME);
             $isRan = $migration->hasMigrated($ranMigrations, $migrationName);
+
             $statusList[] = [
-                'Status' => $isRan ? CliStatusIcon::Success->icon() . 'migrated' : CliStatusIcon::Pending->icon() . 'Pending',
+                'Status' => $isRan ? CliStatusIcon::Success->icon() . 'Migrated' : CliStatusIcon::Pending->icon() . 'Pending',
                 'Migration' => $migrationName,
             ];
         }
