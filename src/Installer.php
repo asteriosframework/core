@@ -3,7 +3,6 @@
 namespace Asterios\Core;
 
 use Asterios\Core\Db\Migration;
-use Asterios\Core\Dto\DbMigrationDto;
 use Asterios\Core\Enum\MediaModeEnum;
 use Asterios\Core\Interfaces\InstallerInterface;
 
@@ -14,30 +13,33 @@ class Installer implements InstallerInterface
     protected bool $runDatabaseSeeder = false;
     protected bool $runDatabaseMigrations = false;
 
-    protected DbMigrationDto|null $dto;
-
     /**
      * @var string[] $errors
      */
     protected array $errors = [];
 
-    public static function forge(string $envFile = '.env', DbMigrationDto $dto = null): self
+    public static function forge(string $envFile = '.env'): self
     {
-        return new static($envFile, $dto);
+        return new static($envFile);
     }
 
-    final public function __construct(string $envFile = '.env', DbMigrationDto $dto = null)
+    final public function __construct(string $envFile = '.env')
     {
         $this->envFile = $envFile;
-        $this->dto = $dto;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function isInstalled(): bool
     {
         return File::forge()
             ->file_exists($this->getInstalledFile());
     }
 
+    /**
+     * @inheritDoc
+     */
     public function setIsInstalled(): bool
     {
         $timestamp = time();
@@ -59,7 +61,7 @@ class Installer implements InstallerInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getInstalledFile(): string
     {
@@ -68,6 +70,9 @@ class Installer implements InstallerInterface
         return $protectedDirectory . DIRECTORY_SEPARATOR . $this->installedFile;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function createMediaFolders(): self
     {
         $env = (new Env($this->envFile));
@@ -99,6 +104,9 @@ class Installer implements InstallerInterface
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function setRunDatabaseSeeder(bool $value): self
     {
         $this->runDatabaseSeeder = $value;
@@ -106,6 +114,9 @@ class Installer implements InstallerInterface
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function setRunDatabaseMigrations(bool $value): self
     {
         $this->runDatabaseMigrations = $value;
@@ -113,6 +124,9 @@ class Installer implements InstallerInterface
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function runDbMigrations(): self
     {
         Logger::forge()
@@ -140,7 +154,10 @@ class Installer implements InstallerInterface
         return $this;
     }
 
-    public function runDbSeeders(): self
+    /**
+     * @inheritDoc
+     */
+    public function runDbSeeders(bool $truncateTables = true): self
     {
 
         Logger::forge()
@@ -150,7 +167,7 @@ class Installer implements InstallerInterface
 
         $migration = (new Migration($this->envFile));
 
-        $result = $migration->seed($this->dto);
+        $result = $migration->seed($truncateTables);
 
         if (!$result)
         {
@@ -168,7 +185,10 @@ class Installer implements InstallerInterface
         return $this;
     }
 
-    public function run(bool $createMediaFolders = false, bool $runDbMigration = false, bool $runDbSeeder = false): bool
+    /**
+     * @inheritDoc
+     */
+    public function run(bool $createMediaFolders = false, bool $runDbMigration = false, bool $runDbSeeder = false, bool $truncateTables = true): bool
     {
         Logger::forge()
             ->info('Install application ...');
@@ -223,6 +243,9 @@ class Installer implements InstallerInterface
         return true;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function createMediaFolder(string $mediaFolder, MediaModeEnum $type): bool
     {
         $file = File::forge();

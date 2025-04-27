@@ -137,6 +137,9 @@ class Migration implements MigrationInterface
         return true;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function seed(bool $truncateTables = true): bool
     {
         $seederPath = $this->getSeederPath();
@@ -171,7 +174,7 @@ class Migration implements MigrationInterface
 
                 Db::write('SET FOREIGN_KEY_CHECKS = 0;');
 
-                if ($dto->truncateTables())
+                if ($truncateTables)
                 {
                     Db::write("TRUNCATE `$table`;");
                 }
@@ -195,7 +198,12 @@ class Migration implements MigrationInterface
         return true;
     }
 
-    public function getSeederFilesInOrder(array $seederFiles, string $seederPath): array
+    /**
+     * @param array $seederFiles
+     * @param string $seederPath
+     * @return array
+     */
+    private function getSeederFilesInOrder(array $seederFiles, string $seederPath): array
     {
         $files = scandir($seederPath);
 
