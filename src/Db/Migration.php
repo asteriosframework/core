@@ -82,7 +82,7 @@ class Migration implements MigrationInterface
                     $tableName = $this->getTableName($migrationName);
 
                     Logger::forge()
-                        ->info('Drop table ' . $migrationName);
+                        ->info('Drop table ' . $tableName);
 
                     $this->dropTable($tableName);
                 }
@@ -338,17 +338,17 @@ SQL;
         Db::read('DROP TABLE IF EXISTS `' . $tableName . '`');
     }
 
+    /**
+     * @param string $input
+     * @return string
+     */
     private function getTableName(string $input): string
     {
-        $parts = explode('_', $input);
-
-        array_shift($parts);
-
-        if (end($parts) === 'table')
+        if (preg_match('/_(create|drop|update)_(.+?)_table/', $input, $matches))
         {
-            array_pop($parts);
+            return $matches[2];
         }
 
-        return implode('_', $parts);
+        return '';
     }
 }
