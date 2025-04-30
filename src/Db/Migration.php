@@ -81,6 +81,8 @@ class Migration implements MigrationInterface
                 {
                     $tableName = $this->getTableName($migrationName);
 
+                    Db::write('DELETE FROM migration WHERE migration = \'' . $migrationName . '\'');
+
                     Logger::forge()
                         ->info('Drop table ' . $tableName);
 
