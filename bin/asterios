@@ -1,6 +1,7 @@
 #!/usr/bin/php
 <?php declare(strict_types=1);
 
+use Asterios\Core\Cli\Builder\ColorBuilder;
 use Asterios\Core\Cli\CommandRegistry;
 
 require getcwd() . '/vendor/autoload.php';
@@ -18,10 +19,15 @@ handleCommand($input, $argument);
 function handleCommand(string $commandName, ?string $argument = null): void
 {
     $commandInfo = CommandRegistry::findByNameOrAlias($commandName);
+    $colorBuilder = new ColorBuilder();
 
     if (!$commandInfo)
     {
-        echo "\033[1;31mUnknown command:\033[0m $commandName\n\n";
+        echo $colorBuilder->red()
+                ->bold()
+                ->apply('Unknown command: ') . $colorBuilder->yellow()
+                ->bold()
+                ->apply($commandName) . PHP_EOL . PHP_EOL;
 
         $defaultCommand = CommandRegistry::findByNameOrAlias('list');
 
@@ -32,7 +38,13 @@ function handleCommand(string $commandName, ?string $argument = null): void
         }
         else
         {
-            echo "\033[1;31mFailed to load the default 'list' command.\033[0m\n";
+            echo $colorBuilder->red()
+                    ->bold()
+                    ->apply('Failed to load the default ') . $colorBuilder->red()
+                    ->yellow()
+                    ->apply('list') . $colorBuilder->red()
+                    ->bold()
+                    ->apply(' command.' . PHP_EOL);
         }
 
         exit(1);
