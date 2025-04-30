@@ -82,7 +82,7 @@ class Migration implements MigrationInterface
                     $tableName = $this->getTableName($migrationName);
 
                     Logger::forge()
-                        ->info('Drop table ' . $tableName);
+                        ->info('Drop table ' . $migrationName);
 
                     $this->dropTable($tableName);
                 }
