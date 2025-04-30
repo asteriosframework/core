@@ -3,6 +3,7 @@
 namespace Asterios\Core\Cli\Base;
 
 use Asterios\Core\Cli\Attributes\Command;
+use Asterios\Core\Cli\Builder\ColorBuilder;
 use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 use Asterios\Core\Cli\Support\ArgumentParserTrait;
 use Asterios\Core\Interfaces\CommandInterface;
@@ -11,6 +12,8 @@ abstract class BaseCommand implements CommandInterface
 {
     use CommandsBuilderTrait;
     use ArgumentParserTrait;
+
+    protected ColorBuilder $colorBuilder;
 
     public function __construct()
     {
@@ -34,12 +37,20 @@ abstract class BaseCommand implements CommandInterface
         /** @var Command $command */
         $command = $attributes[0]->newInstance();
 
-        echo "Command:     " . $command->name . PHP_EOL;
-        echo "Description: " . $command->description . PHP_EOL . PHP_EOL;
+        echo $this->color()
+                ->cyan()
+                ->apply('Command:     ') . $this->color()
+                ->yellow()
+                ->apply($command->name) . PHP_EOL;
+        echo $this->color()
+                ->cyan()
+                ->apply('Description: ') . $command->description . PHP_EOL . PHP_EOL;
 
         if (!empty($command->options))
         {
-            echo "Options:" . PHP_EOL;
+            echo $this->color()
+                    ->cyan()
+                    ->apply('Options:') . PHP_EOL;
 
             // Maximale Länge der Optionsnamen berechnen
             $maxLength = max(array_map(fn($key) => mb_strlen($key), array_keys($command->options)));
@@ -52,5 +63,13 @@ abstract class BaseCommand implements CommandInterface
 
             echo PHP_EOL;
         }
+    }
+
+    /**
+     * @return ColorBuilder
+     */
+    private function color(): ColorBuilder
+    {
+        return $this->colorBuilder ??= new ColorBuilder;
     }
 }
