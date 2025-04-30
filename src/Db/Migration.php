@@ -77,6 +77,11 @@ class Migration implements MigrationInterface
                     continue;
                 }
 
+                if ($this->forceMigration)
+                {
+                    $this->dropTable($this->getTableName($migrationName));
+                }
+
                 $migration = require $file;
                 if (method_exists($migration, 'up'))
                 {
@@ -316,5 +321,29 @@ SQL;
         $result = Db::read('SELECT MAX(`batch`) AS max_batch FROM `migration`');
 
         return isset($result[0]['max_batch']) ? (int)$result[0]['max_batch'] + 1 : 1;
+    }
+
+    /**
+     * @param string $tableName
+     * @return void
+     * @throws ConfigLoadException
+     */
+    private function DropTable(string $tableName): void
+    {
+        Db::read('DROP TABLE IF EXISTS `' . $tableName . '`');
+    }
+
+    private function getTableName(string $input): string
+    {
+        $parts = explode('_', $input);
+
+        array_shift($parts);
+
+        if (end($parts) === 'table')
+        {
+            array_pop($parts);
+        }
+
+        return implode('_', $parts);
     }
 }
