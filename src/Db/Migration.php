@@ -79,7 +79,12 @@ class Migration implements MigrationInterface
 
                 if ($this->forceMigration)
                 {
-                    $this->dropTable($this->getTableName($migrationName));
+                    $tableName = $this->getTableName($migrationName);
+
+                    Logger::forge()
+                        ->info('Drop table ' . $tableName);
+
+                    $this->dropTable($tableName);
                 }
 
                 $migration = require $file;
