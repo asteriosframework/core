@@ -3,6 +3,7 @@
 namespace Asterios\Core;
 
 use Asterios\Core\Db\Migration;
+use Asterios\Core\Db\Seeder;
 use Asterios\Core\Enum\MediaModeEnum;
 use Asterios\Core\Interfaces\InstallerInterface;
 
@@ -165,14 +166,14 @@ class Installer implements InstallerInterface
 
         usleep(1000);
 
-        $migration = (new Migration($this->envFile));
+        $seeder = (new Seeder($this->envFile));
 
-        $result = $migration->seed($truncateTables);
+        $result = $seeder->seed($truncateTables);
 
         if (!$result)
         {
             Logger::forge()
-                ->error('Database seeding failed.', ['error' => $migration->getErrors()]);
+                ->error('Database seeding failed.', ['error' => $seeder->getErrors()]);
 
             return $this;
         }

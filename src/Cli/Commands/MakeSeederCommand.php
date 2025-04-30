@@ -4,6 +4,7 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
+use Asterios\Core\Db\Seeder;
 use Asterios\Core\Interfaces\CommandInterface;
 
 #[Command(
@@ -30,8 +31,8 @@ class MakeSeederCommand implements CommandInterface
 
         $seederName = strtolower($argument);
 
-        $protectedDirectory = str_replace('/public', '', $_SERVER['DOCUMENT_ROOT']);
-        $appSeederDirectory = $protectedDirectory . 'database/seeder/';
+        $seeder = new Seeder();
+        $appSeederDirectory = $seeder->getSeederPath();
 
         if (!is_dir($appSeederDirectory) && !mkdir($appSeederDirectory, 0755, true) && !is_dir($appSeederDirectory))
         {

@@ -19,11 +19,6 @@ class Migration implements MigrationInterface
     protected array $messages = [];
     protected string $envFile = '.env';
 
-    /**
-     * @var array<string, array<int, string>>
-     */
-    protected array $seeder = [];
-
     protected ?Env $env = null;
 
     public function __construct(string $envFile = '.env')
@@ -52,25 +47,34 @@ class Migration implements MigrationInterface
             return false;
         }
 
-        $this->ensureMigrationTableExists();
+        try
+        {
+            $this->ensureMigrationTableExists();
+            $batch = $this->getNextBatchNumber();
+        } catch (ConfigLoadException $e)
+        {
+            $this->logError('Could not load config file:' . $e->getMessage());
+
+            return false;
+        }
+
         $files = glob($migrationPath . '/*.php');
         sort($files);
-        $batch = $this->getNextBatchNumber();
 
         foreach ($files as $file)
         {
-            $migrationName = basename($file, '.php');
-
-            if ($this->hasMigrationRun($migrationName))
-            {
-                Logger::forge()
-                    ->info('Skipping already run migration: ' . $migrationName);
-                $this->messages[][$migrationName] = 'skipped';
-                continue;
-            }
-
             try
             {
+                $migrationName = basename($file, '.php');
+
+                if ($this->hasMigrationRun($migrationName))
+                {
+                    Logger::forge()
+                        ->info('Skipping already run migration: ' . $migrationName);
+                    $this->messages[][$migrationName] = 'skipped';
+                    continue;
+                }
+
                 $migration = require $file;
                 if (method_exists($migration, 'up'))
                 {
@@ -185,120 +189,33 @@ class Migration implements MigrationInterface
     /**
      * @inheritDoc
      */
-    public function seed(bool $truncateTables = true): bool
-    {
-        $seederPath = $this->getSeederPath();
-
-        if (null === $seederPath)
-        {
-            $this->logError('Could not load seeder path.');
-
-            return false;
-        }
-
-        if (empty($this->getSeeder()))
-        {
-            try
-            {
-                $this->getSeederFromConfig();
-            } catch (ConfigLoadException|MigrationException $e)
-            {
-                $this->logError('Error loading seeder config file: ' . $e->getMessage());
-
-                return false;
-            }
-        }
-
-        $files = $this->getSeederFilesInOrder($this->getSeeder(), $seederPath);
-
-        foreach ($files as $file)
-        {
-            try
-            {
-                $table = pathinfo($file, PATHINFO_FILENAME);
-
-                Db::write('SET FOREIGN_KEY_CHECKS = 0;');
-
-                if ($truncateTables)
-                {
-                    Db::write("TRUNCATE `$table`;");
-                }
-
-                Db::forge()
-                    ->seedFromFile($file);
-
-                Db::write('SET FOREIGN_KEY_CHECKS = 1;');
-
-                Logger::forge()
-                    ->info('Seeded: ' . $table . '.json');
-                usleep(1000);
-            } catch (\JsonException|ConfigLoadException $e)
-            {
-                $this->logError('Error Seeder for ' . $file . ':' . $e->getMessage());
-
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * @param array $seederFiles
-     * @param string $seederPath
-     * @return array
-     */
-    private function getSeederFilesInOrder(array $seederFiles, string $seederPath): array
-    {
-        $files = scandir($seederPath);
-
-        $validFiles = array_filter($files, static function ($file) use ($seederPath) {
-            return $file !== '.' && $file !== '..' && is_file($seederPath . '/' . $file) && pathinfo($file, PATHINFO_EXTENSION) === 'json';
-        });
-
-        $orderedFiles = $this->sortFilesByDependencies($validFiles, $seederFiles);
-
-        return array_map(static fn($file) => $seederPath . '/' . $file, $orderedFiles);
-    }
-
-    private function sortFilesByDependencies(array $files, array $dependencies): array
-    {
-        $sorted = [];
-        $visited = [];
-
-        $visit = static function ($file) use ($dependencies, &$visited, &$sorted, &$visit) {
-            if (isset($visited[$file]))
-                return;
-
-            $visited[$file] = true;
-
-            if (isset($dependencies[$file]))
-            {
-                foreach ($dependencies[$file] as $dependency)
-                {
-                    if (!isset($visited[$dependency]))
-                    {
-                        $visit($dependency);
-                    }
-                }
-            }
-
-            $sorted[] = $file;
-        };
-
-        foreach ($files as $file)
-        {
-            $visit($file);
-        }
-
-        return $sorted;
-    }
-
     public function getErrors(): array
     {
         return $this->errors;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function getMigrationsPath(): ?string
+    {
+        $migrationPath = $this->getPathsFromEnv('DATABASE_MIGRATION_PATH');
+
+        return $migrationPath ? $this->getProtectedPath() . $migrationPath : null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMessages(): array
+    {
+        return $this->messages;
+    }
+
+    /**
+     * @param string $msg
+     * @return void
+     */
     protected function logError(string $msg): void
     {
         Logger::forge()
@@ -306,6 +223,10 @@ class Migration implements MigrationInterface
         $this->errors[] = $msg;
     }
 
+    /**
+     * @param string $key
+     * @return string|null
+     */
     protected function getPathsFromEnv(string $key): ?string
     {
         try
@@ -319,25 +240,18 @@ class Migration implements MigrationInterface
         }
     }
 
-    protected function getMigrationsPath(): ?string
-    {
-        $migrationPath = $this->getPathsFromEnv('DATABASE_MIGRATION_PATH');
-
-        return $migrationPath ? $this->getProtectedPath() . $migrationPath : null;
-    }
-
-    protected function getSeederPath(): ?string
-    {
-        $seederPath = $this->getPathsFromEnv('DATABASE_SEEDER_PATH');
-
-        return $seederPath ? $this->getProtectedPath() . $seederPath : null;
-    }
-
+    /**
+     * @return string
+     */
     protected function getProtectedPath(): string
     {
         return Asterios::getBasePath();
     }
 
+    /**
+     * @return void
+     * @throws ConfigLoadException
+     */
     protected function ensureMigrationTableExists(): void
     {
         $sql = <<<SQL
@@ -351,61 +265,44 @@ SQL;
         Db::write($sql);
     }
 
-    protected function hasMigrationRun(string $migrationName): bool
+    /**
+     * @param string $migrationName
+     * @return bool
+     * @throws MigrationException
+     */
+    private function hasMigrationRun(string $migrationName): bool
     {
-        $result = Db::read("SELECT COUNT(*) AS count FROM `migration` WHERE `migration` = '" . Db::escape($migrationName) . "'");
+        try
+        {
+            $result = Db::read("SELECT COUNT(*) AS count FROM `migration` WHERE `migration` = '" . Db::escape($migrationName) . "'");
+        } catch (ConfigLoadException $e)
+        {
+            throw new MigrationException('Failed to load config for reading migration status in database: ' . $e->getMessage());
+        }
 
         return $result && (int)$result[0]['count'] > 0;
     }
 
+    /**
+     * @param string $migrationName
+     * @param int $batch
+     * @return void
+     * @throws ConfigLoadException
+     */
     protected function markMigrationAsRun(string $migrationName, int $batch): void
     {
         $escapedName = Db::escape($migrationName);
         Db::write("INSERT INTO `migration` (`migration`, `batch`) VALUES ('$escapedName', $batch)");
     }
 
-    protected function getNextBatchNumber(): int
+    /**
+     * @return int
+     * @throws ConfigLoadException
+     */
+    private function getNextBatchNumber(): int
     {
-        $result = Db::read("SELECT MAX(`batch`) AS max_batch FROM `migration`");
+        $result = Db::read('SELECT MAX(`batch`) AS max_batch FROM `migration`');
 
         return isset($result[0]['max_batch']) ? (int)$result[0]['max_batch'] + 1 : 1;
-    }
-
-    public function getMessages(): array
-    {
-        return $this->messages;
-    }
-
-    /**
-     * @param array<string, array<int, string>> $seeder
-     * @return void
-     */
-    public function setSeeder(array $seeder): void
-    {
-        $this->seeder = $seeder;
-    }
-
-    /**
-     * @return array<string, array<int, string>>
-     */
-    protected function getSeeder(): array
-    {
-        return $this->seeder;
-    }
-
-    /**
-     * @return void
-     * @throws MigrationException|ConfigLoadException
-     */
-    protected function getSeederFromConfig(): void
-    {
-        $seeder = (array)Config::get('seeder');
-
-        if (empty($seeder))
-        {
-            throw new MigrationException('Seeder config file is empty!');
-        }
-
-        $this->setSeeder($seeder);
     }
 }

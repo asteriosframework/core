@@ -13,17 +13,18 @@ interface MigrationInterface
     public function migrate(): bool;
 
     /**
-     * @param bool $truncateTables
-     * @return bool
-     */
-    public function seed(bool $truncateTables = true): bool;
-
-    /**
      * @return bool
      * @throws MigrationException
      */
     public function rollback(): bool;
 
+    /**
+     * @return array
+     */
     public function getErrors(): array;
 
+    /**
+     * @return string|null
+     */
+    public function getMigrationsPath(): ?string;
 }
