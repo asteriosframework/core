@@ -71,6 +71,7 @@ class Seeder implements SeederInterface
             try
             {
                 $table = pathinfo($file, PATHINFO_FILENAME);
+                $fileNameForLogger = pathinfo($file, PATHINFO_BASENAME);
 
                 Db::write('SET FOREIGN_KEY_CHECKS = 0;');
 
@@ -82,14 +83,17 @@ class Seeder implements SeederInterface
                 Db::forge()
                     ->seedFromFile($file);
 
+                $this->messages[][$fileNameForLogger] = 'done';
+
                 Db::write('SET FOREIGN_KEY_CHECKS = 1;');
 
                 Logger::forge()
-                    ->info('Seeded: ' . $table . '.json');
+                    ->info('Seeded: ' . $fileNameForLogger);
                 usleep(1000);
             } catch (\JsonException|ConfigLoadException $e)
             {
-                $this->logError('Error Seeder for ' . $file . ':' . $e->getMessage());
+                $this->logError('Error Seeder for ' . $fileNameForLogger . ':' . $e->getMessage());
+                $this->messages[][$fileNameForLogger] = 'failed';
 
                 return false;
             }
