@@ -3,10 +3,10 @@
 namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
+use Asterios\Core\Cli\Base\BaseCommand;
 use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 use Asterios\Core\Db\Seeder;
 use Asterios\Core\Enum\CliStatusIcon;
-use Asterios\Core\Interfaces\CommandInterface;
 
 #[Command(
     name: 'db:seed',
@@ -14,7 +14,7 @@ use Asterios\Core\Interfaces\CommandInterface;
     group: 'Database',
     aliases: ['--ds']
 )]
-class DbSeedCommand implements CommandInterface
+class DbSeedCommand extends BaseCommand
 {
     use CommandsBuilderTrait;
 

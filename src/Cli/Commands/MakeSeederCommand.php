@@ -3,9 +3,9 @@
 namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
+use Asterios\Core\Cli\Base\BaseCommand;
 use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 use Asterios\Core\Db\Seeder;
-use Asterios\Core\Interfaces\CommandInterface;
 
 #[Command(
     name: 'make:seeder',
@@ -13,7 +13,7 @@ use Asterios\Core\Interfaces\CommandInterface;
     group: 'Make',
     aliases: ['--ms']
 )]
-class MakeSeederCommand implements CommandInterface
+class MakeSeederCommand extends BaseCommand
 {
     use CommandsBuilderTrait;
 

@@ -3,8 +3,8 @@
 namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
+use Asterios\Core\Cli\Base\BaseCommand;
 use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
-use Asterios\Core\Interfaces\CommandInterface;
 
 #[Command(
     name: 'make:migration',
@@ -12,7 +12,7 @@ use Asterios\Core\Interfaces\CommandInterface;
     group: 'Make',
     aliases: ['--mmi']
 )]
-class MakeMigrationCommand implements CommandInterface
+class MakeMigrationCommand extends BaseCommand
 {
     use CommandsBuilderTrait;
 

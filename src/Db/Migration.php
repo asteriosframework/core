@@ -21,6 +21,8 @@ class Migration implements MigrationInterface
 
     protected ?Env $env = null;
 
+    protected bool $forceMigration = false;
+
     public function __construct(string $envFile = '.env')
     {
         $this->envFile = Asterios::getBasePath() . DIRECTORY_SEPARATOR . $envFile;
@@ -67,7 +69,7 @@ class Migration implements MigrationInterface
             {
                 $migrationName = basename($file, '.php');
 
-                if ($this->hasMigrationRun($migrationName))
+                if (!$this->forceMigration && $this->hasMigrationRun($migrationName))
                 {
                     Logger::forge()
                         ->info('Skipping already run migration: ' . $migrationName);
@@ -205,11 +207,21 @@ class Migration implements MigrationInterface
     }
 
     /**
-     * @return array
+     * @inheritDoc
      */
     public function getMessages(): array
     {
         return $this->messages;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function force(): self
+    {
+        $this->forceMigration = true;
+
+        return $this;
     }
 
     /**

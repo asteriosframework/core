@@ -19,7 +19,7 @@ interface MigrationInterface
     public function rollback(): bool;
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getErrors(): array;
 
@@ -27,4 +27,14 @@ interface MigrationInterface
      * @return string|null
      */
     public function getMigrationsPath(): ?string;
+
+    /**
+     * @return string[]
+     */
+    public function getMessages(): array;
+
+    /**
+     * @return self
+     */
+    public function force(): self;
 }

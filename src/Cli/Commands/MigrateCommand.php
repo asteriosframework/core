@@ -3,18 +3,21 @@
 namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
+use Asterios\Core\Cli\Base\BaseCommand;
 use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 use Asterios\Core\Db\Migration;
 use Asterios\Core\Enum\CliStatusIcon;
-use Asterios\Core\Interfaces\CommandInterface;
 
 #[Command(
     name: 'migrate',
     description: 'Run all outstanding migrations',
     group: 'Database',
-    aliases: ['--m']
+    aliases: ['--m'],
+    options: [
+        '--force' => 'Re-run already executed migrations',
+    ]
 )]
-class MigrateCommand implements CommandInterface
+class MigrateCommand extends BaseCommand
 {
     use CommandsBuilderTrait;
 
@@ -22,7 +25,20 @@ class MigrateCommand implements CommandInterface
     {
         $this->printHeader();
 
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
+
         $migration = new Migration();
+
+        if ($this->hasFlag('--force'))
+        {
+            $migration->force();
+        }
+
         $migration->migrate();
 
         $messages = $migration->getMessages();
