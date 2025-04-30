@@ -336,7 +336,7 @@ SQL;
     private function DropTable(string $tableName): void
     {
         Db::write('SET FOREIGN_KEY_CHECKS = 0;');
-        Db::read('DROP TABLE IF EXISTS `' . $tableName . '`');
+        Db::write('DROP TABLE IF EXISTS `' . $tableName . '`');
         Db::write('SET FOREIGN_KEY_CHECKS = 1;');
     }
 
