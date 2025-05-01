@@ -120,6 +120,16 @@ class Asterios
     }
 
     /**
+     * @param int|string $category
+     * @param string $locale
+     * @return void
+     */
+    public static function setLocale(int|string $category, string $locale): void
+    {
+        setlocale($category, $locale);
+    }
+
+    /**
      * This method return given config value that is stored in the default.json config file.
      * If no value is given, the whole config data will be returned as object
      * @param string|null $item
