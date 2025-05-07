@@ -13,8 +13,6 @@ abstract class BaseCommand implements CommandInterface
     use CommandsBuilderTrait;
     use ArgumentParserTrait;
 
-    protected ColorBuilder $colorBuilder;
-
     public function __construct()
     {
         $this->parseArguments();
@@ -22,6 +20,9 @@ abstract class BaseCommand implements CommandInterface
 
     abstract public function handle(?string $argument): void;
 
+    /**
+     * @return void
+     */
     protected function printCommandHelpFromAttribute(): void
     {
         $reflection = new \ReflectionClass($this);
@@ -29,7 +30,7 @@ abstract class BaseCommand implements CommandInterface
 
         if (empty($attributes))
         {
-            echo "No help available." . PHP_EOL;
+            echo 'No help available.' . PHP_EOL;
 
             return;
         }
@@ -51,8 +52,7 @@ abstract class BaseCommand implements CommandInterface
             echo $this->color()
                     ->cyan()
                     ->apply('Options:') . PHP_EOL;
-
-            // Maximale Länge der Optionsnamen berechnen
+            
             $maxLength = max(array_map(fn($key) => mb_strlen($key), array_keys($command->options)));
 
             foreach ($command->options as $opt => $desc)

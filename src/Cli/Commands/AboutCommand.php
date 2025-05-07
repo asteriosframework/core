@@ -5,7 +5,6 @@ namespace Asterios\Core\Cli\Commands;
 use Asterios\Core\Asterios;
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
-use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 
 #[Command(
     name: 'about',
@@ -15,8 +14,6 @@ use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 )]
 class AboutCommand extends BaseCommand
 {
-    use CommandsBuilderTrait;
-
     /**
      * @inheritDoc
      */

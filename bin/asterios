@@ -23,11 +23,7 @@ function handleCommand(string $commandName, ?string $argument = null): void
 
     if (!$commandInfo)
     {
-        echo $colorBuilder->red()
-                ->bold()
-                ->apply('Unknown command: ') . $colorBuilder->yellow()
-                ->bold()
-                ->apply($commandName) . PHP_EOL . PHP_EOL;
+        printErrorBox('Unknown command: ' . $commandName);
 
         $defaultCommand = CommandRegistry::findByNameOrAlias('list');
 
@@ -52,4 +48,34 @@ function handleCommand(string $commandName, ?string $argument = null): void
 
     $instance = new $commandInfo['class'];
     $instance->handle($argument);
+}
+
+/**
+ * @param string $message
+ * @param string $context
+ * @return void
+ */
+function printErrorBox(string $message, string $context = ''): void
+{
+    $color = new ColorBuilder();
+    $symbol = '❌ ERROR';
+    $line = str_repeat('─', 60);
+
+    echo PHP_EOL;
+    echo $color->red()
+            ->bold()
+            ->apply($symbol) . PHP_EOL;
+    echo $color->red()
+            ->apply($line) . PHP_EOL;
+    echo $color->red()
+            ->apply($message) . PHP_EOL;
+
+    if (!empty($context))
+    {
+        echo PHP_EOL . $color->gray()
+                ->apply(trim($context)) . PHP_EOL;
+    }
+
+    echo $color->red()
+            ->apply($line) . PHP_EOL . PHP_EOL;
 }

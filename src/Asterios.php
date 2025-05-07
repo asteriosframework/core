@@ -42,7 +42,7 @@ class Asterios
     /**
      * @var  string  The Asterios environment
      */
-    private static string $environment = Asterios::PRODUCTION;
+    private static string $environment = Asterios::DEVELOPMENT;
 
     /**
      * @var string Encoding

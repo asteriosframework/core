@@ -19,6 +19,9 @@ trait CommandsBuilderTrait
         echo str_repeat('=', mb_strlen($text)) . PHP_EOL . PHP_EOL;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function printTable(string $prefix = 'asterios'): void
     {
         $registeredCommands = CommandRegistry::all();
@@ -53,32 +56,84 @@ trait CommandsBuilderTrait
         }
     }
 
+    /**
+     * @inheritDoc
+     */
     public function printError(string $message, string $context = ''): void
     {
+        $symbol = '❌ ERROR';
+        $line = str_repeat('─', 60);
+
+        echo PHP_EOL;
         echo $this->color()
-            ->red()
-            ->apply($message . ' ' . $context . PHP_EOL . PHP_EOL);
+                ->red()
+                ->bold()
+                ->apply($symbol) . PHP_EOL;
+        echo $this->color()
+                ->red()
+                ->apply($line) . PHP_EOL;
+        echo $this->color()
+                ->red()
+                ->apply($message) . PHP_EOL;
+
+        if (!empty($context))
+        {
+            echo PHP_EOL . $this->color()
+                    ->gray()
+                    ->apply(trim($context)) . PHP_EOL;
+        }
+
+        echo $this->color()
+                ->red()
+                ->apply($line) . PHP_EOL . PHP_EOL;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function printDataTable(array $groups): void
     {
         foreach ($groups as $group => $rows)
         {
+            $totalWidth = 80;
+            $dots = ' ' . str_repeat('.', max(1, $totalWidth - mb_strlen(strip_tags($group))));
+
             echo $this->color()
-                ->cyan()
-                ->apply($group . ':' . PHP_EOL);
+                    ->green()
+                    ->apply($group) . $dots . PHP_EOL;
+
+            $maxLabelLength = 0;
+            $processedRows = [];
 
             foreach ($rows as $label => $value)
             {
                 $emoji = $this->detectEmoji($label, $value);
-                $valueStr = $this->formatFancyValue($value);
-                $this->printPrettyRow($emoji . ' ' . $label, $valueStr);
+                $fullLabel = $emoji . ' ' . $label;
+
+                $labelLength = mb_strwidth(strip_tags($fullLabel));
+                if ($labelLength > $maxLabelLength)
+                {
+                    $maxLabelLength = $labelLength;
+                }
+
+                $processedRows[] = [
+                    'label' => $fullLabel,
+                    'value' => $this->formatFancyValue($value),
+                ];
+            }
+
+            foreach ($processedRows as $row)
+            {
+                $this->printPrettyRowAligned($row['label'], $row['value'], $maxLabelLength);
             }
 
             echo PHP_EOL;
         }
     }
 
+    /**
+     * @inheritDoc
+     */
     public function printListTable(string $title, array $items, string $keyField, string $valueField): void
     {
         echo $this->color()
@@ -86,69 +141,117 @@ trait CommandsBuilderTrait
             ->apply($title . ':' . PHP_EOL);
 
         $maxKeyLength = 0;
+        $processedItems = [];
 
         foreach ($items as $item)
         {
-            if (isset($item[$keyField]))
+            $key = (string)($item[$keyField] ?? '');
+            $value = (string)($item[$valueField] ?? '');
+
+            $keyLength = mb_strwidth(strip_tags($key));
+            if ($keyLength > $maxKeyLength)
             {
-                $length = mb_strlen((string)$item[$keyField]);
-                if ($length > $maxKeyLength)
-                {
-                    $maxKeyLength = $length;
-                }
+                $maxKeyLength = $keyLength;
             }
+
+            $processedItems[] = [
+                'key' => $key,
+                'value' => $value,
+            ];
         }
 
-        $totalWidth = $maxKeyLength + 10;
-
-        foreach ($items as $item)
+        foreach ($processedItems as $item)
         {
-            $key = $item[$keyField] ?? '';
-            $value = $item[$valueField] ?? '';
-            $dots = str_repeat('.', max(1, $totalWidth - mb_strlen($key)));
-            echo "  " . $this->color()
-                    ->yellow()
-                    ->apply($key . ' ' . $dots . ' ' . $value . PHP_EOL);
+            $this->printPrettyRowAligned($item['key'], $item['value'], $maxKeyLength);
         }
 
         echo PHP_EOL;
     }
 
+    /**
+     * @param string $command
+     * @param string $description
+     * @return void
+     */
     private function printPrettyCommand(string $command, string $description): void
     {
-        $totalWidth = 40;
-        $dots = str_repeat('.', max(1, $totalWidth - mb_strlen($command)));
+        $command = trim(strip_tags($command));
+        $description = trim(strip_tags($description));
+
+        $labelWidth = 40;
+
+        $actualCommandWidth = mb_strwidth($command);
+        $dotsWidth = max(1, $labelWidth - $actualCommandWidth + 2);
+
+        $dots = str_repeat('.', $dotsWidth);
+
         echo "  " . $this->color()
                 ->white()
-                ->apply($command . ' ' . $dots . ' ' . $description . PHP_EOL);
+                ->apply($command . ' ' . $dots)
+            . ' ' . $this->formatFancyValue($description) . PHP_EOL;
     }
 
+    /**
+     * @param string $label
+     * @param string $value
+     * @return void
+     */
     private function printPrettyRow(string $label, string $value): void
     {
         $label = trim($label);
-        $totalWidth = 45;
+        $totalWidth = 80;
         $dots = str_repeat('.', max(1, $totalWidth - mb_strlen(strip_tags($label))));
         echo "  " . $this->color()
                 ->white()
                 ->apply($label . ' ' . $dots . ' ' . $value . PHP_EOL);
     }
 
+    /**
+     * @param mixed $value
+     * @return string
+     */
     private function formatFancyValue(mixed $value): string
     {
         return match (true)
         {
-            is_bool($value) => $value ? $this->color()
-                ->green()
-                ->apply('✔ yes') : $this->color()
-                ->red()
-                ->apply('✘ no'),
+            is_bool($value) => $value
+                ? $this->color()
+                    ->green()
+                    ->apply('✔ yes')
+                : $this->color()
+                    ->red()
+                    ->apply('✘ no'),
+
             is_null($value) => $this->color()
                 ->gray()
                 ->apply('–'),
+
+            is_string($value) => match (strtolower($value))
+            {
+                'production' => $this->color()
+                    ->green()
+                    ->apply($value),
+                'development' => $this->color()
+                    ->yellow()
+                    ->apply($value),
+                'testing', 'test' => $this->color()
+                    ->cyan()
+                    ->apply($value),
+                'local', 'staging' => $this->color()
+                    ->magenta()
+                    ->apply($value),
+                default => $value,
+            },
+
             default => (string)$value,
         };
     }
 
+    /**
+     * @param string $label
+     * @param mixed $value
+     * @return string
+     */
     private function detectEmoji(string $label, mixed $value): string
     {
         $label = strtolower($label);
@@ -165,8 +268,30 @@ trait CommandsBuilderTrait
         };
     }
 
+    /**
+     * @return ColorBuilder
+     */
     private function color(): ColorBuilder
     {
         return $this->colorBuilder ??= new ColorBuilder;
+    }
+
+    private function printPrettyRowAligned(string $label, string $value, int $maxLabelWidth): void
+    {
+        $label = trim(strip_tags($label));
+        $value = trim(strip_tags($value));
+
+        $valueColumn = 60;
+
+        $labelWidth = mb_strwidth($label);
+        $dotsWidth = max(2, $valueColumn - $labelWidth - 2);
+        $dots = str_repeat('.', $dotsWidth);
+
+        echo "  " . $this->color()
+                ->white()
+                ->apply($label . ' ' . $dots)
+            . '  ' . $this->color()
+                ->white()
+                ->apply($value . PHP_EOL);
     }
 }
