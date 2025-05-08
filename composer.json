@@ -1,5 +1,6 @@
 {
   "name": "asterios/core",
+  "bin": ["bin/asterios"],
   "description" : "Asterios PHP Core",
   "type": "asterios-package",
   "homepage": "https://www.asteriosphp.de",

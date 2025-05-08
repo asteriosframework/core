@@ -164,6 +164,11 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
         return $this->items;
     }
 
+    public function toObject(): object
+    {
+        return (object)$this->items;
+    }
+
     /**
      * @inheritdoc
      */

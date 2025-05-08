@@ -12,14 +12,17 @@ class Env implements EnvInterface
 {
     use FileTrait;
 
-    protected string $envFile;
+    protected null|string $envFile = null;
 
     /**
      * @param string $envFile
      */
     public function __construct(string $envFile = '.env')
     {
-        $this->envFile = $envFile;
+        if (null === $this->envFile)
+        {
+            $this->envFile = $envFile;
+        }
     }
 
     /**

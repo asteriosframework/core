@@ -42,7 +42,7 @@ class Asterios
     /**
      * @var  string  The Asterios environment
      */
-    private static string $environment = Asterios::PRODUCTION;
+    private static string $environment = Asterios::DEVELOPMENT;
 
     /**
      * @var string Encoding
@@ -120,6 +120,16 @@ class Asterios
     }
 
     /**
+     * @param int|string $category
+     * @param string $locale
+     * @return void
+     */
+    public static function setLocale(int|string $category, string $locale): void
+    {
+        setlocale($category, $locale);
+    }
+
+    /**
      * This method return given config value that is stored in the default.json config file.
      * If no value is given, the whole config data will be returned as object
      * @param string|null $item
@@ -174,5 +184,15 @@ class Asterios
     public static function isDevelopment(): bool
     {
         return self::$environment === self::DEVELOPMENT;
+    }
+
+    public static function getDocumentRoot(): string
+    {
+        return $_SERVER['DOCUMENT_ROOT'];
+    }
+
+    public static function getBasePath(string $path = ''): string
+    {
+        return dirname(__DIR__, 4) . ($path ? DIRECTORY_SEPARATOR . $path : '');
     }
 }
