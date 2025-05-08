@@ -136,6 +136,37 @@ class Db
     }
 
     /**
+     * Quote a value for use in an SQL statement.
+     *
+     * @param string|int|float|null|bool $value
+     * @param string $config_group
+     * @return string
+     * @throws Exception\ConfigLoadException
+     */
+    public static function quote(string|int|float|null|bool $value, string $config_group = 'default'): string
+    {
+        $connection = self::forge($config_group)
+            ->get_connection();
+
+        if (is_null($value))
+        {
+            return 'NULL';
+        }
+
+        if (is_bool($value))
+        {
+            return $value ? '1' : '0';
+        }
+
+        if (is_int($value) || is_float($value))
+        {
+            return (string)$value;
+        }
+
+        return "'" . $connection->real_escape_string($value) . "'";
+    }
+
+    /**
      * @throws Exception\ConfigLoadException
      */
     public static function write(string $sql, string $config_group = 'default'): bool
@@ -268,59 +299,42 @@ class Db
     }
 
     /**
-     * @param string $table
-     * @param bool $truncate
-     * @param null|string $seederPath
-     * @return bool
+     * @param string $seederFile
+     * @return void
      * @throws Exception\ConfigLoadException
+     * @throws \JsonException
      */
-    public function seed(string $table, bool $truncate = true, string $seederPath = null): bool
+    public static function seedFromFile(string $seederFile): void
     {
-        if (null === $seederPath)
+        if (!file_exists($seederFile))
         {
-            return false;
+            throw new \RuntimeException("Seed file not found: $seederFile");
         }
 
-        $hasTable = self::forge()
-                ->get_connection()
-                ->query('SHOW TABLES LIKE "' . $table . '"')->num_rows === 1;
+        $json = file_get_contents($seederFile);
+        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 
-        if ($hasTable)
+        if (!is_array($data) || empty($data))
         {
-            if ($truncate)
-            {
-                self::forge()
-                    ->get_connection()
-                    ->query('SET FOREIGN_KEY_CHECKS = 0');
-                self::forge()
-                    ->get_connection()
-                    ->query('TRUNCATE TABLE ' . $table);
-                self::forge()
-                    ->get_connection()
-                    ->query('SET FOREIGN_KEY_CHECKS = 1');
-            }
-
-            $sqlFile = $seederPath . $table . '.sql';
-
-            $sqlScript = file_get_contents($sqlFile);
-
-            self::forge()
-                ->get_connection()
-                ->multi_query($sqlScript);
-
-            $count = 1;
-
-            while (self::forge()
-                ->get_connection()
-                ->next_result())
-            {
-                ++$count;
-            }
-
-            return $count !== 0;
+            throw new \RuntimeException("Invalid or empty JSON in seed file: $seederFile");
         }
 
-        return false;
+        $table = basename($seederFile, '.json');
+
+        foreach ($data as $row)
+        {
+            if (!is_array($row))
+            {
+                continue;
+            }
+
+            $columns = array_map(static fn($col) => '`' . $col . '`', array_keys($row));
+            $values = array_map([self::class, 'quote'], array_values($row));
+
+            $sql = 'INSERT INTO `' . $table . '` (' . implode(', ', $columns) . ') VALUES (' . implode(', ', $values) . ');';
+
+            self::write($sql);
+        }
     }
 
     private function set_host(string $host): void

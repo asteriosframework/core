@@ -1,0 +1,81 @@
+#!/usr/bin/php
+<?php declare(strict_types=1);
+
+use Asterios\Core\Cli\Builder\ColorBuilder;
+use Asterios\Core\Cli\CommandRegistry;
+
+require getcwd() . '/vendor/autoload.php';
+
+$input = $argv[1] ?? 'list';
+$argument = $argv[2] ?? null;
+
+handleCommand($input, $argument);
+
+/**
+ * @param string $commandName
+ * @param string|null $argument
+ * @return void
+ */
+function handleCommand(string $commandName, ?string $argument = null): void
+{
+    $commandInfo = CommandRegistry::findByNameOrAlias($commandName);
+    $colorBuilder = new ColorBuilder();
+
+    if (!$commandInfo)
+    {
+        printErrorBox('Unknown command: ' . $commandName);
+
+        $defaultCommand = CommandRegistry::findByNameOrAlias('list');
+
+        if ($defaultCommand)
+        {
+            $commandList = new $defaultCommand['class'];
+            $commandList->handle(null);
+        }
+        else
+        {
+            echo $colorBuilder->red()
+                    ->bold()
+                    ->apply('Failed to load the default ') . $colorBuilder->red()
+                    ->yellow()
+                    ->apply('list') . $colorBuilder->red()
+                    ->bold()
+                    ->apply(' command.' . PHP_EOL);
+        }
+
+        exit(1);
+    }
+
+    $instance = new $commandInfo['class'];
+    $instance->handle($argument);
+}
+
+/**
+ * @param string $message
+ * @param string $context
+ * @return void
+ */
+function printErrorBox(string $message, string $context = ''): void
+{
+    $color = new ColorBuilder();
+    $symbol = '❌ ERROR';
+    $line = str_repeat('─', 60);
+
+    echo PHP_EOL;
+    echo $color->red()
+            ->bold()
+            ->apply($symbol) . PHP_EOL;
+    echo $color->red()
+            ->apply($line) . PHP_EOL;
+    echo $color->red()
+            ->apply($message) . PHP_EOL;
+
+    if (!empty($context))
+    {
+        echo PHP_EOL . $color->gray()
+                ->apply(trim($context)) . PHP_EOL;
+    }
+
+    echo $color->red()
+            ->apply($line) . PHP_EOL . PHP_EOL;
+}
