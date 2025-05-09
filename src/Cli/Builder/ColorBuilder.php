@@ -2,20 +2,24 @@
 
 namespace Asterios\Core\Cli\Builder;
 
-final class ColorBuilder
+use Asterios\Core\Interfaces\Cli\Builder\ColorBuilderInterface;
+
+class ColorBuilder implements ColorBuilderInterface
 {
     /** @var string[] */
     private array $codes = [];
 
-    public function __construct()
-    {
-    }
-
+    /**
+     * @inheritDoc
+     */
     public static function create(): self
     {
         return new self();
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function grayText(string $text): string
     {
         return self::create()
@@ -23,6 +27,9 @@ final class ColorBuilder
             ->apply($text);
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function greenText(string $text): string
     {
         return self::create()
@@ -30,6 +37,9 @@ final class ColorBuilder
             ->apply($text);
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function boldGreenText(string $text): string
     {
         return self::create()
@@ -38,6 +48,9 @@ final class ColorBuilder
             ->apply($text);
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function redText(string $text): string
     {
         return self::create()
@@ -45,6 +58,9 @@ final class ColorBuilder
             ->apply($text);
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function boldRedText(string $text): string
     {
         return self::create()
@@ -53,6 +69,9 @@ final class ColorBuilder
             ->apply($text);
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function boldText(string $text): string
     {
         return self::create()
@@ -60,6 +79,9 @@ final class ColorBuilder
             ->apply($text);
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function yellowText(string $text): string
     {
         return self::create()
@@ -67,6 +89,9 @@ final class ColorBuilder
             ->apply($text);
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function boldYellowText(string $text): string
     {
         return self::create()
@@ -75,6 +100,9 @@ final class ColorBuilder
             ->apply($text);
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function cyanText(string $text): string
     {
         return self::create()
@@ -82,6 +110,9 @@ final class ColorBuilder
             ->apply($text);
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function boldCyanText(string $text): string
     {
         return self::create()
@@ -90,6 +121,9 @@ final class ColorBuilder
             ->apply($text);
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function magentaText(string $text): string
     {
         return self::create()
@@ -97,21 +131,67 @@ final class ColorBuilder
             ->apply($text);
     }
 
+    /**
+     * @inheritDoc
+     */
+    public static function boldMagentaText(string $text): string
+    {
+        return self::create()
+            ->bold()
+            ->magenta()
+            ->apply($text);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function blackText(string $text): string
+    {
+        return self::create()
+            ->black()
+            ->apply($text);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function boldBlackText(string $text): string
+    {
+        return self::create()
+            ->bold()
+            ->black()
+            ->apply($text);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public static function successText(string $text): string
     {
         return self::boldGreenText($text);
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function errorText(string $text): string
     {
         return self::boldRedText($text);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function black(): self
     {
         $this->codes[] = '90';
+
+        return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function gray(): self
     {
         $this->codes[] = '33';
@@ -119,6 +199,9 @@ final class ColorBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function white(): self
     {
         $this->codes[] = '97';
@@ -126,6 +209,9 @@ final class ColorBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function green(): self
     {
         $this->codes[] = '92';
@@ -133,6 +219,9 @@ final class ColorBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function red(): self
     {
         $this->codes[] = '91';
@@ -140,6 +229,9 @@ final class ColorBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function yellow(): self
     {
         $this->codes[] = '93';
@@ -147,6 +239,9 @@ final class ColorBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function cyan(): self
     {
         $this->codes[] = '96';
@@ -154,6 +249,9 @@ final class ColorBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function magenta(): self
     {
         $this->codes[] = '95';
@@ -161,6 +259,9 @@ final class ColorBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function bold(): self
     {
         $this->codes[] = '1';
@@ -168,6 +269,9 @@ final class ColorBuilder
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function apply(string $text): string
     {
         $prefix = "\033[" . implode(';', $this->codes) . "m";

@@ -3,23 +3,27 @@
 namespace Asterios\Core\Cli;
 
 use Asterios\Core\Cli\Attributes\Command;
+use Asterios\Core\Interfaces\Cli\CommandRegistryInterface;
 use Asterios\Core\Interfaces\CommandInterface;
 use ReflectionClass;
 
-class CommandRegistry
+class CommandRegistry implements CommandRegistryInterface
 {
-    private static ?array $discovered = null;
+    private ?array $discovered = null;
 
-    public static function all(): array
+    /**
+     * @inheritDoc
+     */
+    public function all(): array
     {
-        if (self::$discovered)
+        if ($this->discovered !== null)
         {
-            return self::$discovered;
+            return $this->discovered;
         }
 
         $commands = [];
 
-        $files = self::getAllPhpFiles(__DIR__ . '/Commands');
+        $files = $this->getAllPhpFiles(__DIR__ . '/Commands');
 
         foreach ($files as $file)
         {
@@ -51,12 +55,15 @@ class CommandRegistry
             ];
         }
 
-        return self::$discovered = $commands;
+        return $this->discovered = $commands;
     }
 
-    public static function findByNameOrAlias(string $name): ?array
+    /**
+     * @inheritDoc
+     */
+    public function findByNameOrAlias(string $name): ?array
     {
-        foreach (self::all() as $command)
+        foreach ($this->all() as $command)
         {
             if ($command['name'] === $name || in_array($name, $command['aliases'] ?? [], true))
             {
@@ -67,7 +74,11 @@ class CommandRegistry
         return null;
     }
 
-    private static function getAllPhpFiles(string $dir): array
+    /**
+     * @param string $dir
+     * @return array
+     */
+    protected function getAllPhpFiles(string $dir): array
     {
         $files = [];
         $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
@@ -75,9 +86,15 @@ class CommandRegistry
         foreach ($rii as $file)
         {
             if ($file->isDir())
+            {
                 continue;
+            }
+
             if ($file->getExtension() !== 'php')
+            {
                 continue;
+            }
+
             $files[] = $file->getRealPath();
         }
 

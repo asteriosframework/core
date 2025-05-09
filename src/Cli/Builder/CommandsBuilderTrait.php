@@ -4,10 +4,12 @@ namespace Asterios\Core\Cli\Builder;
 
 use Asterios\Core\Asterios;
 use Asterios\Core\Cli\CommandRegistry;
+use Asterios\Core\Interfaces\Cli\CommandRegistryInterface;
 
 trait CommandsBuilderTrait
 {
     protected ColorBuilder $colorBuilder;
+    protected ?CommandRegistryInterface $commandRegistry = null;
 
     public function printHeader(): void
     {
@@ -24,7 +26,7 @@ trait CommandsBuilderTrait
      */
     public function printTable(string $prefix = 'asterios'): void
     {
-        $registeredCommands = CommandRegistry::all();
+        $registeredCommands = $this->getRegisteredCommands();
         $grouped = [];
 
         foreach ($registeredCommands as $registeredCommand)
@@ -195,6 +197,7 @@ trait CommandsBuilderTrait
      * @param string $label
      * @param string $value
      * @return void
+     * @codeCoverageIgnore
      */
     private function printPrettyRow(string $label, string $value): void
     {
@@ -293,5 +296,15 @@ trait CommandsBuilderTrait
             . '  ' . $this->color()
                 ->white()
                 ->apply($value . PHP_EOL);
+    }
+
+    public function setCommandRegistry(CommandRegistryInterface $registry): void
+    {
+        $this->commandRegistry = $registry;
+    }
+
+    public function getRegisteredCommands(): array
+    {
+        return ($this->commandRegistry ?? new CommandRegistry())->all();
     }
 }
