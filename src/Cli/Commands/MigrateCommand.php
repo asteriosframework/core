@@ -41,11 +41,12 @@ class MigrateCommand extends BaseCommand
 
         $migration->migrate();
 
+        /** @var array $messages */
         $messages = $migration->getMessages();
 
-        foreach ($messages as $migration)
+        foreach ($messages as $migrationMessage)
         {
-            foreach ($migration as $filename => $status)
+            foreach ($migrationMessage as $filename => $status)
             {
                 $status = match ($status)
                 {

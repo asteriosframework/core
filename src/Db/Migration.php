@@ -65,6 +65,8 @@ class Migration implements MigrationInterface
 
         foreach ($files as $file)
         {
+            $migrationName = '';
+
             try
             {
                 $migrationName = basename($file, '.php');
