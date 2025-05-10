@@ -2,7 +2,7 @@
 
 namespace Asterios\Core\Db\Builder;
 
-use Asterios\Core\Interfaces\TimestampColumnBuilderInterface;
+use Asterios\Core\Contracts\TimestampColumnBuilderInterface;
 
 class TimestampColumnBuilder implements TimestampColumnBuilderInterface
 {

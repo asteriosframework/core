@@ -4,13 +4,13 @@ namespace Asterios\Core\Db;
 
 use Asterios\Core\Asterios;
 use Asterios\Core\Config;
+use Asterios\Core\Contracts\MigrationInterface;
 use Asterios\Core\Db;
 use Asterios\Core\Env;
 use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Exception\MigrationException;
-use Asterios\Core\Interfaces\MigrationInterface;
 use Asterios\Core\Logger;
 
 class Migration implements MigrationInterface
@@ -65,6 +65,8 @@ class Migration implements MigrationInterface
 
         foreach ($files as $file)
         {
+            $migrationName = '';
+
             try
             {
                 $migrationName = basename($file, '.php');

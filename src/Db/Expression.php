@@ -2,7 +2,7 @@
 
 namespace Asterios\Core\Db;
 
-use Asterios\Core\Interfaces\Stringable;
+use Asterios\Core\Contracts\Stringable;
 
 class Expression implements Stringable
 {

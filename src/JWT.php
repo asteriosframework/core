@@ -2,8 +2,8 @@
 
 namespace Asterios\Core;
 
+use Asterios\Core\Contracts\JWTInterface;
 use Asterios\Core\Exception\JWTException;
-use Asterios\Core\Interfaces\JWTInterface;
 use Exception;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT as FirebaseJWT;
@@ -55,8 +55,7 @@ class JWT implements JWTInterface
             $this->decodedData = (array)$jwt->data;
 
             return true;
-        }
-        catch (ExpiredException|Exception)
+        } catch (ExpiredException|Exception)
         {
             return false;
         }

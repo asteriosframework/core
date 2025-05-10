@@ -4,13 +4,13 @@ namespace Asterios\Core\Db;
 
 use Asterios\Core\Asterios;
 use Asterios\Core\Config;
+use Asterios\Core\Contracts\SeederInterface;
 use Asterios\Core\Db;
 use Asterios\Core\Env;
 use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Exception\MigrationException;
-use Asterios\Core\Interfaces\SeederInterface;
 use Asterios\Core\Logger;
 
 class Seeder implements SeederInterface

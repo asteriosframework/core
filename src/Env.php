@@ -2,10 +2,10 @@
 
 namespace Asterios\Core;
 
+use Asterios\Core\Contracts\EnvInterface;
 use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvItemNotFoundException;
 use Asterios\Core\Exception\EnvLoadException;
-use Asterios\Core\Interfaces\EnvInterface;
 use Asterios\Core\Traits\FileTrait;
 
 class Env implements EnvInterface
