@@ -2,7 +2,7 @@
 
 namespace Asterios\Core\Db\Builder;
 
-use Asterios\Core\Interfaces\SchemaBuilderInterface;
+use Asterios\Core\Contracts\SchemaBuilderInterface;
 
 class SchemaBuilder implements SchemaBuilderInterface
 {

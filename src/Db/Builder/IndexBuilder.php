@@ -2,7 +2,7 @@
 
 namespace Asterios\Core\Db\Builder;
 
-use Asterios\Core\Interfaces\IndexBuilderInterface;
+use Asterios\Core\Contracts\IndexBuilderInterface;
 
 class IndexBuilder implements IndexBuilderInterface
 {
@@ -25,7 +25,7 @@ class IndexBuilder implements IndexBuilderInterface
 
         return $this;
     }
-    
+
     /**
      * @inheritDoc
      */

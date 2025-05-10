@@ -4,8 +4,8 @@ namespace Asterios\Core;
 
 use ArrayAccess;
 use ArrayIterator;
+use Asterios\Core\Contracts\CollectionInterface;
 use Asterios\Core\Exception\CollectionException;
-use Asterios\Core\Interfaces\CollectionInterface;
 use Closure;
 use Countable;
 use IteratorAggregate;
@@ -149,8 +149,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
         try
         {
             return json_encode($this->items, JSON_THROW_ON_ERROR);
-        }
-        catch (\JsonException $e)
+        } catch (\JsonException $e)
         {
             throw new CollectionException($e->getMessage(), $e->getCode(), $e);
         }

@@ -2,9 +2,9 @@
 
 namespace Asterios\Core;
 
+use Asterios\Core\Contracts\MathInterface;
 use Asterios\Core\Dto\MathDto;
 use Asterios\Core\Enum\MathEnum;
-use Asterios\Core\Interfaces\MathInterface;
 
 class Math implements MathInterface
 {

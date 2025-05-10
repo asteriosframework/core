@@ -6,17 +6,20 @@ use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Builder\ColorBuilder;
 use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 use Asterios\Core\Cli\Support\ArgumentParserTrait;
-use Asterios\Core\Interfaces\CommandInterface;
+use Asterios\Core\Contracts\CommandInterface;
 
 abstract class BaseCommand implements CommandInterface
 {
     use CommandsBuilderTrait;
     use ArgumentParserTrait;
 
+    // @codeCoverageIgnoreStart
     public function __construct()
     {
         $this->parseArguments();
     }
+
+    // @codeCoverageIgnoreEnd
 
     abstract public function handle(?string $argument): void;
 
@@ -28,12 +31,14 @@ abstract class BaseCommand implements CommandInterface
         $reflection = new \ReflectionClass($this);
         $attributes = $reflection->getAttributes(Command::class);
 
+        // @codeCoverageIgnoreStart
         if (empty($attributes))
         {
             echo 'No help available.' . PHP_EOL;
 
             return;
         }
+        // @codeCoverageIgnoreEnd
 
         /** @var Command $command */
         $command = $attributes[0]->newInstance();
@@ -52,7 +57,7 @@ abstract class BaseCommand implements CommandInterface
             echo $this->color()
                     ->cyan()
                     ->apply('Options:') . PHP_EOL;
-            
+
             $maxLength = max(array_map(fn($key) => mb_strlen($key), array_keys($command->options)));
 
             foreach ($command->options as $opt => $desc)

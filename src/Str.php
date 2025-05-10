@@ -2,8 +2,8 @@
 
 namespace Asterios\Core;
 
-use Asterios\Core\Interfaces\SingletonInterface;
-use Asterios\Core\Interfaces\StrInterface;
+use Asterios\Core\Contracts\SingletonInterface;
+use Asterios\Core\Contracts\StrInterface;
 
 class Str implements StrInterface, SingletonInterface
 {

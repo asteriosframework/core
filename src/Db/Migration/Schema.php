@@ -2,10 +2,10 @@
 
 namespace Asterios\Core\Db\Migration;
 
+use Asterios\Core\Contracts\SchemaInterface;
 use Asterios\Core\Db;
 use Asterios\Core\Db\Builder\SchemaBuilder;
 use Asterios\Core\Exception\ConfigLoadException;
-use Asterios\Core\Interfaces\SchemaInterface;
 use Asterios\Core\Logger;
 use Closure;
 

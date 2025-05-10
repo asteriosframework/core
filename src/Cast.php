@@ -2,7 +2,7 @@
 
 namespace Asterios\Core;
 
-use Asterios\Core\Interfaces\CastInterface;
+use Asterios\Core\Contracts\CastInterface;
 
 class Cast implements CastInterface
 {

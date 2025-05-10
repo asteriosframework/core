@@ -1,6 +1,6 @@
 <?php
 
-namespace Asterios\Core\Interfaces;
+namespace Asterios\Core\Contracts;
 
 interface Stringable
 {

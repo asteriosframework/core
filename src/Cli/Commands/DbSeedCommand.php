@@ -25,11 +25,12 @@ class DbSeedCommand extends BaseCommand
         $seeder = new Seeder();
         $seeder->seed();
 
+        /** @var array $messages */
         $messages = $seeder->getMessages();
 
-        foreach ($messages as $seeder)
+        foreach ($messages as $seederMessage)
         {
-            foreach ($seeder as $filename => $status)
+            foreach ($seederMessage as $filename => $status)
             {
                 $status = match ($status)
                 {

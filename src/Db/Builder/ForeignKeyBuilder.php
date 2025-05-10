@@ -2,7 +2,7 @@
 
 namespace Asterios\Core\Db\Builder;
 
-use Asterios\Core\Interfaces\ForeignKeyBuilderInterface;
+use Asterios\Core\Contracts\ForeignKeyBuilderInterface;
 
 class ForeignKeyBuilder implements ForeignKeyBuilderInterface
 {

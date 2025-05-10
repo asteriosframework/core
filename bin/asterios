@@ -18,14 +18,15 @@ handleCommand($input, $argument);
  */
 function handleCommand(string $commandName, ?string $argument = null): void
 {
-    $commandInfo = CommandRegistry::findByNameOrAlias($commandName);
+    $commandRegistry = new CommandRegistry();
+    $commandInfo = $commandRegistry->findByNameOrAlias($commandName);
     $colorBuilder = new ColorBuilder();
 
     if (!$commandInfo)
     {
         printErrorBox('Unknown command: ' . $commandName);
 
-        $defaultCommand = CommandRegistry::findByNameOrAlias('list');
+        $defaultCommand = $commandRegistry->findByNameOrAlias('list');
 
         if ($defaultCommand)
         {
