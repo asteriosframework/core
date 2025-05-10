@@ -1,3 +1,10 @@
+## [1.1.0-rc.11](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.10...1.1.0-rc.11) (2025-05-10)
+
+### Features
+
+* refactor cli classes WIP ([301a564](https://gitlab.com/asteriosframework/core/commit/301a564d30e9d6d512c2add720405a6fc0664377))
+* rename interface folder to contracts [skip-ci] ([158fed7](https://gitlab.com/asteriosframework/core/commit/158fed78180593c4fe31b9bf816a976c81c9b810))
+
 ## [1.1.0-rc.10](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.9...1.1.0-rc.10) (2025-05-08)
 
 ### Features
