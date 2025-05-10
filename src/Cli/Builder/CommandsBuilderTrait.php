@@ -4,7 +4,7 @@ namespace Asterios\Core\Cli\Builder;
 
 use Asterios\Core\Asterios;
 use Asterios\Core\Cli\CommandRegistry;
-use Asterios\Core\Interfaces\Cli\CommandRegistryInterface;
+use Asterios\Core\Contracts\Cli\CommandRegistryInterface;
 
 trait CommandsBuilderTrait
 {

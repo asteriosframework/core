@@ -3,8 +3,8 @@
 namespace Asterios\Core\Cli;
 
 use Asterios\Core\Cli\Attributes\Command;
-use Asterios\Core\Interfaces\Cli\CommandRegistryInterface;
-use Asterios\Core\Interfaces\CommandInterface;
+use Asterios\Core\Contracts\Cli\CommandRegistryInterface;
+use Asterios\Core\Contracts\CommandInterface;
 use ReflectionClass;
 
 class CommandRegistry implements CommandRegistryInterface

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Asterios\Core\Interfaces\Cli\Builder;
+namespace Asterios\Core\Contracts\Cli\Builder;
 
 interface ColorBuilderInterface
 {

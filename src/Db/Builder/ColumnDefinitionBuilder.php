@@ -2,7 +2,7 @@
 
 namespace Asterios\Core\Db\Builder;
 
-use Asterios\Core\Interfaces\ColumnDefinitionBuilderInterface;
+use Asterios\Core\Contracts\ColumnDefinitionBuilderInterface;
 
 class ColumnDefinitionBuilder implements ColumnDefinitionBuilderInterface
 {

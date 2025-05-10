@@ -1,7 +1,9 @@
 {
   "name": "asterios/core",
-  "bin": ["bin/asterios"],
-  "description" : "Asterios PHP Core",
+  "bin": [
+    "bin/asterios"
+  ],
+  "description": "Asterios PHP Core",
   "type": "asterios-package",
   "homepage": "https://www.asteriosphp.de",
   "license": "MIT",
@@ -19,7 +21,7 @@
       "*": "dist"
     },
     "platform": {
-      "php": "8.2"
+      "php": "8.3"
     },
     "optimize-autoloader": true
   },
@@ -76,6 +78,5 @@
       "@phpstan",
       "@tests"
     ]
-
   }
 }

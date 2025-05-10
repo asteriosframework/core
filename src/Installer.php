@@ -2,10 +2,10 @@
 
 namespace Asterios\Core;
 
+use Asterios\Core\Contracts\InstallerInterface;
 use Asterios\Core\Db\Migration;
 use Asterios\Core\Db\Seeder;
 use Asterios\Core\Enum\MediaModeEnum;
-use Asterios\Core\Interfaces\InstallerInterface;
 
 class Installer implements InstallerInterface
 {

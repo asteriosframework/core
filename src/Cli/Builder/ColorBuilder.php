@@ -2,7 +2,7 @@
 
 namespace Asterios\Core\Cli\Builder;
 
-use Asterios\Core\Interfaces\Cli\Builder\ColorBuilderInterface;
+use Asterios\Core\Contracts\Cli\Builder\ColorBuilderInterface;
 
 class ColorBuilder implements ColorBuilderInterface
 {

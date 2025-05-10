@@ -164,9 +164,9 @@ class CommandsBuilderTraitTest extends MockeryTestCase
 
         $instance->run();
 
-        $this->assertStringContainsString('[[System Info]]', $instance->output);
-        $this->assertStringContainsString('PHP Version', $instance->output);
-        $this->assertStringContainsString('db', $instance->output);
+        self::assertStringContainsString('[[System Info]]', $instance->output);
+        self::assertStringContainsString('PHP Version', $instance->output);
+        self::assertStringContainsString('db', $instance->output);
     }
 
     public function testPrintListTable(): void
@@ -194,9 +194,9 @@ class CommandsBuilderTraitTest extends MockeryTestCase
 
         $instance->run();
 
-        $this->assertStringContainsString('[[Available:', $instance->output);
-        $this->assertStringContainsString('start', $instance->output);
-        $this->assertStringContainsString('stop', $instance->output);
+        self::assertStringContainsString('[[Available:', $instance->output);
+        self::assertStringContainsString('start', $instance->output);
+        self::assertStringContainsString('stop', $instance->output);
     }
 
     public function testGetRegisteredCommands(): void
@@ -231,8 +231,7 @@ class CommandsBuilderTraitTest extends MockeryTestCase
 
         $commands = $cli->getRegisteredCommands();
 
-        $this->assertCount(1, $commands);
-        $this->assertEquals('test:command', $commands[0]['name']);
+        self::assertCount(1, $commands);
+        self::assertEquals('test:command', $commands[0]['name']);
     }
-
 }
