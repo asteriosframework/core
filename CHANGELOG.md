@@ -1,3 +1,9 @@
+## [1.1.0-rc.13](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.12...1.1.0-rc.13) (2025-05-13)
+
+### Features
+
+* modify collection and set alias functions to clarify [skip-ci] ([b171ab2](https://gitlab.com/asteriosframework/core/commit/b171ab2abcb72bf21a0d06a18bc9b72a656e4ebd))
+
 ## [1.1.0-rc.12](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.11...1.1.0-rc.12) (2025-05-13)
 
 ### Features
