@@ -235,9 +235,9 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     {
         if (is_array($key))
         {
-            foreach ($key as $k)
+            foreach ($key as $item)
             {
-                if (!array_key_exists($k, $this->items))
+                if (!array_key_exists($item, $this->items))
                 {
                     return false;
                 }
