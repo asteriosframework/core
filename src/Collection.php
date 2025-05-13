@@ -25,7 +25,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function all(): array
     {
@@ -33,7 +33,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function add($item): self
     {
@@ -43,7 +43,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function map(Closure $callback): self
     {
@@ -53,7 +53,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function filter(Closure $callback): self
     {
@@ -63,7 +63,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function reduce(Closure $callback, $initial = null): mixed
     {
@@ -71,7 +71,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function first(Closure $callback = null, $default = null): mixed
     {
@@ -87,7 +87,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function offsetExists($offset): bool
     {
@@ -95,7 +95,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function offsetGet($offset): mixed
     {
@@ -103,7 +103,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function offsetSet($offset, $value): void
     {
@@ -118,7 +118,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function offsetUnset($offset): void
     {
@@ -126,7 +126,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function count(): int
     {
@@ -134,7 +134,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getIterator(): ArrayIterator
     {
@@ -142,7 +142,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function toJson(): string
     {
@@ -156,20 +156,23 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function toArray(): array
     {
         return $this->items;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function toObject(): object
     {
         return (object)$this->items;
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function isEmpty(): bool
     {
@@ -177,7 +180,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function flip(): array
     {
@@ -185,7 +188,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function sum(): int
     {
@@ -193,7 +196,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function reverse(bool $preserveKeys = false): array
     {
@@ -201,7 +204,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function avg(bool $withoutDecimal = false): float|int
     {
@@ -218,10 +221,31 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function hasItems(): bool
     {
         return !$this->isEmpty();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function has(string|array $key): bool
+    {
+        if (is_array($key))
+        {
+            foreach ($key as $k)
+            {
+                if (!array_key_exists($k, $this->items))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return array_key_exists($key, $this->items);
     }
 }

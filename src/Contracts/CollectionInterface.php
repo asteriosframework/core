@@ -91,4 +91,10 @@ interface CollectionInterface
      * @return bool
      */
     public function hasItems(): bool;
+
+    /**
+     * @param string|array $key
+     * @return bool
+     */
+    public function has(string|array $key): bool;
 }
