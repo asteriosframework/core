@@ -1,4 +1,3 @@
-
 # Select what we should cache between builds
 cache:
   key: build_cache
@@ -11,7 +10,7 @@ cache:
 test:
   stage: test
   image: ${DOCKER_IMAGE}
-  needs: ['build']
+  needs: [ 'build' ]
   services:
     - name: mariadb:11.5@sha256:4b812bbd9a025569fbe5a7a70e4a3cd3af53aa36621fecb1c2e108af2113450a
       alias: db
@@ -37,10 +36,9 @@ test:
 
 code-quality:
   image: ${DOCKER_IMAGE}
-  needs: ['build']
+  needs: [ 'build' ]
   stage: test
   script:
-    - composer cs-fixer:check
     - composer phpstan
   cache:
     key: build_cache

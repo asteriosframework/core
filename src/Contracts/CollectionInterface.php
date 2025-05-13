@@ -116,4 +116,11 @@ interface CollectionInterface
      * @return void
      */
     public function unsetItem(mixed $item): void;
+
+    /**
+     * @param string $item
+     * @param Closure $callback
+     * @return mixed
+     */
+    public function findIn(string $item, Closure $callback): mixed;
 }
