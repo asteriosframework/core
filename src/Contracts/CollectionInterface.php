@@ -93,8 +93,8 @@ interface CollectionInterface
     public function hasItems(): bool;
 
     /**
-     * @param string|array $key
+     * @param string|array $items
      * @return bool
      */
-    public function has(string|array $key): bool;
+    public function has(string|array $items): bool;
 }

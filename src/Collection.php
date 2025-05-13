@@ -231,11 +231,11 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     /**
      * @inheritDoc
      */
-    public function has(string|array $key): bool
+    public function has(string|array $items): bool
     {
-        if (is_array($key))
+        if (is_array($items))
         {
-            foreach ($key as $item)
+            foreach ($items as $item)
             {
                 if (!array_key_exists($item, $this->items))
                 {
@@ -246,6 +246,6 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
             return true;
         }
 
-        return array_key_exists($key, $this->items);
+        return array_key_exists($items, $this->items);
     }
 }
