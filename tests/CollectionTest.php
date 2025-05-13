@@ -320,4 +320,30 @@ class CollectionTest extends MockeryTestCase
 
         self::assertFalse($actual);
     }
+
+    /**
+     * * @dataProvider hasItemProvider
+     */
+    public function testHasItem(array $data, string|array $item, bool $expected): void
+    {
+        $this->testedClass = Collection::forge($data);
+
+        $test = $this->testedClass->toArray();
+
+        $actual = $this->testedClass->has($item);
+
+        self::assertEquals($expected, $actual);
+    }
+
+    ########## Provider ##########
+
+    public static function hasItemProvider(): array
+    {
+        return [
+            [['id' => 1], 'id', true],
+            [['id' => 1], 'username', false],
+            [['id' => 1], ['id'], true],
+            [['id' => 1], ['John'], false],
+        ];
+    }
 }
