@@ -5,6 +5,7 @@ namespace Asterios\Test;
 use Asterios\Core\Collection;
 use Asterios\Core\Exception\CollectionException;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class CollectionTest extends MockeryTestCase
 {
@@ -321,9 +322,7 @@ class CollectionTest extends MockeryTestCase
         self::assertFalse($actual);
     }
 
-    /**
-     * * @dataProvider hasItemProvider
-     */
+    #[DataProvider('hasItemProvider')]
     public function testHasItem(array $data, string|array $item, bool $expected): void
     {
         $this->testedClass = Collection::forge($data);
@@ -333,6 +332,62 @@ class CollectionTest extends MockeryTestCase
         $actual = $this->testedClass->has($item);
 
         self::assertEquals($expected, $actual);
+    }
+
+    public function testFindInReturnsCorrectEntry(): void
+    {
+        $data = [
+            'options' => [
+                [
+                    'option' => 'navigation',
+                    'value' => 'normal',
+                ],
+                [
+                    'option' => 'info',
+                    'value' => 'expanded',
+                ],
+            ],
+        ];
+
+        $this->testedClass = Collection::forge($data);
+
+        $result = $this->testedClass->findIn('options', static function ($option) {
+            return $option['option'] === 'navigation';
+        });
+
+        self::assertIsArray($result);
+        self::assertEquals('navigation', $result['option']);
+        self::assertEquals('normal', $result['value']);
+    }
+
+    public function testFindInReturnsNullIfNotFound(): void
+    {
+        $data = [
+            'options' => [
+                ['option' => 'info', 'value' => 'expanded'],
+            ],
+        ];
+
+        $this->testedClass = Collection::forge($data);
+
+        $result = $this->testedClass->findIn('options', static function ($option) {
+            return $option['option'] === 'navigation';
+        });
+
+        self::assertNull($result);
+    }
+
+    public function testFindInReturnsNullIfItemNotArray(): void
+    {
+        $data = [
+            'options' => 'not-an-array',
+        ];
+
+        $this->testedClass = Collection::forge($data);
+
+        $result = $this->testedClass->findIn('options', static fn() => true);
+
+        self::assertNull($result);
     }
 
     ########## Provider ##########

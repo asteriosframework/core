@@ -275,4 +275,27 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     {
         $this->offsetUnset($item);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function findIn(string $item, Closure $callback): mixed
+    {
+        $items = $this->getItem($item);
+
+        if (!is_array($items))
+        {
+            return null;
+        }
+
+        foreach ($items as $entry)
+        {
+            if ($callback($entry))
+            {
+                return $entry;
+            }
+        }
+
+        return null;
+    }
 }
