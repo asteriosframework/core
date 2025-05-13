@@ -248,4 +248,31 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
 
         return array_key_exists($items, $this->items);
     }
+
+    /**
+     * Alias for offsetGet
+     * @inheritDoc
+     */
+    public function getItem(mixed $item): mixed
+    {
+        return $this->offsetGet($item);
+    }
+
+    /**
+     * Alias for offsetSet
+     * @inheritDoc
+     */
+    public function setItem(mixed $item, mixed $value): void
+    {
+        $this->offsetSet($item, $value);
+    }
+
+    /**
+     * Alias for OffsetUnset
+     * @inheritDoc
+     */
+    public function unsetItem(mixed $item): void
+    {
+        $this->offsetUnset($item);
+    }
 }

@@ -97,4 +97,23 @@ interface CollectionInterface
      * @return bool
      */
     public function has(string|array $items): bool;
+
+    /**
+     * @param mixed $item
+     * @return mixed
+     */
+    public function getItem(mixed $item): mixed;
+
+    /**
+     * @param mixed $item
+     * @param mixed $value
+     * @return void
+     */
+    public function setItem(mixed $item, mixed $value): void;
+
+    /**
+     * @param mixed $item
+     * @return void
+     */
+    public function unsetItem(mixed $item): void;
 }
