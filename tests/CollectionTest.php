@@ -45,7 +45,7 @@ class CollectionTest extends MockeryTestCase
             return $item * 2;
         });
 
-        $actual = $this->testedClass->offsetGet(0);
+        $actual = $this->testedClass->getItem(0);
 
         self::assertEquals(2, $actual);
     }
@@ -119,7 +119,7 @@ class CollectionTest extends MockeryTestCase
         $expectedData = array_merge($data, [4]);
 
         $this->testedClass = Collection::forge($data);
-        $this->testedClass->offsetSet(null, 4);
+        $this->testedClass->setItem(null, 4);
 
         $actual = $this->testedClass->all();
 
@@ -133,7 +133,7 @@ class CollectionTest extends MockeryTestCase
         $expectedData = array_merge($data, ['d' => 4]);
 
         $this->testedClass = Collection::forge($data);
-        $this->testedClass->offsetSet('d', 4);
+        $this->testedClass->setItem('d', 4);
 
         $actual = $this->testedClass->all();
 
@@ -146,7 +146,7 @@ class CollectionTest extends MockeryTestCase
 
         $this->testedClass = Collection::forge($data);
 
-        $this->testedClass->offsetUnset(67890);
+        $this->testedClass->unsetItem(67890);
 
         $expectedData = [12345 => ['username' => 'john']];
 
