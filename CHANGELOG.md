@@ -1,3 +1,11 @@
+## [1.1.0-rc.12](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.11...1.1.0-rc.12) (2025-05-13)
+
+### Features
+
+* add has method to collection ([8aba789](https://gitlab.com/asteriosframework/core/commit/8aba7893efb788c65159a81f98440f7d702468ec))
+* changes from code qs ([50a08a7](https://gitlab.com/asteriosframework/core/commit/50a08a7d34fcca3718561e8d5b65938a5b6ad681))
+* changes from code qs [skip-ci] ([843b39b](https://gitlab.com/asteriosframework/core/commit/843b39b8492b0bf996dc74f263664a608a14fa59))
+
 ## [1.1.0-rc.11](https://gitlab.com/asteriosframework/core/compare/1.1.0-rc.10...1.1.0-rc.11) (2025-05-10)
 
 ### Features
