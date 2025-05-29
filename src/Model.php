@@ -1029,7 +1029,7 @@ class Model
 
         $this->has_properties($data);
 
-        $sql = self::SQL_COMMAND_UPDATE . ' 
+        $sql = self::SQL_COMMAND_UPDATE . '
             ' . $this->table() . ' ' . self::SQL_COMMAND_SET . ' ' . $this->prepare_update($data) . ' ' . self::SQL_STATEMENT_WHERE . ' ' . $this->backticks($this->primary_key()) . ' = ' . $id;
 
         return Db::write($sql, $this->connection);
