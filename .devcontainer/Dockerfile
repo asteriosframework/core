@@ -1,11 +1,9 @@
-FROM php:8.3-alpine
+FROM php:8.3-fpm-alpine
 
 # Install necessary packages
 RUN apk update && \
     apk add --no-cache \
         mariadb-client \
-        nginx \
-        supervisor \
         bash \
         libzip-dev \
         oniguruma-dev \
@@ -26,14 +24,8 @@ RUN pecl install xdebug && docker-php-ext-enable xdebug
 # Set working directory
 WORKDIR /var/www
 
-# Copy nginx config (wird später beim Build hinzugefügt)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy project files (optional, falls benötigt)
+# COPY . /var/www
 
-# Expose HTTP port
-EXPOSE 80
-
-# Copy supervisor config (wird später beim Build hinzugefügt)
-COPY supervisord.conf /etc/supervisord.conf
-
-# Start services using supervisord
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+# Expose PHP-FPM port
+EXPOSE 9000

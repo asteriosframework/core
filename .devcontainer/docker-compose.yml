@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../:/var/www
+    networks:
+      - backend
+    expose:
+      - 9000
+    environment:
+      XDEBUG_MODE: develop,debug
+      XDEBUG_CONFIG: client_host=host.docker.internal
+    env_file:
+      - .env
+
+  mariadb:
+    image: mariadb:11.3
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - backend
+    ports:
+      - "3306:3306"
+    env_file:
+      - .env
+
+  nginx:
+    image: nginx:alpine
+    depends_on:
+      - php
+    volumes:
+      - ../:/var/www
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - backend
+    ports:
+      - "8080:80"
+    env_file:
+      - .env
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mariadb_data:
