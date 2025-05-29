@@ -18,14 +18,19 @@ class DbSeedCommand extends BaseCommand
 {
     use CommandsBuilderTrait;
 
+    /** @codeCoverageIgnoreSart */
     public function handle(?string $argument): void
+    {
+        $this->handleWithSeeder(new Seeder());
+    }
+
+    // @codeCoverageIgnoreEnd
+
+    public function handleWithSeeder(Seeder $seeder): void
     {
         $this->printHeader();
 
-        $seeder = new Seeder();
         $seeder->seed();
-
-        /** @var array $messages */
         $messages = $seeder->getMessages();
 
         foreach ($messages as $seederMessage)
