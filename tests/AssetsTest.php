@@ -314,6 +314,3 @@ namespace Asterios\Test
         }
     }
 }
-
-
-
