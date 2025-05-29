@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    user: vscode
     volumes:
       - ../:/var/www
     networks:

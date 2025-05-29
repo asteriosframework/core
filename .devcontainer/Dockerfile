@@ -13,7 +13,8 @@ RUN apk update && \
         make \
         openssl-dev \
         pkgconfig \
-        linux-headers
+        linux-headers \
+        shadow
 
 # Install PHP extensions for MySQL/MariaDB
 RUN docker-php-ext-install pdo pdo_mysql mysqli
@@ -21,11 +22,11 @@ RUN docker-php-ext-install pdo pdo_mysql mysqli
 # Install Xdebug
 RUN pecl install xdebug && docker-php-ext-enable xdebug
 
+# Create vscode user with home directory
+RUN useradd -m -s /bin/bash vscode
+
 # Set working directory
 WORKDIR /var/www
-
-# Copy project files (optional, falls benötigt)
-# COPY . /var/www
 
 # Expose PHP-FPM port
 EXPOSE 9000
