@@ -5,6 +5,8 @@ RUN apk update && \
     apk add --no-cache \
         mariadb-client \
         bash \
+        git \
+        curl \
         libzip-dev \
         oniguruma-dev \
         autoconf \

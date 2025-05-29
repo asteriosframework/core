@@ -9,9 +9,10 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "felixfbecker.php-debug",
                 "bmewburn.vscode-intelephense-client",
-                "esbenp.prettier-vscode"
+                "esbenp.prettier-vscode",
+                "redjue.git-commit-plugin",
+                "xdebug.php-debug"
             ],
             "settings": {
                 "php.validate.executablePath": "/usr/local/bin/php"
@@ -21,5 +22,10 @@
     "forwardPorts": [
         8080,
         3306
+    ],
+    "mounts": [
+        "source=${env:HOMEDRIVE}${env:HOMEPATH}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached",
+        "source=${env:HOMEDRIVE}${env:HOMEPATH}/.git-credentials,target=/home/vscode/.git-credentials,type=bind,consistency=cached",
+        "source=${env:HOMEDRIVE}${env:HOMEPATH}/.gnupg,target=/home/vscode/.gnupg,type=bind,consistency=cached"
     ]
 }
