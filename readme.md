@@ -11,12 +11,14 @@
 [![GitHub Issues](https://img.shields.io/github/issues/asteriosframework/core.svg)](https://github.com/asteriosframework/core/issues)
 [![GitHub pull-requests](https://img.shields.io/github/issues-pr/asteriosframework/core.svg)](https://GitHub.com/Naereen/StrapDown.js/pull/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
+![Project Site](https://img.shields.io/website?url=https%3A%2F%2Fasteriosphp.de)
 
 </div>
 
 
 <p align="center">The AsteriosPHP Framework is a simple and flexible PHP 8.+ framework, inspired from the best features of other frameworks, in a modern and elegant way.
     <br>
+    <a href="https://asteriosphp.de">AsteriosPHP Project Site</a>
 </p>
 
 <h2>Table of Contents</h2>
