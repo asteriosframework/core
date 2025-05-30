@@ -39,7 +39,7 @@ class MigrateStatusCommand extends BaseCommand
             ];
         }
 
-        if (empty($statusList))
+        if ([] === $statusList)
         {
             echo CliStatusIcon::Warning->icon() . 'No migrations were found.' . PHP_EOL;
         }
