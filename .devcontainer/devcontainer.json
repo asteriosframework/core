@@ -6,6 +6,8 @@
     "service": "php",
     "workspaceFolder": "/var/www",
     "remoteUser": "vscode",
+    "containerUser": "vscode",
+    "updateRemoteUserUID": true,
     "customizations": {
         "vscode": {
             "extensions": [

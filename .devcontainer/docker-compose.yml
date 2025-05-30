@@ -3,6 +3,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        UNAME: ${UNAME}
+        UID: ${UID}
+        GID: ${GID}
     user: vscode
     volumes:
       - ../:/var/www
