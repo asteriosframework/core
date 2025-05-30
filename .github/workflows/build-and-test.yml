@@ -1,0 +1,60 @@
+name: Build, Test Docker image
+permissions:
+  contents: read
+  packages: read
+  security-events: write
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - develop
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get GitHub Token
+        id: github-token
+        uses: jfheinrich-eu/psono-secret-whisperer@v1.0.0
+        with:
+          ci_api_key_id: ${{ secrets.PSONO_API_KEY_ID }}
+          ci_api_secret_key_hex: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
+          ci_server_url: ${{ vars.PSONO_SERVER_URL }}
+          secret_id: ${{ secrets.PSONO_GITHUB_CLI_TOKEN }}
+          secret_type: 'secret'
+          secret_fields: "password"
+          mask_secrets: password
+
+      - name: Prepare PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, curl, json, zip, bcmath, fileinfo, openssl, intl, redis
+          ini-values: post_max_size=256M, upload_max_filesize=256M
+          tools: composer:v2
+          coverage: xdebug
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --no-suggest --optimize-autoloader
+
+      - name: Run code style checks
+        run: |
+          composer run-script cs-fixer:check
+          composer run-script phpstan
+
+      - name: Run tests
+        run: composer run-script tests:ci
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.clover.xml
