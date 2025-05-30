@@ -24,7 +24,7 @@ class DbSeedCommandTest extends MockeryTestCase
                 'CommentsSeeder.php' => 'unknown',
             ],
         ];
-        
+
         $seederMock = m::mock(Seeder::class);
         $seederMock->shouldReceive('seed')
             ->once();
@@ -35,6 +35,7 @@ class DbSeedCommandTest extends MockeryTestCase
         // DbSeedCommand teil-mocken, um printHeader zu überwachen
         $commandMock = m::mock(DbSeedCommand::class)
             ->makePartial();
+        $commandMock->shouldAllowMockingProtectedMethods();
         $commandMock->shouldReceive('printHeader')
             ->once();
 

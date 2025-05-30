@@ -30,6 +30,7 @@ class AboutCommandTest extends MockeryTestCase
         $commandMock = m::mock(AboutCommand::class)
             ->makePartial();
 
+        $commandMock->shouldAllowMockingProtectedMethods();
         $commandMock->shouldReceive('printHeader')
             ->once()
             ->withNoArgs();
@@ -42,7 +43,7 @@ class AboutCommandTest extends MockeryTestCase
 
                 return true;
             });
-        
+
         $commandMock->handle(null);
     }
 }
