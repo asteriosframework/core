@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Asterios\Test;
 
@@ -77,6 +79,6 @@ class ViewTest extends MockeryTestCase
         View::forge('welcome');
         $result = \ob_get_clean();
 
-        self::assertEquals('<h1>Error 404</h1>', $result);
+        self::assertEquals("<h1>Error 404</h1>\n", $result);
     }
 }

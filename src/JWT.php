@@ -55,7 +55,8 @@ class JWT implements JWTInterface
             $this->decodedData = (array)$jwt->data;
 
             return true;
-        } catch (ExpiredException|Exception)
+        }
+        catch (ExpiredException|Exception)
         {
             return false;
         }

@@ -56,9 +56,11 @@ class Installer implements InstallerInterface
         }
 
         return File::forge()
-            ->write($this->getInstalledFile(),
+            ->write(
+                $this->getInstalledFile(),
                 Cast::forge()
-                    ->string($timestamp));
+                    ->string($timestamp)
+            );
     }
 
     /**
@@ -81,7 +83,8 @@ class Installer implements InstallerInterface
         try
         {
             $mediaPaths = $env->getArrayPrefixed('MEDIA_');
-        } catch (Exception\EnvException|Exception\EnvLoadException $e)
+        }
+        catch (Exception\EnvException|Exception\EnvLoadException $e)
         {
             Logger::forge()
                 ->error('Could not load MEDIA_ env variables!', ['exception' => $e->getTraceAsString()]);

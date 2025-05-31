@@ -19,8 +19,7 @@ class Command
         string $group = 'General',
         array $aliases = [],
         array $options = []
-    )
-    {
+    ) {
         $this->name = $name;
         $this->description = $description;
         $this->group = $group;

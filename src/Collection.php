@@ -149,7 +149,8 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
         try
         {
             return json_encode($this->items, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e)
+        }
+        catch (\JsonException $e)
         {
             throw new CollectionException($e->getMessage(), $e->getCode(), $e);
         }
