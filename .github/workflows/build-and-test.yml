@@ -11,7 +11,6 @@ on:
       - develop
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     defaults:
@@ -29,14 +28,26 @@ jobs:
           ci_api_secret_key_hex: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
           ci_server_url: ${{ vars.PSONO_SERVER_URL }}
           secret_id: ${{ secrets.PSONO_GITHUB_CLI_TOKEN }}
-          secret_type: 'secret'
+          secret_type: "secret"
+          secret_fields: "password"
+          mask_secrets: password
+
+      - name: Get Global Codecov Token
+        id: codecov-token
+        uses: jfheinrich-eu/psono-secret-whisperer@v1.0.0
+        with:
+          ci_api_key_id: ${{ secrets.PSONO_API_KEY_ID }}
+          ci_api_secret_key_hex: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
+          ci_server_url: ${{ vars.PSONO_SERVER_URL }}
+          secret_id: ${{ secrets.PSONO_GLOBAL_CODECOV_TOKEN }}
+          secret_type: "secret"
           secret_fields: "password"
           mask_secrets: password
 
       - name: Prepare PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: "8.3"
           extensions: mbstring, xml, curl, json, zip, bcmath, fileinfo, openssl, intl, redis
           ini-values: post_max_size=256M, upload_max_filesize=256M
           tools: composer:v2
@@ -58,3 +69,11 @@ jobs:
         with:
           name: coverage-report
           path: coverage.clover.xml
+
+      - name: Upload results to Codecov
+        uses: codecov/codecov-action@v5.4.3
+        with:
+          files: coverage.clover.xml
+          flags: unittests
+          token: ${{ steps.codecov-token.outputs.secret1 }}
+          name: codecov-asterios-core
