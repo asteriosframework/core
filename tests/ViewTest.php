@@ -59,7 +59,7 @@ class ViewTest extends MockeryTestCase
         \ob_start();
         View::forge('index');
         $result = \ob_get_clean();
-        self::assertEquals('<h1>Hello World</h1>', $result);
+        self::assertEquals("<h1>Hello World</h1>\n", $result);
     }
 
     /**
