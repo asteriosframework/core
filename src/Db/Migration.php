@@ -53,7 +53,8 @@ class Migration implements MigrationInterface
         {
             $this->ensureMigrationTableExists();
             $batch = $this->getNextBatchNumber();
-        } catch (ConfigLoadException $e)
+        }
+        catch (ConfigLoadException $e)
         {
             $this->logError('Could not load config file:' . $e->getMessage());
 
@@ -106,7 +107,8 @@ class Migration implements MigrationInterface
                     $this->messages[][$migrationName] = 'missing';
                     throw new \RuntimeException('Missing method "up" in migration:' . basename($file));
                 }
-            } catch (\Throwable $e)
+            }
+            catch (\Throwable $e)
             {
                 $this->messages[][$migrationName] = 'failed';
                 $this->logError('Migration failed: ' . basename($file) . ' - ' . $e->getMessage());
@@ -150,7 +152,8 @@ class Migration implements MigrationInterface
                 {
                     throw new \RuntimeException('Missing method "down" fehlt in Migration: ' . basename($file));
                 }
-            } catch (\Throwable $e)
+            }
+            catch (\Throwable $e)
             {
                 $this->logError('Rollback failed: ' . basename($file) . ' ' . $e->getMessage());
 
@@ -168,7 +171,8 @@ class Migration implements MigrationInterface
         try
         {
             $migrations = Db::read('SELECT migration FROM migration');
-        } catch (ConfigLoadException)
+        }
+        catch (ConfigLoadException)
         {
             return [];
         }
@@ -258,7 +262,8 @@ class Migration implements MigrationInterface
         try
         {
             return $this->env->get($key);
-        } catch (EnvException|EnvLoadException $e)
+        }
+        catch (EnvException|EnvLoadException $e)
         {
             $this->logError("Env-Fehler [$key]: " . $e->getMessage());
 
@@ -301,7 +306,8 @@ SQL;
         try
         {
             $result = Db::read("SELECT COUNT(*) AS count FROM `migration` WHERE `migration` = '" . Db::escape($migrationName) . "'");
-        } catch (ConfigLoadException $e)
+        }
+        catch (ConfigLoadException $e)
         {
             throw new MigrationException('Failed to load config for reading migration status in database: ' . $e->getMessage());
         }

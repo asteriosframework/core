@@ -42,7 +42,8 @@ class TimestampColumnBuilder implements TimestampColumnBuilderInterface
                     'TIMESTAMP(' . $value . ')',
                     $definition
                 );
-            });
+            }
+        );
 
         return $this;
     }

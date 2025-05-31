@@ -64,7 +64,7 @@
     ],
     "tests:ci": [
       "Composer\\Config::disableProcessTimeout",
-      "XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml --do-not-cache-result --log-junit phpunit-report.xml --coverage-cobertura phpunit-coverage.xml --coverage-html coverage-report/ --coverage-text --colors=never ./tests"
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml --do-not-cache-result --log-junit phpunit-report.xml --coverage-cobertura phpunit-coverage.xml --coverage-html coverage-report/ --coverage-clover coverage.clover.xml --coverage-text --colors=never ./tests"
     ],
     "phpstan": [
       "Composer\\Config::disableProcessTimeout",

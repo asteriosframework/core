@@ -11,7 +11,6 @@ use Closure;
 
 class Schema implements SchemaInterface
 {
-
     /**
      * @inheritDoc
      */
@@ -24,7 +23,7 @@ class Schema implements SchemaInterface
 
         $definitionParts = array_filter(array_merge($columns, $foreignKeys, $indexes));
 
-        $indented = array_map(static fn($line) => '    ' . $line, $definitionParts);
+        $indented = array_map(static fn ($line) => '    ' . $line, $definitionParts);
         $sqlStatements = implode(",\n", $indented);
 
         $sql = "CREATE TABLE `$table` (\n" . $sqlStatements . "\n) ENGINE=$engine DEFAULT CHARSET=$charSet;";
@@ -32,7 +31,8 @@ class Schema implements SchemaInterface
         try
         {
             Db::write($sql);
-        } catch (ConfigLoadException $e)
+        }
+        catch (ConfigLoadException $e)
         {
             Logger::forge()
                 ->fatal('Create migration for table ' . $table . ' failed: ' . $e->getMessage());
@@ -49,7 +49,8 @@ class Schema implements SchemaInterface
         try
         {
             Db::write($sql);
-        } catch (ConfigLoadException $e)
+        }
+        catch (ConfigLoadException $e)
         {
             Logger::forge()
                 ->fatal('Drop migration for table ' . $table . ' failed: ' . $e->getMessage());

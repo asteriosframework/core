@@ -58,7 +58,7 @@ abstract class BaseCommand implements CommandInterface
                     ->cyan()
                     ->apply('Options:') . PHP_EOL;
 
-            $maxLength = max(array_map(fn($key) => mb_strlen($key), array_keys($command->options)));
+            $maxLength = max(array_map(fn ($key) => mb_strlen($key), array_keys($command->options)));
 
             foreach ($command->options as $opt => $desc)
             {
@@ -75,6 +75,6 @@ abstract class BaseCommand implements CommandInterface
      */
     private function color(): ColorBuilder
     {
-        return $this->colorBuilder ??= new ColorBuilder;
+        return $this->colorBuilder ??= new ColorBuilder();
     }
 }

@@ -70,7 +70,7 @@ class SchemaBuilder implements SchemaBuilderInterface
      */
     public function enum(string $name, array $values): ColumnDefinitionBuilder
     {
-        $quoted = array_map(static fn($v) => "'" . addslashes($v) . "'", $values);
+        $quoted = array_map(static fn ($v) => "'" . addslashes($v) . "'", $values);
 
         return $this->column($name, 'ENUM(' . implode(', ', $quoted) . ')');
     }

@@ -35,7 +35,7 @@ trait ArgumentParserTrait
     {
         $positional = array_values(array_filter(
             $this->args,
-            static fn($arg) => !str_starts_with($arg, '--')
+            static fn ($arg) => !str_starts_with($arg, '--')
         ));
 
         return $positional[$index] ?? null;

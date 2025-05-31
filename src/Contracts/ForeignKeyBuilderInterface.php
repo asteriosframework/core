@@ -4,7 +4,6 @@ namespace Asterios\Core\Contracts;
 
 interface ForeignKeyBuilderInterface
 {
-
     /**
      * @param string $table
      * @param string $column

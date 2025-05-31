@@ -70,7 +70,7 @@ return new class {
     {
         // TODO: Add migration logic for: $formattedName
         $schemaBlueprintUp
-        
+
     }
 
     public function down(): void
