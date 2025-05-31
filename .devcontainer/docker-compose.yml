@@ -9,7 +9,10 @@ services:
         GID: ${GID}
     user: vscode
     volumes:
-      - ../:/var/www
+      - ${HOSTHOME}/.ssh:/home/vscode/.ssh:rw
+      - ${HOSTHOME}/.gitconfig:/home/vscode/.gitconfig:rw
+      - ${HOSTHOME}/.gnupg:/home/vscode/.gnupg:rw
+      - ../:/var/www:rw
     networks:
       - backend
     expose:

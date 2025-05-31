@@ -1,0 +1,12 @@
+#!/bin/bash
+
+/usr/bin/keychain \
+--dir ~/.ssh/.keychain \
+--gpg2 --agents gpg,ssh \
+$(find ~/.ssh -name '*ed25519*' ! -iname '*.pub')
+
+source ~/.ssh/.keychain/$HOSTNAME-sh
+source ~/.ssh/.keychain/$HOSTNAME-sh-gpg
+
+# Set GPG environment.
+export GPG_TTY=$(tty)

@@ -1,15 +1,20 @@
 FROM php:8.3-fpm-alpine
-ARG UNAME=vscode
-ARG UID=1000
-ARG GID=1000
+ARG UNAME
+ARG UID
+ARG GID
 
 # Install necessary packages
 RUN apk update && \
     apk add --no-cache \
+    composer \
     mariadb-client \
+    openssh-client \
     bash \
     git \
     curl \
+    gpg \
+    gpg-agent \
+    keychain \
     libzip-dev \
     oniguruma-dev \
     autoconf \
@@ -21,13 +26,32 @@ RUN apk update && \
     linux-headers \
     shadow \
     python3 \
-    py3-pip
+    py3-pip \
+    nodejs \
+    npm
 
-# Install PHP extensions for MySQL/MariaDB
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+RUN apk add composer \
+    php83-curl \
+    php83-iconv \
+    php83-mbstring \
+    php83-openssl \
+    php83-zip \
+    php83-phar \
+    php83-mysqli \
+    php83-pdo \
+    php83-pdo_mysql \
+    php83-sodium \
+    php83-pecl-xdebug \
+    php83-tokenizer \
+    php83-dom \
+    php83-xml \
+    php83-xmlreader \
+    php83-xmlwriter \
+    --repository https://dl-cdn.alpinelinux.org/alpine/edge/community
+RUN apk add libcurl \
+    --repository https://dl-cdn.alpinelinux.org/alpine/edge/main
 
-# Install Xdebug
-RUN pecl install xdebug && docker-php-ext-enable xdebug
+RUN cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
 # Create vscode user with home directory
 RUN groupadd -g $GID -o $UNAME && useradd -m -u $UID -g $GID -s /bin/bash $UNAME
