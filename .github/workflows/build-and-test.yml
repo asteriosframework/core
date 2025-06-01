@@ -76,4 +76,4 @@ jobs:
           files: coverage.clover.xml
           flags: unittests
           token: ${{ steps.codecov-token.outputs.secret1 }}
-          name: codecov-asterios-core
+          slug: asteriosframework/core
