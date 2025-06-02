@@ -328,7 +328,7 @@ class Db
                 continue;
             }
 
-            $columns = array_map(static fn($col) => '`' . $col . '`', array_keys($row));
+            $columns = array_map(static fn ($col) => '`' . $col . '`', array_keys($row));
             $values = array_map([self::class, 'quote'], array_values($row));
 
             $sql = 'INSERT INTO `' . $table . '` (' . implode(', ', $columns) . ') VALUES (' . implode(', ', $values) . ');';

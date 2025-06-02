@@ -56,7 +56,8 @@ class Seeder implements SeederInterface
             try
             {
                 $this->getSeederFromConfig();
-            } catch (ConfigLoadException|MigrationException $e)
+            }
+            catch (ConfigLoadException|MigrationException $e)
             {
                 $this->logError('Error loading seeder config file: ' . $e->getMessage());
 
@@ -90,7 +91,8 @@ class Seeder implements SeederInterface
                 Logger::forge()
                     ->info('Seeded: ' . $fileNameForLogger);
                 usleep(1000);
-            } catch (\JsonException|ConfigLoadException $e)
+            }
+            catch (\JsonException|ConfigLoadException $e)
             {
                 $this->logError('Error Seeder for ' . $fileNameForLogger . ':' . $e->getMessage());
                 $this->messages[][$fileNameForLogger] = 'failed';
@@ -156,7 +158,8 @@ class Seeder implements SeederInterface
         try
         {
             return $this->env->get($key);
-        } catch (EnvException|EnvLoadException $e)
+        }
+        catch (EnvException|EnvLoadException $e)
         {
             $this->logError("Env-Fehler [$key]: " . $e->getMessage());
 
@@ -195,7 +198,7 @@ class Seeder implements SeederInterface
 
         $orderedFiles = $this->sortFilesByDependencies($validFiles, $seederFiles);
 
-        return array_map(static fn($file) => $seederPath . '/' . $file, $orderedFiles);
+        return array_map(static fn ($file) => $seederPath . '/' . $file, $orderedFiles);
     }
 
     /**
@@ -210,7 +213,9 @@ class Seeder implements SeederInterface
 
         $visit = static function ($file) use ($dependencies, &$visited, &$sorted, &$visit) {
             if (isset($visited[$file]))
+            {
                 return;
+            }
 
             $visited[$file] = true;
 

@@ -1,0 +1,71 @@
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/*
+          - .travis.yml
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - package-lock.json
+          - yarn.lockfile
+          - requirements.txt
+          - composer.lock
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - docs/**/*
+          - "**/*.md"
+github:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**/*
+git:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .gitignore
+          - .gitkeep
+labels:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/pr_labeler.yml
+          - .github/labeler.yml
+lint:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .stylelintrc.json
+          - .flake8
+npm:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .npmignore
+          - package.json
+          - package-lock.json
+openapi:
+  - changed-files:
+      - any-glob-to-any-file:
+          - openapi/*
+rollup:
+  - changed-files:
+      - any-glob-to-any-file:
+          - rollup.config.mjs
+styling:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.css"
+test:
+  - changed-files:
+      - any-glob-to-any-file:
+          - tests/**/*
+python:
+  - changed-files:
+      - any-glob-to-any-file:
+          - pyproject.toml
+          - src/**/*.py
+vscode:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .vscode/*
+pre-commit:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .pre-commit-config.yaml
