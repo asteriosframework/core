@@ -6,6 +6,7 @@ use Asterios\Core\Asterios;
 use Asterios\Core\Cli\CommandRegistry;
 use Asterios\Core\Contracts\Cli\CommandRegistryInterface;
 
+/** @codeCoverageIgnore */
 trait CommandsBuilderTrait
 {
     protected ColorBuilder $colorBuilder;
