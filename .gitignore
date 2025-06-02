@@ -10,3 +10,4 @@ coverage-report/
 phpunit-coverage.xml
 phpunit-report.xml
 .vscode/
+.psonoci.toml

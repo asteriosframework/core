@@ -37,7 +37,7 @@ trait CommandsBuilderTrait
 
         foreach ($grouped as &$commands)
         {
-            usort($commands, static fn($a, $b) => strcmp($a['name'], $b['name']));
+            usort($commands, static fn ($a, $b) => strcmp($a['name'], $b['name']));
         }
         unset($commands);
 
@@ -276,7 +276,7 @@ trait CommandsBuilderTrait
      */
     private function color(): ColorBuilder
     {
-        return $this->colorBuilder ??= new ColorBuilder;
+        return $this->colorBuilder ??= new ColorBuilder();
     }
 
     private function printPrettyRowAligned(string $label, string $value, int $maxLabelWidth): void

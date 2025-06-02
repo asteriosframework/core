@@ -48,8 +48,10 @@ class MakeSeederCommand extends BaseCommand
             return;
         }
 
-        file_put_contents($filename,
-            "[]\n");
+        file_put_contents(
+            $filename,
+            "[]\n"
+        );
 
         echo "✅  Seeder '{$seederName}' created.\n";
     }

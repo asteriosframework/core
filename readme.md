@@ -1,8 +1,27 @@
-# AseriosPHP <!-- omit in toc -->
+<p align="center">
+  <a href="" rel="noopener">
+ <img width=200px height=88px src="./docs/asteriosphp-logo.png" alt="AsteriosPHP"></a>
+</p>
 
-[![pipeline status](https://gitlab.com/asteriosframework/core/badges/develop/pipeline.svg)](https://gitlab.com/asteriosframework/core/-/commits/develop)
-[![coverage report](https://gitlab.com/asteriosframework/core/badges/develop/coverage.svg)](https://gitlab.com/asteriosframework/core/-/commits/develop)
-[![Latest Release](https://gitlab.com/asteriosframework/core/-/badges/release.svg)](https://gitlab.com/asteriosframework/core/-/releases)
+<div align="center">
+
+[![Status](https://img.shields.io/badge/status-active-success.svg)]()
+![Maintainer](https://img.shields.io/badge/maintainer-@asteriosphp-blue)
+![Maintainer](https://img.shields.io/badge/maintainer-@jfheinrich-blue)
+[![GitHub Issues](https://img.shields.io/github/issues/asteriosframework/core.svg)](https://github.com/asteriosframework/core/issues)
+[![GitHub pull-requests](https://img.shields.io/github/issues-pr/asteriosframework/core.svg)](https://GitHub.com/Naereen/StrapDown.js/pull/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
+![Project Site](https://img.shields.io/website?url=https%3A%2F%2Fasteriosphp.de)
+
+</div>
+
+
+<p align="center">The AsteriosPHP Framework is a simple and flexible PHP 8.+ framework, inspired from the best features of other frameworks, in a modern and elegant way.
+    <br>
+    <a href="https://asteriosphp.de">AsteriosPHP Project Site</a>
+</p>
+
+<h2>Table of Contents</h2>
 
 - [Installation](#installation)
 - [Description](#description)
@@ -12,12 +31,13 @@
 
 ## Installation
 
-This framework is ready to use it with [ddev](https://ddev.readthedocs.io/en/stable/).
+This framework is ready to use it with [ddev](https://ddev.readthedocs.io/en/stable/)
+or with VScode DevContainer.
 
 *Repository installtion*
 
 ```bash
-$ git clone git@gitlab.com:asteriosframework/core.git
+$ git clone git@github.com:asteriosframework/core.git
 ```
 
 *Composer installation*

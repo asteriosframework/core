@@ -33,7 +33,9 @@ class CommandRegistry implements CommandRegistryInterface
         foreach (get_declared_classes() as $class)
         {
             if (!is_subclass_of($class, CommandInterface::class))
+            {
                 continue;
+            }
 
             $ref = new ReflectionClass($class);
             $attrs = $ref->getAttributes(Command::class);
