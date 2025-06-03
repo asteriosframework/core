@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace Asterios\Core\Cli\Builder;
 
@@ -36,9 +37,10 @@ trait CommandsBuilderTrait
             $grouped[$group][] = $registeredCommand;
         }
 
+
         foreach ($grouped as &$commands)
         {
-            usort($commands, static fn($a, $b) => strcmp($a['name'], $b['name']));
+            usort($commands, static fn ($a, $b) => strcmp($a['name'], $b['name']));
         }
         unset($commands);
 
