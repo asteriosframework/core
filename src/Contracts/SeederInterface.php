@@ -27,7 +27,7 @@ interface SeederInterface
     public function getErrors(): array;
 
     /**
-     * @return string[]
+     * @return array<array<string>>
      */
     public function getMessages(): array;
 

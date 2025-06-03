@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace Asterios\Core\Cli\Builder;
 
@@ -6,12 +7,13 @@ use Asterios\Core\Asterios;
 use Asterios\Core\Cli\CommandRegistry;
 use Asterios\Core\Contracts\Cli\CommandRegistryInterface;
 
+/** @codeCoverageIgnore */
 trait CommandsBuilderTrait
 {
     protected ColorBuilder $colorBuilder;
     protected ?CommandRegistryInterface $commandRegistry = null;
 
-    public function printHeader(): void
+    protected function printHeader(): void
     {
         $text = Asterios::NAME . ' CLI';
         echo str_repeat('=', mb_strlen($text)) . PHP_EOL;
@@ -24,7 +26,7 @@ trait CommandsBuilderTrait
     /**
      * @inheritDoc
      */
-    public function printTable(string $prefix = 'asterios'): void
+    protected function printTable(string $prefix = 'asterios'): void
     {
         $registeredCommands = $this->getRegisteredCommands();
         $grouped = [];
@@ -34,6 +36,7 @@ trait CommandsBuilderTrait
             $group = $registeredCommand['group'] ?? 'General';
             $grouped[$group][] = $registeredCommand;
         }
+
 
         foreach ($grouped as &$commands)
         {
@@ -61,7 +64,7 @@ trait CommandsBuilderTrait
     /**
      * @inheritDoc
      */
-    public function printError(string $message, string $context = ''): void
+    protected function printError(string $message, string $context = ''): void
     {
         $symbol = '❌ ERROR';
         $line = str_repeat('─', 60);
@@ -93,7 +96,7 @@ trait CommandsBuilderTrait
     /**
      * @inheritDoc
      */
-    public function printDataTable(array $groups): void
+    protected function printDataTable(array $groups): void
     {
         foreach ($groups as $group => $rows)
         {
@@ -136,7 +139,7 @@ trait CommandsBuilderTrait
     /**
      * @inheritDoc
      */
-    public function printListTable(string $title, array $items, string $keyField, string $valueField): void
+    protected function printListTable(string $title, array $items, string $keyField, string $valueField): void
     {
         echo $this->color()
             ->cyan()
@@ -298,13 +301,45 @@ trait CommandsBuilderTrait
                 ->apply($value . PHP_EOL);
     }
 
-    public function setCommandRegistry(CommandRegistryInterface $registry): void
+    protected function setCommandRegistry(CommandRegistryInterface $registry): void
     {
         $this->commandRegistry = $registry;
     }
 
-    public function getRegisteredCommands(): array
+    protected function getRegisteredCommands(): array
     {
         return ($this->commandRegistry ?? new CommandRegistry())->all();
+    }
+
+    protected function generateFile(string $targetPath, string $stubPath, array $replacements): bool
+    {
+        if ($this->fileExists($stubPath))
+        {
+            return false;
+        }
+
+        $content = $this->readFile($stubPath);
+
+        foreach ($replacements as $search => $replace)
+        {
+            $content = str_replace($search, $replace, $content);
+        }
+
+        return $this->writeFile($targetPath, $content);
+    }
+
+    protected function fileExists(string $path): bool
+    {
+        return file_exists($path);
+    }
+
+    protected function readFile(string $path): string
+    {
+        return file_get_contents($path);
+    }
+
+    protected function writeFile(string $path, string $content): bool
+    {
+        return file_put_contents($path, $content) !== false;
     }
 }

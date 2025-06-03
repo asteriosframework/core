@@ -25,10 +25,12 @@ class CommandRegistry implements CommandRegistryInterface
 
         $files = $this->getAllPhpFiles(__DIR__ . '/Commands');
 
+        // @codeCoverageIgnoreStart
         foreach ($files as $file)
         {
             require_once $file;
         }
+        // @codeCoverageIgnoreEnd
 
         foreach (get_declared_classes() as $class)
         {
@@ -40,10 +42,12 @@ class CommandRegistry implements CommandRegistryInterface
             $ref = new ReflectionClass($class);
             $attrs = $ref->getAttributes(Command::class);
 
+            // @codeCoverageIgnoreStart
             if (empty($attrs))
             {
                 continue;
             }
+            // @codeCoverageIgnoreEnd
 
             /** @var Command $attr */
             $attr = $attrs[0]->newInstance();
@@ -80,7 +84,7 @@ class CommandRegistry implements CommandRegistryInterface
      * @param string $dir
      * @return array
      */
-    protected function getAllPhpFiles(string $dir): array
+    public function getAllPhpFiles(string $dir): array
     {
         $files = [];
         $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
