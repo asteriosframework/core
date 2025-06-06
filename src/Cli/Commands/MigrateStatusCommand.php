@@ -18,23 +18,32 @@ class MigrateStatusCommand extends BaseCommand
 {
     use CommandsBuilderTrait;
 
+    private Migration $migration;
+
+    public function __construct(?Migration $migration = null)
+    {
+        parent::__construct();
+        $this->migration = $migration ?? new Migration();
+    }
+
     public function handle(?string $argument): void
     {
         $this->printHeader();
 
-        $migration = new Migration();
-        $ranMigrations = $migration->getRanMigrations();
-        $allMigrationFiles = $migration->getAllMigrationFiles();
+        $ranMigrations = $this->migration->getRanMigrations();
+        $allMigrationFiles = $this->migration->getAllMigrationFiles();
 
         $statusList = [];
 
         foreach ($allMigrationFiles as $migrationFile)
         {
             $migrationName = pathinfo($migrationFile, PATHINFO_FILENAME);
-            $isRan = $migration->hasMigrated($ranMigrations, $migrationName);
+            $isRan = $this->migration->hasMigrated($ranMigrations, $migrationName);
 
             $statusList[] = [
-                'Status' => $isRan ? CliStatusIcon::Success->icon() . 'Migrated' : CliStatusIcon::Pending->icon() . 'Pending',
+                'Status' => $isRan
+                    ? CliStatusIcon::Success->icon() . 'Migrated'
+                    : CliStatusIcon::Pending->icon() . 'Pending',
                 'Migration' => $migrationName,
             ];
         }
