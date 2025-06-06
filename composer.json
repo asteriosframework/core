@@ -37,7 +37,7 @@
   },
   "require": {
     "vanilla/htmlawed": "2.2.15",
-    "mobiledetect/mobiledetectlib": "3.74.3",
+    "mobiledetect/mobiledetectlib": "4.8.09",
     "ext-mysqli": "*",
     "ext-curl": "*",
     "firebase/php-jwt": "^6.10"
