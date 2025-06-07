@@ -73,7 +73,7 @@ RUN chown -R $UNAME:$UNAME /home/$UNAME/.venv /home/vscode /etc/php83 /var/log/p
 
 RUN sed -i 's/^user = .*/user = vscode/' /etc/php83/php-fpm.d/www.conf && \
     sed -i 's/^group = .*/group = vscode/' /etc/php83/php-fpm.d/www.conf && \
-    sed -i -E -e 's/^;(zend_extension=xdebug\.so)$/\1/g' /etc/php83/conf.d/50_xdebug.ini 
+    sed -i -E -e 's/^;(zend_extension=xdebug\.so)$/\1/g' /etc/php83/conf.d/50_xdebug.ini
 
 WORKDIR /var/www
 USER $UNAME
@@ -81,4 +81,3 @@ USER $UNAME
 EXPOSE 9000
 
 CMD ["php-fpm83", "--nodaemonize", "--fpm-config", "/etc/php83/php-fpm.conf"]
-
