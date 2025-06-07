@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine
+FROM alpine:latest
 ARG UNAME
 ARG UID
 ARG GID
@@ -30,7 +30,9 @@ RUN apk update && \
     nodejs \
     npm
 
-RUN apk add composer \
+RUN apk add php83 \
+    php83-fpm \
+    php83-bcmath \
     php83-curl \
     php83-iconv \
     php83-mbstring \
@@ -44,28 +46,39 @@ RUN apk add composer \
     php83-pecl-xdebug \
     php83-tokenizer \
     php83-dom \
+    php83-simplexml \
+    php83-json \
     php83-xml \
     php83-xmlreader \
     php83-xmlwriter \
+    php83-pecl-ast \
     --repository https://dl-cdn.alpinelinux.org/alpine/edge/community
+
 RUN apk add libcurl \
     --repository https://dl-cdn.alpinelinux.org/alpine/edge/main
 
-RUN cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
-
-# Create vscode user with home directory
+# User mit /bin/bash als Shell anlegen (funktioniert, wenn bash installiert ist)
 RUN groupadd -g $GID -o $UNAME && useradd -m -u $UID -g $GID -s /bin/bash $UNAME
 
 # Install pre-commit in user-local directory to avoid PEP 668 error
-RUN python -m venv /home/$UNAME/.venv && \
+RUN python3 -m venv /home/$UNAME/.venv && \
     . /home/$UNAME/.venv/bin/activate && \
     /home/$UNAME/.venv/bin/pip install --upgrade pip && \
     pip install pre-commit && \
     deactivate
-RUN chown -R $UNAME:$UNAME /home/$UNAME/.venv
+RUN chown -R $UNAME:$UNAME /home/$UNAME/.venv /home/vscode /etc/php83 /var/log/php83
 
-# Set working directory
+# Optional: eigene php.ini kopieren
+# COPY php.ini /etc/php83/php.ini
+
+RUN sed -i 's/^user = .*/user = vscode/' /etc/php83/php-fpm.d/www.conf && \
+    sed -i 's/^group = .*/group = vscode/' /etc/php83/php-fpm.d/www.conf && \
+    sed -i -E -e 's/^;(zend_extension=xdebug\.so)$/\1/g' /etc/php83/conf.d/50_xdebug.ini 
+
 WORKDIR /var/www
+USER $UNAME
 
-# Expose PHP-FPM port
 EXPOSE 9000
+
+CMD ["php-fpm83", "--nodaemonize", "--fpm-config", "/etc/php83/php-fpm.conf"]
+
