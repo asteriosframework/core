@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Asterios\Core;
@@ -23,7 +24,7 @@ class Security
      * @param mixed $value Input value to clean
      * @param string|null $filters Filter; example: xss_clean
      * @param string $type Type of filter: input_filter, output_filter
-     * @return mixed;
+     * @return mixed
      * @throws Exception\ConfigLoadException
      */
     public static function clean($value, ?string $filters = null, string $type = 'input_filter')

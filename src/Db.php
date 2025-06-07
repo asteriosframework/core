@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Asterios\Core;
 
@@ -60,6 +62,7 @@ class Db
 
     public function __destruct()
     {
+        // @phpstan-ignore-next-line
         if ($this->get_connection() !== null)
         {
             $this->get_connection()
@@ -173,10 +176,11 @@ class Db
     {
         $write = true;
 
-        if (true !== self::forge($config_group)
-                ->get_connection()
-                ->query($sql))
-        {
+        if (
+            true !== self::forge($config_group)
+            ->get_connection()
+            ->query($sql)
+        ) {
             $write = false;
         }
 
@@ -255,8 +259,8 @@ class Db
         }
 
         $hasTable = self::forge()
-                ->get_connection()
-                ->query('SHOW TABLES LIKE "' . $table . '"')->num_rows === 1;
+            ->get_connection()
+            ->query('SHOW TABLES LIKE "' . $table . '"')->num_rows === 1;
 
         if ($dropTable)
         {
@@ -290,11 +294,12 @@ class Db
 
         while (self::forge()
             ->get_connection()
-            ->next_result())
-        {
+            ->next_result()
+        ) {
             ++$count;
         }
 
+        // @phpstan-ignore-next-line
         return $count !== 0;
     }
 

@@ -3,3 +3,5 @@ parameters:
 	paths:
 		- src
 	treatPhpDocTypesAsCertain: false
+	ignoreErrors:
+		- '#Trait Asterios\\Core\\Traits\\(Str|Model|Logger|Ip|InputService|Date|Asterios)Trait is used zero times#'

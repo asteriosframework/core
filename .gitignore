@@ -11,3 +11,5 @@ phpunit-coverage.xml
 phpunit-report.xml
 .vscode/
 .psonoci.toml
+coverage.clover.xml
+phpinfo.html

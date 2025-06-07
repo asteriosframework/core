@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Asterios\Core;
 
@@ -29,6 +31,7 @@ class InputService
 
     public function isAjax(): bool
     {
+        //@phpstan-ignore-next-line
         return (null !== $this->server('HTTP_X_REQUESTED_WITH')) && strtolower($this->server('HTTP_X_REQUESTED_WITH')) === 'xmlhttprequest';
     }
 

@@ -18,7 +18,7 @@
                 "github.vscode-github-actions"
             ],
             "settings": {
-                "php.validate.executablePath": "/usr/local/bin/php"
+                "php.validate.executablePath": "/usr/bin/php"
             }
         }
     },
