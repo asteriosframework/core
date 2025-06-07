@@ -54,7 +54,7 @@ class Session
             return $return;
         }
 
-        is_object($key) and $key = (string)$key;
+        is_object($key) && ($key = (string)$key);
 
         if (array_key_exists($key, $array))
         {

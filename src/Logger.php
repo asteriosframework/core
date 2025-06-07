@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Asterios\Core;
 
@@ -152,6 +154,7 @@ class Logger
             return;
         }
         /** @var false|string $time */
+        // @phpstan-ignore-next-line
         $time = date($this->options['logFormat']);
 
         $context = json_encode($args['context'], JSON_THROW_ON_ERROR);

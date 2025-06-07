@@ -1,7 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Asterios\Core
-{
+declare(strict_types=1);
+
+namespace Asterios\Core {
     /**
      * @return array|false
      */
@@ -11,8 +12,7 @@ namespace Asterios\Core
     }
 }
 
-namespace Asterios\Test
-{
+namespace Asterios\Test {
 
     use Asterios\Core\Exception\JWTException;
     use Asterios\Core\JWT;
@@ -66,8 +66,10 @@ namespace Asterios\Test
                 ->setSecretKey('exampleSecretKey')
                 ->generate([]);
 
-            self::assertEquals('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjAsImV4cCI6MzYwMCwiZGF0YSI6W119.8N4FnIowS8ZO3Ul5-9VKSXPFIIXpC0UbFUJeMHrhqHw',
-                $actual);
+            self::assertEquals(
+                'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjAsImV4cCI6MzYwMCwiZGF0YSI6W119.8N4FnIowS8ZO3Ul5-9VKSXPFIIXpC0UbFUJeMHrhqHw',
+                $actual
+            );
         }
 
         /**
@@ -81,8 +83,10 @@ namespace Asterios\Test
                 ->setExpire(300)
                 ->generate([]);
 
-            self::assertEquals('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjAsImV4cCI6MzAwLCJkYXRhIjpbXX0.5O1cZCZwxI3_MmTCDEh5bepygLhB2uicYfq20gO_iwA',
-                $actual);
+            self::assertEquals(
+                'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjAsImV4cCI6MzAwLCJkYXRhIjpbXX0.5O1cZCZwxI3_MmTCDEh5bepygLhB2uicYfq20gO_iwA',
+                $actual
+            );
         }
 
         /**
@@ -96,8 +100,10 @@ namespace Asterios\Test
                 ->setAlgorithm('HS512')
                 ->generate([]);
 
-            self::assertEquals('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjAsImV4cCI6MzYwMCwiZGF0YSI6W119.tB14Q44Z1fQr4YbwJA7BSypt5QjRBNOkOK_mZRuIPhUmJvcUR_SN04lQpjN-hGxYX0p0WSXxYc-Ttsi_VDZtpA',
-                $actual);
+            self::assertEquals(
+                'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjAsImV4cCI6MzYwMCwiZGF0YSI6W119.tB14Q44Z1fQr4YbwJA7BSypt5QjRBNOkOK_mZRuIPhUmJvcUR_SN04lQpjN-hGxYX0p0WSXxYc-Ttsi_VDZtpA',
+                $actual
+            );
         }
 
         /**
@@ -146,7 +152,6 @@ namespace Asterios\Test
 
             $actual = $this->testedClass->getDecodedData();
             self::assertEquals(['username' => 'john.doe'], $actual);
-
         }
 
         /**
@@ -156,8 +161,10 @@ namespace Asterios\Test
         {
             $actual = $this->testedClass->getBearerToken();
 
-            self::assertEquals('9876543210',
-                $actual);
+            self::assertEquals(
+                '9876543210',
+                $actual
+            );
         }
 
         /**

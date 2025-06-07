@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Asterios\Core;
 
@@ -134,7 +136,7 @@ class Str implements StrInterface, SingletonInterface
                 return $string;
             case 'unique':
                 return md5(uniqid((string)mt_rand(), true));
-            case 'sha1' :
+            case 'sha1':
                 return sha1(uniqid((string)mt_rand(), true));
             case 'uuid':
                 $pool = ['8', '9', 'a', 'b'];
@@ -192,7 +194,7 @@ class Str implements StrInterface, SingletonInterface
         {
             if (array_key_exists($key, $array))
             {
-                $remove or $return[$key] = $array[$key];
+                $remove || ($return[$key] = $array[$key]);
 
                 if ($remove)
                 {

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Asterios\Core;
@@ -212,6 +213,7 @@ class Router
         {
             $headers = getallheaders();
 
+            // @phpstan-ignore-next-line
             if (false !== $headers)
             {
                 return $headers;
