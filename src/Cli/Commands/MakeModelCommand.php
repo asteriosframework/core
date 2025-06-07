@@ -4,7 +4,6 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
-use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 
 #[Command(
     name: 'make:model',
@@ -14,8 +13,6 @@ use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 )]
 class MakeModelCommand extends BaseCommand
 {
-    use CommandsBuilderTrait;
-
     public function handle(?string $argument): void
     {
         $this->printHeader();

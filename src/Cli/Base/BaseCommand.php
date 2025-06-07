@@ -4,7 +4,7 @@ namespace Asterios\Core\Cli\Base;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Builder\ColorBuilder;
-use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
+use Asterios\Core\Traits\Cli\Commands\CommandsBuilderTrait;
 use Asterios\Core\Cli\Support\ArgumentParserTrait;
 use Asterios\Core\Contracts\CommandInterface;
 

@@ -1,9 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Asterios\Core\Cli\Builder;
+namespace Asterios\Core\Traits\Cli\Commands;
 
 use Asterios\Core\Asterios;
+use Asterios\Core\Cli\Builder\ColorBuilder;
 use Asterios\Core\Cli\CommandRegistry;
 use Asterios\Core\Contracts\Cli\CommandRegistryInterface;
 
@@ -341,5 +342,13 @@ trait CommandsBuilderTrait
     protected function writeFile(string $path, string $content): bool
     {
         return file_put_contents($path, $content) !== false;
+    }
+
+    protected function ensureDirectoryExists(string $dir): void
+    {
+        if (!is_dir($dir) && !mkdir($dir, 0777, true) && !is_dir($dir))
+        {
+            throw new \RuntimeException(sprintf('Migration directory "%s" was not created', $dir));
+        }
     }
 }

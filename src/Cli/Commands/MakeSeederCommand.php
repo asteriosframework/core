@@ -4,7 +4,6 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
-use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 use Asterios\Core\Db\Seeder;
 
 #[Command(
@@ -15,8 +14,6 @@ use Asterios\Core\Db\Seeder;
 )]
 class MakeSeederCommand extends BaseCommand
 {
-    use CommandsBuilderTrait;
-
     public function handle(?string $argument): void
     {
         $this->printHeader();

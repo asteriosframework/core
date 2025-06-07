@@ -4,7 +4,6 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
-use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 use Asterios\Core\Db\Seeder;
 use Asterios\Core\Enum\CliStatusIcon;
 
@@ -16,8 +15,6 @@ use Asterios\Core\Enum\CliStatusIcon;
 )]
 class DbSeedCommand extends BaseCommand
 {
-    use CommandsBuilderTrait;
-
     /** @codeCoverageIgnoreSart */
     public function handle(?string $argument): void
     {

@@ -4,7 +4,6 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
-use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 
 #[Command(
     name: 'make:migration',
@@ -14,8 +13,6 @@ use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 )]
 class MakeMigrationCommand extends BaseCommand
 {
-    use CommandsBuilderTrait;
-
     public function handle(?string $argument): void
     {
         $this->printHeader();
@@ -36,10 +33,7 @@ class MakeMigrationCommand extends BaseCommand
 
         $filename = "{$timestamp}_{$formattedName}.php";
 
-        if (!is_dir($appMigrationDirectory) && !mkdir($appMigrationDirectory, 0777, true) && !is_dir($appMigrationDirectory))
-        {
-            throw new \RuntimeException(sprintf('Migration directory "%s" was not created', $appMigrationDirectory));
-        }
+        $this->ensureDirectoryExists($appMigrationDirectory);
 
         $filepath = $appMigrationDirectory . $filename;
 
@@ -80,8 +74,7 @@ return new class {
     }
 };
 PHP;
-
-        file_put_contents($filepath, $content);
+        $this->writeFile($filepath, $content);
 
         echo "✅  Migration created: $filepath\n";
     }
