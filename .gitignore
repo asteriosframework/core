@@ -13,3 +13,4 @@ phpunit-report.xml
 .psonoci.toml
 coverage.clover.xml
 phpinfo.html
+.phan/.file

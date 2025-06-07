@@ -52,6 +52,8 @@ RUN apk add php83 \
     php83-xmlreader \
     php83-xmlwriter \
     php83-pecl-ast \
+    php83-pcntl \
+    php83-posix \
     --repository https://dl-cdn.alpinelinux.org/alpine/edge/community
 
 RUN apk add libcurl \
