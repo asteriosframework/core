@@ -62,18 +62,22 @@ jobs:
           composer run-script phpstan
 
       - name: Run tests
-        run: composer run-script tests:ci
+        run: |
+          composer run-script tests:ci
+          composer run-script test:phpspec
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4.6.2
         with:
           name: coverage-report
-          path: coverage.clover.xml
+          path: |
+            coverage.clover.xml
+            spec.coverage.clover.xml
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5.4.3
         with:
-          files: coverage.clover.xml
+          files: coverage.clover.xml, spec.coverage.clover.xml
           flags: unittests
           token: ${{ steps.codecov-token.outputs.secret1 }}
           slug: asteriosframework/core

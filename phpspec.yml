@@ -4,12 +4,14 @@ extensions:
     format:
       - text
       - html
-      - cobertura
+      - clover
     output:
-      html: coverage
-      cobertura: cobertura.xml
+      html: spec.coverage
+      clover: spec.coverage.clover.xml
     whitelist:
-      - src
+      - src/Bootstrap
+      - src/DI
+      - src/Helper
 
 suites:
   test_suite:
