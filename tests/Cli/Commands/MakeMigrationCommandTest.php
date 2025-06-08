@@ -97,4 +97,3 @@ class MakeMigrationCommandTest extends MockeryTestCase
         self::assertStringContainsString('Example: asterios make:migration create_users_table', $output);
     }
 }
-
