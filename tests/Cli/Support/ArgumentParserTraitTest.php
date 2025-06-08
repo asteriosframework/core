@@ -16,7 +16,7 @@ class ArgumentParserTraitTest extends MockeryTestCase
 
     protected function makeInstance(array $args): object
     {
-        return new class($args) {
+        return new class ($args) {
             use ArgumentParserTrait;
 
             public function __construct(array $args)
