@@ -67,12 +67,4 @@ PHP;
     {
         $this->args = $args;
     }
-
-    /** @codeCoverageIgnoreSart */
-    private function stringToNamespace(string $input): string
-    {
-        $parts = preg_split('/(?=[A-Z])/', $input, -1, PREG_SPLIT_NO_EMPTY);
-        return implode('\\', $parts);
-    }
-    /** @codeCoverageIgnoreEnd  */
 }
