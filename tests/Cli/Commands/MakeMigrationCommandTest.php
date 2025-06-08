@@ -94,7 +94,7 @@ class MakeMigrationCommandTest extends MockeryTestCase
         $command->handle(null);
         $output = ob_get_clean();
 
-        $this->assertStringContainsString('Example: asterios make:migration create_users_table', $output);
+        self::assertStringContainsString('Example: asterios make:migration create_users_table', $output);
     }
 }
 

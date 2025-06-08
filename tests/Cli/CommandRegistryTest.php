@@ -23,9 +23,9 @@ class CommandRegistryTest extends MockeryTestCase
         $registry = new CommandRegistry();
         $result = $registry->getAllPhpFiles($dir);
 
-        $this->assertIsArray($result);
-        $this->assertCount(1, $result);
-        $this->assertStringEndsWith('file1.php', $result[0]);
+        self::assertIsArray($result);
+        self::assertCount(1, $result);
+        self::assertStringEndsWith('file1.php', $result[0]);
 
         unlink($dir . '/file1.php');
         unlink($dir . '/file2.txt');
@@ -53,7 +53,7 @@ class CommandRegistryTest extends MockeryTestCase
         $this->assertNotEmpty($commands);
 
         $cmd = $commands[0];
-        $this->assertStringContainsString('Command', $cmd['class']);
+        self::assertStringContainsString('Command', $cmd['class']);
     }
 
     /**
@@ -73,12 +73,10 @@ class CommandRegistryTest extends MockeryTestCase
         $foundByAlias = $mock->findByNameOrAlias('t:e');
         $notFound = $mock->findByNameOrAlias('nonexistent');
 
-        $this->assertNotNull($foundByName);
-        $this->assertSame('test:example', $foundByName['name']);
-
-        $this->assertNotNull($foundByAlias);
-        $this->assertSame('test:example', $foundByAlias['name']);
-
-        $this->assertNull($notFound);
+        self::assertNotNull($foundByName);
+        self::assertSame('test:example', $foundByName['name']);
+        self::assertNotNull($foundByAlias);
+        self::assertSame('test:example', $foundByAlias['name']);
+        self::assertNull($notFound);
     }
 }

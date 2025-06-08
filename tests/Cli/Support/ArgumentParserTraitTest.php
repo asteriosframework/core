@@ -16,7 +16,7 @@ class ArgumentParserTraitTest extends MockeryTestCase
 
     protected function makeInstance(array $args): object
     {
-        return new class($args) {
+        return new class ($args) {
             use ArgumentParserTrait;
 
             public function __construct(array $args)
@@ -24,7 +24,6 @@ class ArgumentParserTraitTest extends MockeryTestCase
                 $this->parseArguments($args);
             }
 
-            // Expose protected methods for testing
             public function has(string $flag): bool
             {
                 return $this->hasFlag($flag);
