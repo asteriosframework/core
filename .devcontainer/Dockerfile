@@ -81,5 +81,8 @@ WORKDIR /var/www
 USER $UNAME
 
 EXPOSE 9000
+EXPOSE 9003
+EXPOSE 9081
+EXPOSE 9080
 
 CMD ["php-fpm83", "--nodaemonize", "--fpm-config", "/etc/php83/php-fpm.conf"]

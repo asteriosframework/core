@@ -1,0 +1,17 @@
+---
+extensions:
+  FriendsOfPhpSpec\PhpSpec\CodeCoverage\CodeCoverageExtension:
+    format:
+      - text
+      - html
+      - cobertura
+    output:
+      html: coverage
+      cobertura: cobertura.xml
+    whitelist:
+      - src
+
+suites:
+  test_suite:
+    namespace: Asterios\Core
+    psr4_prefix: Asterios\Core
