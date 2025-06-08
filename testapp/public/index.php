@@ -2,14 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Asterios\Testapp\Public;
-
-use DateTime;
+require_once '../vendor/autoload.php';
 
 // bootstrap the application
-$bootstrapPath = __DIR__ . str_replace('/', DIRECTORY_SEPARATOR, '/../../src/Bootstrap/Bootstrap.php');
-require_once $bootstrapPath;
+$bootstrapPath = realpath(__DIR__ . '/../vendor/asterios/core/src');
+require_once $bootstrapPath . '/Bootstrap/Bootstrap.php';
+require_once $bootstrapPath . '/Helper/CoreHelper.php';
 
+$loadedClasses = get_declared_classes();
+$expectedClasses = array_filter($loadedClasses, function ($class) {
+    return str_starts_with($class, 'Asterios\\');
+});
+var_dump($expectedClasses);
+
+use DateTime;
 use Asterios\Core\Asterios;
 use Asterios\Core\Bootstrap\Bootstrap;
 use DateTimeInterface;
@@ -26,6 +32,7 @@ if (config('app.copyright', 'false') === 'true') {
 
 echo 'Project directory: ' . base_path() . '<br>' . PHP_EOL;
 echo 'App directory: ' . app_path() . '<br>' . PHP_EOL;
+echo 'App Environment: ' . config('environment') . '<br>' . PHP_EOL;
 
 $toResolve = new class() {
     public function __invoke(): DateTime

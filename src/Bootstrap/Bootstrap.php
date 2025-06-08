@@ -1,11 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Asterios\Core\Bootstrap;
 
 use Throwable;
-
-require __DIR__ . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, '../../vendor/autoload.php');
-require __DIR__ . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, '../Helper/CoreHelper.php');
 
 error_reporting(-1);
 ini_set('display_errors', 1);
@@ -26,8 +25,7 @@ final class Bootstrap
     {
         self::$basePath = $basePath;
 
-        try
-        {
+        try {
             self::$container = new Container();
 
             self::$container->set(CoreHelper::class, CoreHelper::class, ['basePath' => $basePath]);
@@ -52,9 +50,7 @@ final class Bootstrap
             self::$asterios->init();
 
             self::$isInitialized = true;
-        }
-        catch (Throwable $e)
-        {
+        } catch (Throwable $e) {
             echo $e->getMessage() . PHP_EOL;
             echo 'Execution abort' . PHP_EOL;
         }
