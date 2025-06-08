@@ -67,7 +67,7 @@ class TimestampsBuilder implements TimestampsBuilderInterface
             $this->getPrecisionString($this->updatedAt),
             $this->isNullable
                 ? 'NULL DEFAULT NULL'
-                : 'DEFAULT CURRENT_TIMESTAMP' . $this->getPrecisionString($this->updatedAt) . ' ON UPDATE CURRENT_TIMESTAMP' . $this->getPrecisionString($this->updatedAt)
+                : 'DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP' . $this->getPrecisionString($this->updatedAt)
         ));
     }
 
