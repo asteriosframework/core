@@ -29,7 +29,7 @@ class MigrateCommand extends BaseCommand
             return;
         }
 
-        $migration = new Migration();
+        $migration = $this->createMigration();
 
         if ($this->hasFlag('--force'))
         {
@@ -58,4 +58,11 @@ class MigrateCommand extends BaseCommand
             }
         }
     }
+
+    /** @codeCoverageIgnoreSart */
+    protected function createMigration(): Migration
+    {
+        return new Migration();
+    }
+    /** @codeCoverageIgnoreEnd */
 }

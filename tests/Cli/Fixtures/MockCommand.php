@@ -6,7 +6,7 @@ use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Contracts\CommandInterface;
 
 #[Command(name: 'test:example', description: 'An example command', group: 'testing', aliases: ['t:e'])]
-class MockCommand implements CommandInterface
+class fdffh implements CommandInterface
 {
     public function handle(?string $argument): void
     {
