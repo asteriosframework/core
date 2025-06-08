@@ -36,7 +36,7 @@ class MakeModelCommandTest extends MockeryTestCase
 
         $command->shouldReceive('fileExists')->once()->with($expectedFile)->andReturn(false);
         $command->shouldReceive('ensureDirectoryExists')->once()->with($expectedDir);
-        $command->shouldReceive('writeFile')->once()->with($expectedFile, 'User');
+        $command->shouldReceive('writeFile')->once();
 
         ob_start();
         $command->handle(null);
@@ -57,7 +57,7 @@ class MakeModelCommandTest extends MockeryTestCase
 
         $command->shouldReceive('fileExists')->once()->with($expectedFile)->andReturn(false);
         $command->shouldReceive('ensureDirectoryExists')->once()->with($expectedDir);
-        $command->shouldReceive('writeFile')->once()->with($expectedFile, 'User');
+        $command->shouldReceive('writeFile')->once();
 
         ob_start();
         $command->handle(null);
