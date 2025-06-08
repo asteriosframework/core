@@ -25,7 +25,8 @@ final class Bootstrap
     {
         self::$basePath = $basePath;
 
-        try {
+        try
+        {
             self::$container = new Container();
 
             self::$container->set(CoreHelper::class, CoreHelper::class, ['basePath' => $basePath]);
@@ -50,7 +51,9 @@ final class Bootstrap
             self::$asterios->init();
 
             self::$isInitialized = true;
-        } catch (Throwable $e) {
+        }
+        catch (Throwable $e)
+        {
             echo $e->getMessage() . PHP_EOL;
             echo 'Execution abort' . PHP_EOL;
         }
