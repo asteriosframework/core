@@ -26,6 +26,9 @@
     "optimize-autoloader": true
   },
   "autoload": {
+    "exclude-from-classmap": [
+      "testapp/"
+    ],
     "psr-4": {
       "Asterios\\Core\\": "src/"
     }

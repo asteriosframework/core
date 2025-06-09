@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/asteriosframework/core.git",
-                "reference": "3f7585f499150ffd1fb154e66f1f2db93c579096"
+                "reference": "fdd88dda6a2b3a243afb336dc4f0e4e41bb165c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/asteriosframework/core/zipball/3f7585f499150ffd1fb154e66f1f2db93c579096",
-                "reference": "3f7585f499150ffd1fb154e66f1f2db93c579096",
+                "url": "https://api.github.com/repos/asteriosframework/core/zipball/fdd88dda6a2b3a243afb336dc4f0e4e41bb165c1",
+                "reference": "fdd88dda6a2b3a243afb336dc4f0e4e41bb165c1",
                 "shasum": ""
             },
             "require": {
@@ -115,7 +115,7 @@
                 "source": "https://github.com/asteriosframework/core/tree/feature/di-bootstrap",
                 "issues": "https://github.com/asteriosframework/core/issues"
             },
-            "time": "2025-06-08T09:35:21+00:00"
+            "time": "2025-06-08T15:03:27+00:00"
         },
         {
             "name": "firebase/php-jwt",

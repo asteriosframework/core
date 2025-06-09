@@ -12,6 +12,7 @@ ini_set('display_errors', 1);
 use Asterios\Core\Asterios;
 use Asterios\Core\Config;
 use Asterios\Core\DI\Container;
+use Asterios\Core\Env;
 use Asterios\Core\Helper\CoreHelper;
 
 final class Bootstrap
@@ -21,34 +22,54 @@ final class Bootstrap
     public static Asterios $asterios;
     public static string $basePath;
 
+    public static function isInitialized(): bool
+    {
+        return self::$isInitialized;
+    }
+
+    public static function getAsterios(): Asterios
+    {
+        return self::$asterios;
+    }
+
+    public static function getContainer(): Container
+    {
+        return self::$container ?? self::$container = new Container();
+    }
+
+    public static function getBasePath(): string
+    {
+        return self::$basePath;
+    }
+
     public static function init(string $basePath): void
     {
         self::$basePath = $basePath;
 
         try
         {
-            self::$container = new Container();
-
-            self::$container->set(CoreHelper::class, CoreHelper::class, ['basePath' => $basePath]);
-
-            self::$container->set(Config::class, Config::class);
+            self::getContainer()
+                ->set(CoreHelper::class, CoreHelper::class, ['basePath' => self::getBasePath()])
+                ->set(Config::class, Config::class)
+                ->set(Env::class, Env::class, ['envFile' => self::getBasePath() . '/.env']);
 
             /** @var \Asterios\Core\Config $configObj */
             $configObj = self::$container->get(Config::class);
             $configObj->set_config_path(normalize_path(self::$basePath . '/config'));
 
-            self::$container->set(Asterios::class, Asterios::class);
-            self::$asterios = self::$container->get(Asterios::class);
+            self::$asterios = new Asterios();
+            self::$asterios->setEnvironment(env('ENVIRONMENT', Asterios::DEVELOPMENT));
+            self::$asterios->setTimezone(env('TIMEZONE', 'UTC'));
 
             /**
-             * @var object{environment:string, timezone: string}
+             * @var  CoreHelper $configHelper
              */
-            $config = self::$asterios->config();
-
-            self::$asterios->setEnvironment($config->environment);
-            self::$asterios->setTimezone($config->timezone);
+            $configHelper = self::$container->get(CoreHelper::class);
+            $configHelper->loadConfig();
 
             self::$asterios->init();
+
+            self::$container->set(Asterios::class, self::$asterios);
 
             self::$isInitialized = true;
         }

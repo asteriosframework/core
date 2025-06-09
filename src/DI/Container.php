@@ -2,6 +2,7 @@
 
 namespace Asterios\Core\DI;
 
+use Asterios\Core\DI\Exceptions\ContainerException;
 use Asterios\Core\DI\Exceptions\NotFoundException;
 use Asterios\Core\DI\Psr\Container\ContainerInterface;
 use ReflectionClass;
@@ -16,6 +17,8 @@ class Container implements ContainerInterface
 
     /**
      * {@inheritDoc}
+     * @throws NotFoundException — No entry was found for this identifier.
+     * @throws ContainerException — Error while retrieving the entry.
      */
     public function get($id)
     {
