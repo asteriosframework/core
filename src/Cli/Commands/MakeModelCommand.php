@@ -4,7 +4,7 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
-use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
+use Asterios\Core\Cli\Support\ArgumentParserTrait;
 
 #[Command(
     name: 'make:model',
@@ -14,13 +14,11 @@ use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 )]
 class MakeModelCommand extends BaseCommand
 {
-    use CommandsBuilderTrait;
-
     public function handle(?string $argument): void
     {
         $this->printHeader();
 
-        global $argv;
+        $argument ??= $this->getPositional(0);
 
         if (!$argument)
         {
@@ -31,32 +29,18 @@ class MakeModelCommand extends BaseCommand
         }
 
         $modelName = ucfirst($argument);
-
-        $modelNamespace = 'App\\Models';
-
-        foreach ($argv as $arg)
-        {
-            if (str_starts_with($arg, '--namespace='))
-            {
-                $modelNamespace = $this->stringToNamespace(substr($arg, strlen('--namespace=')));
-                break;
-            }
-        }
+        $modelNamespace = $this->getValue('--namespace') ?? 'App\\Models';
 
         $protectedDirectory = str_replace('/public', '', $_SERVER['DOCUMENT_ROOT']);
         $appModelDirectory = $protectedDirectory . 'app/Models/';
 
-        if (!is_dir($appModelDirectory) && !mkdir($appModelDirectory, 0755, true) && !is_dir($appModelDirectory))
-        {
-            throw new \RuntimeException(sprintf('Model directory "%s" was not created', $appModelDirectory));
-        }
+        $this->ensureDirectoryExists($appModelDirectory);
 
         $filename = $appModelDirectory . $modelName . '.php';
 
-        if (file_exists($filename))
+        if ($this->fileExists($filename))
         {
             echo "⚠️  Model '{$modelName}' already exists at \033[0;36m{$filename}\033[0m\n";
-
             return;
         }
 
@@ -74,15 +58,13 @@ class {$modelName} extends Model
 
 PHP;
 
-        file_put_contents($filename, $template);
+        $this->writeFile($filename, $template);
 
         echo "✅  Model \033[1;32m{$modelNamespace}\\{$modelName}\033[0m created at \033[0;36m{$filename}\033[0m\n";
     }
 
-    private function stringToNamespace(string $input): string
+    public function setArgs(array $args): void
     {
-        $parts = preg_split('/(?=[A-Z])/', $input, -1, PREG_SPLIT_NO_EMPTY);
-
-        return implode('\\', $parts);
+        $this->args = $args;
     }
 }

@@ -140,7 +140,7 @@ class SchemaBuilder implements SchemaBuilderInterface
     public function updatedAt(string $column = 'updated_at'): TimestampColumnBuilder
     {
         $precision = $this->getPrecision($column);
-        $this->columns[] = '`' . $column . '` TIMESTAMP' . $precision . ' DEFAULT CURRENT_TIMESTAMP' . $precision . ' ON UPDATE CURRENT_TIMESTAMP' . $precision;
+        $this->columns[] = '`' . $column . '` TIMESTAMP' . $precision . ' ON UPDATE CURRENT_TIMESTAMP' . $precision;
 
         return new TimestampColumnBuilder($this, $column);
     }

@@ -4,7 +4,6 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
-use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 use Asterios\Core\Db\Migration;
 use Asterios\Core\Enum\CliStatusIcon;
 
@@ -19,8 +18,6 @@ use Asterios\Core\Enum\CliStatusIcon;
 )]
 class MigrateCommand extends BaseCommand
 {
-    use CommandsBuilderTrait;
-
     public function handle(?string $argument): void
     {
         $this->printHeader();
@@ -32,7 +29,7 @@ class MigrateCommand extends BaseCommand
             return;
         }
 
-        $migration = new Migration();
+        $migration = $this->createMigration();
 
         if ($this->hasFlag('--force'))
         {
@@ -61,4 +58,11 @@ class MigrateCommand extends BaseCommand
             }
         }
     }
+
+    /** @codeCoverageIgnoreSart */
+    protected function createMigration(): Migration
+    {
+        return new Migration();
+    }
+    /** @codeCoverageIgnoreEnd */
 }

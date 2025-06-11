@@ -4,7 +4,7 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
-use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
+use Asterios\Core\Db\Migration;
 use Asterios\Core\Db\Seeder;
 use Asterios\Core\Enum\CliStatusIcon;
 
@@ -16,20 +16,12 @@ use Asterios\Core\Enum\CliStatusIcon;
 )]
 class DbSeedCommand extends BaseCommand
 {
-    use CommandsBuilderTrait;
-
-    /** @codeCoverageIgnoreSart */
     public function handle(?string $argument): void
     {
-        $this->handleWithSeeder(new Seeder());
-    }
 
-    // @codeCoverageIgnoreEnd
-
-    public function handleWithSeeder(Seeder $seeder): void
-    {
         $this->printHeader();
 
+        $seeder = $this->getSeeder();
         $seeder->seed();
         $messages = $seeder->getMessages();
 
@@ -48,4 +40,11 @@ class DbSeedCommand extends BaseCommand
             }
         }
     }
+
+    /** @codeCoverageIgnoreSart */
+    protected function getSeeder(): Seeder
+    {
+        return new Seeder();
+    }
+    /** @codeCoverageIgnoreEnd */
 }

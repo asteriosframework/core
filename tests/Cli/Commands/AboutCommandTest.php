@@ -6,7 +6,6 @@ use Asterios\Core\Asterios;
 use Asterios\Core\Cli\Commands\AboutCommand;
 use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
-use PHPUnit\Framework\Assert;
 
 class AboutCommandTest extends MockeryTestCase
 {
@@ -39,7 +38,7 @@ class AboutCommandTest extends MockeryTestCase
             ->once()
             ->withArgs(function ($actualData) use ($expectedData) {
 
-                Assert::assertEquals($expectedData, $actualData);
+                self::assertEquals($expectedData, $actualData);
 
                 return true;
             });

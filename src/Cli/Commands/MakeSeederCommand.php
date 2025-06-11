@@ -4,7 +4,6 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
-use Asterios\Core\Cli\Builder\CommandsBuilderTrait;
 use Asterios\Core\Db\Seeder;
 
 #[Command(
@@ -15,8 +14,6 @@ use Asterios\Core\Db\Seeder;
 )]
 class MakeSeederCommand extends BaseCommand
 {
-    use CommandsBuilderTrait;
-
     public function handle(?string $argument): void
     {
         $this->printHeader();
@@ -31,28 +28,29 @@ class MakeSeederCommand extends BaseCommand
 
         $seederName = strtolower($argument);
 
-        $seeder = new Seeder();
+        $seeder = $this->createSeeder();
         $appSeederDirectory = $seeder->getSeederPath();
 
-        if (!is_dir($appSeederDirectory) && !mkdir($appSeederDirectory, 0755, true) && !is_dir($appSeederDirectory))
-        {
-            throw new \RuntimeException(sprintf('Seeder directory "%s" was not created', $appSeederDirectory));
-        }
+        $this->ensureDirectoryExists($appSeederDirectory);
 
         $filename = $appSeederDirectory . $seederName . '.json';
 
-        if (file_exists($filename))
+        if ($this->fileExists($filename))
         {
             echo "⚠️  Seeder '{$seederName}' already exists.\n";
 
             return;
         }
 
-        file_put_contents(
-            $filename,
-            "[]\n"
-        );
+        $this->writeFile($filename, "[]\n");
 
         echo "✅  Seeder '{$seederName}' created.\n";
     }
+
+    /** @codeCoverageIgnoreSart */
+    protected function createSeeder(): Seeder
+    {
+        return new Seeder();
+    }
+    /** @codeCoverageIgnoreEnd */
 }
