@@ -1,0 +1,26 @@
+{
+    "name": "asteriosframework/testapp",
+    "description": "Testapp",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Asterios\\Testapp\\": "./"
+        }
+    },
+    "authors": [
+        {
+            "name": "Joerg Heinrich",
+            "email": "asteriosphp@jfheinrich.eu"
+        }
+    ],
+    "require": {
+        "asterios/core": "dev-feature/di-bootstrap"
+    },
+    "repositories": {
+        "asterios/core": {
+            "type": "vcs",
+            "url": "https://github.com/asteriosframework/core.git"
+        }
+    }
+}

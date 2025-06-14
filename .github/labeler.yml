@@ -56,6 +56,7 @@ test:
   - changed-files:
       - any-glob-to-any-file:
           - tests/**/*
+          - spec/**/*
 python:
   - changed-files:
       - any-glob-to-any-file:

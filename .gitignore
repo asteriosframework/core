@@ -12,4 +12,9 @@ phpunit-report.xml
 .vscode/
 .psonoci.toml
 coverage.clover.xml
+spec.coverage.clover.xml
+/spec.coverage
 phpinfo.html
+.phan/.file
+/coverage
+cobertura.xml

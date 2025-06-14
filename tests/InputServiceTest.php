@@ -27,7 +27,7 @@ class InputServiceTest extends MockeryTestCase
             $_GET[$param] = $value;
         }
 
-        $result = (new InputService)->get($param, $default);
+        $result = (new InputService())->get($param, $default);
 
         self::assertEquals($expected_result, $result);
 
@@ -39,12 +39,12 @@ class InputServiceTest extends MockeryTestCase
      */
     public function ip(): void
     {
-        $result1 = (new InputService)->ip();
+        $result1 = (new InputService())->ip();
         self::assertEquals('', $result1);
 
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
-        $result2 = (new InputService)->ip();
+        $result2 = (new InputService())->ip();
         self::assertEquals('127.0.0.1', $result2);
     }
 
@@ -56,7 +56,7 @@ class InputServiceTest extends MockeryTestCase
     {
         $_SERVER[$key] = $value;
 
-        $result = (new InputService)->realIp();
+        $result = (new InputService())->realIp();
 
         self::assertEquals($expected_value, $result);
     }
@@ -68,7 +68,7 @@ class InputServiceTest extends MockeryTestCase
     {
         $_SERVER['HTTP_X_REQUESTED_WITH'] = 'xmlhttprequest';
 
-        $result = (new InputService)->isAjax();
+        $result = (new InputService())->isAjax();
 
         self::assertTrue($result);
     }
@@ -78,12 +78,12 @@ class InputServiceTest extends MockeryTestCase
      */
     public function referrer(): void
     {
-        $result1 = (new InputService)->referrer('default referrer');
+        $result1 = (new InputService())->referrer('default referrer');
         self::assertEquals('default referrer', $result1);
 
         $_SERVER['HTTP_REFERER'] = 'original HTTP_REFERER';
 
-        $result2 = (new InputService)->referrer('default referrer');
+        $result2 = (new InputService())->referrer('default referrer');
         self::assertEquals('original HTTP_REFERER', $result2);
     }
 
@@ -92,12 +92,12 @@ class InputServiceTest extends MockeryTestCase
      */
     public function userAgent(): void
     {
-        $result1 = (new InputService)->userAgent('default useragent');
+        $result1 = (new InputService())->userAgent('default useragent');
         self::assertEquals('default useragent', $result1);
 
         $_SERVER['HTTP_USER_AGENT'] = 'original HTTP_USER_AGENT';
 
-        $result2 = (new InputService)->userAgent('default useragent');
+        $result2 = (new InputService())->userAgent('default useragent');
         self::assertEquals('original HTTP_USER_AGENT', $result2);
     }
 
@@ -106,12 +106,12 @@ class InputServiceTest extends MockeryTestCase
      */
     public function queryString(): void
     {
-        $result1 = (new InputService)->queryString('default querystring');
+        $result1 = (new InputService())->queryString('default querystring');
         self::assertEquals('default querystring', $result1);
 
         $_SERVER['QUERY_STRING'] = 'original QUERY_STRING';
 
-        $result2 = (new InputService)->queryString('default querystring');
+        $result2 = (new InputService())->queryString('default querystring');
         self::assertEquals('original QUERY_STRING', $result2);
     }
 
@@ -120,12 +120,12 @@ class InputServiceTest extends MockeryTestCase
      */
     public function phpSelf(): void
     {
-        $result1 = (new InputService)->phpSelf();
+        $result1 = (new InputService())->phpSelf();
         self::assertGreaterThan(1, strlen($result1));
 
         $_SERVER['PHP_SELF'] = 'original PHP_SELF';
 
-        $result2 = (new InputService)->phpSelf();
+        $result2 = (new InputService())->phpSelf();
         self::assertEquals('original PHP_SELF', $result2);
     }
 
@@ -140,7 +140,7 @@ class InputServiceTest extends MockeryTestCase
             $_COOKIE['cookie'] = $data;
         }
 
-        $result = (new InputService)->cookie('cookie', $default);
+        $result = (new InputService())->cookie('cookie', $default);
         self::assertEquals($expected_value, $result);
 
         unset($_COOKIE);
@@ -157,7 +157,7 @@ class InputServiceTest extends MockeryTestCase
             $_POST['data'] = $data;
         }
 
-        $result = (new InputService)->post('data', $default);
+        $result = (new InputService())->post('data', $default);
         self::assertEquals($expected_value, $result);
 
         unset($_POST);

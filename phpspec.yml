@@ -1,0 +1,19 @@
+---
+extensions:
+  FriendsOfPhpSpec\PhpSpec\CodeCoverage\CodeCoverageExtension:
+    format:
+      - text
+      - html
+      - clover
+    output:
+      html: spec.coverage
+      clover: spec.coverage.clover.xml
+    whitelist:
+      - src/Bootstrap
+      - src/DI
+      - src/Helper
+
+suites:
+  test_suite:
+    namespace: Asterios\Core
+    psr4_prefix: Asterios\Core

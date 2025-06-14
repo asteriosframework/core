@@ -51,7 +51,7 @@ class BaseCommandTest extends MockeryTestCase
             ->andReturnSelf()
             ->once();
         $mockColor->shouldReceive('apply')
-            ->andReturnUsing(fn($text) => "[[$text]]");
+            ->andReturnUsing(fn ($text) => "[[$text]]");
 
         $command = new TestCommand($mockColor);
 

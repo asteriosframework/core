@@ -26,7 +26,7 @@ namespace Asterios\Test {
         protected function setUp(): void
         {
             parent::setUp();
-            $this->testedClass = (new JWT);
+            $this->testedClass = (new JWT());
         }
 
         protected function tearDown(): void
