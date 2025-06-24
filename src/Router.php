@@ -213,7 +213,6 @@ class Router
         {
             $headers = getallheaders();
 
-            // @phpstan-ignore-next-line
             if (false !== $headers)
             {
                 return $headers;

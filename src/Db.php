@@ -62,7 +62,6 @@ class Db
 
     public function __destruct()
     {
-        // @phpstan-ignore-next-line
         if ($this->get_connection() !== null)
         {
             $this->get_connection()
@@ -299,7 +298,6 @@ class Db
             ++$count;
         }
 
-        // @phpstan-ignore-next-line
         return $count !== 0;
     }
 
