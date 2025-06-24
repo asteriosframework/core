@@ -4,13 +4,21 @@ declare(strict_types=1);
 
 namespace Asterios\Core;
 
-class InputService
+use Asterios\Core\Contracts\InputServiceInterface;
+
+class InputService implements InputServiceInterface
 {
+    /**
+     * @inheritDoc
+     */
     public function ip(): string
     {
         return $this->server('REMOTE_ADDR');
     }
 
+    /**
+     * @inheritDoc
+     */
     public function realIp(): string
     {
         if (!empty($this->server('HTTP_CLIENT_IP')))
@@ -29,41 +37,56 @@ class InputService
         return $ip;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function isAjax(): bool
     {
-        //@phpstan-ignore-next-line
         return (null !== $this->server('HTTP_X_REQUESTED_WITH')) && strtolower($this->server('HTTP_X_REQUESTED_WITH')) === 'xmlhttprequest';
     }
 
+    /**
+     * @inheritDoc
+     */
     public function referrer(string $default = ''): string
     {
         return $this->server('HTTP_REFERER', $default);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function userAgent(string $default = ''): string
     {
         return $this->server('HTTP_USER_AGENT', $default);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function queryString(string $default = ''): string
     {
         return $this->server('QUERY_STRING', $default);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function server(string $value, string $default = ''): string
     {
         return (!empty($_SERVER[$value])) ? $_SERVER[$value] : $default;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function phpSelf(): string
     {
         return $this->server('PHP_SELF');
     }
 
     /**
-     * @param string $key
-     * @param int|string|array|bool|null $default
-     * @return int|string|array|bool|null
+     * @inheritDoc
      */
     public function cookie(string $key, int|string|array|bool $default = null): int|string|array|bool|null
     {
@@ -71,9 +94,7 @@ class InputService
     }
 
     /**
-     * @param string $key
-     * @param int|string|array|bool|null $default
-     * @return int|string|array|bool|null
+     * @inheritDoc
      */
     public function post(string $key, int|string|array|bool $default = null): int|string|array|bool|null
     {
@@ -81,9 +102,7 @@ class InputService
     }
 
     /**
-     * @param string $key
-     * @param int|string|array|bool|null $default
-     * @return int|string|array|bool|null
+     * @inheritDoc
      */
     public function get(string $key, int|string|array|bool|null $default = null): int|string|array|bool|null
     {
@@ -98,5 +117,53 @@ class InputService
         }
 
         return $default;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getBrowserLanguage(string $defaultLanguage, array $allowedLanguages = null): string
+    {
+        $acceptLang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
+
+        if (preg_match_all('/([a-z]{2})[-_a-zA-Z]*\s*(;\s*q=\s*[0-9.]+)?/', $acceptLang, $matches))
+        {
+            foreach ($matches[1] as $lang)
+            {
+                if (in_array($lang, $allowedLanguages, true))
+                {
+                    return $lang;
+                }
+            }
+        }
+
+        return $defaultLanguage;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function maskIp(string $ip): string
+    {
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4))
+        {
+            $parts = explode('.', $ip);
+            if (count($parts) === 4)
+            {
+                return $parts[0] . '.' . $parts[1] . '.***.***';
+            }
+        }
+        elseif (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6))
+        {
+            $parts = explode(':', $ip);
+            $masked = array_slice($parts, 0, 2);
+            while (count($masked) < 8)
+            {
+                $masked[] = '****';
+            }
+            return implode(':', $masked);
+        }
+
+        return '***.***.***.***';
     }
 }
