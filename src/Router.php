@@ -97,23 +97,29 @@ class Router implements RouterInterface
     {
         $this->requestedMethod = $this->getRequestMethod();
 
-        if (!$this->executeMiddlewares($this->globalMiddlewares)) {
+        if (!$this->executeMiddlewares($this->globalMiddlewares))
+        {
             return false;
         }
 
         $countHandled = 0;
 
-        if (isset($this->afterRoutes[$this->requestedMethod])) {
+        if (isset($this->afterRoutes[$this->requestedMethod]))
+        {
             $countHandled = $this->handle($this->afterRoutes[$this->requestedMethod], true);
         }
 
-        if ($countHandled === 0) {
+        if ($countHandled === 0)
+        {
             http_response_code(404);
-        } elseif ($callback) {
+        }
+        elseif ($callback)
+        {
             $callback();
         }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
+        if ($_SERVER['REQUEST_METHOD'] === 'HEAD')
+        {
             ob_end_clean();
         }
 
@@ -127,13 +133,17 @@ class Router implements RouterInterface
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
-        if ($method === 'HEAD') {
+        if ($method === 'HEAD')
+        {
             ob_start();
             $method = 'GET';
-        } elseif ($method === 'POST') {
+        }
+        elseif ($method === 'POST')
+        {
             $headers = $this->getRequestHeaders();
             if (isset($headers['X-HTTP-Method-Override']) &&
-                in_array($headers['X-HTTP-Method-Override'], ['PUT', 'DELETE', 'PATCH'], true)) {
+                in_array($headers['X-HTTP-Method-Override'], ['PUT', 'DELETE', 'PATCH'], true))
+            {
                 $method = $headers['X-HTTP-Method-Override'];
             }
         }
@@ -146,13 +156,16 @@ class Router implements RouterInterface
      */
     public function getRequestHeaders(): array
     {
-        if (function_exists('getallheaders')) {
+        if (function_exists('getallheaders'))
+        {
             return getallheaders();
         }
 
         $headers = [];
-        foreach ($_SERVER as $name => $value) {
-            if (str_starts_with($name, 'HTTP_')) {
+        foreach ($_SERVER as $name => $value)
+        {
+            if (str_starts_with($name, 'HTTP_'))
+            {
                 $key = str_replace('_', '-', substr($name, 5));
                 $headers[$key] = $value;
             }
@@ -169,7 +182,8 @@ class Router implements RouterInterface
         $uri = $_SERVER['REQUEST_URI'] ?? '/';
         $uri = substr($uri, strlen($this->getBasePath()));
 
-        if (str_contains($uri, '?')) {
+        if (str_contains($uri, '?'))
+        {
             $uri = strstr($uri, '?', true);
         }
 
@@ -181,7 +195,8 @@ class Router implements RouterInterface
      */
     protected function prepareRoutes(): void
     {
-        foreach ($this->routes as $route) {
+        foreach ($this->routes as $route)
+        {
             $method = strtoupper($route['method']);
             $pattern = rtrim($this->baseRoute . '/' . ltrim($route['route'], '/'), '/');
 
@@ -209,33 +224,41 @@ class Router implements RouterInterface
      */
     private function invoke(string|callable $fn, array $params = []): void
     {
-        if (is_callable($fn)) {
+        if (is_callable($fn))
+        {
             call_user_func_array($fn, $params);
             return;
         }
 
-        if (!str_contains($fn, '@')) {
+        if (!str_contains($fn, '@'))
+        {
             throw new RouterException('Invalid action format. Expected "Controller@method".');
         }
 
         [$controller, $method] = explode('@', $fn);
         $controllerClass = $this->namespace . '\\' . $controller;
 
-        if (!class_exists($controllerClass)) {
+        if (!class_exists($controllerClass))
+        {
             throw new RouterException('Controller class '.$controllerClass.' does not exist.');
         }
 
         $instance = new $controllerClass();
 
-        if (method_exists($instance, 'before') && !$instance->before()) {
+        if (method_exists($instance, 'before') && !$instance->before())
+        {
             return;
         }
 
-        if (!method_exists($instance, $method)) {
+        if (!method_exists($instance, $method))
+        {
             $altMethod = strtolower($this->requestedMethod) . '_' . $method;
-            if (method_exists($instance, $altMethod)) {
+            if (method_exists($instance, $altMethod))
+            {
                 $method = $altMethod;
-            } else {
+            }
+            else
+            {
                 throw new RouterException('Method '.$method.' does not exist in controller '.$controllerClass.'.');
             }
         }
@@ -254,23 +277,30 @@ class Router implements RouterInterface
         $countHandled = 0;
         $uri = $this->getCurrentUri();
 
-        foreach ($routes as $route) {
+        foreach ($routes as $route)
+        {
             $pattern = preg_replace('/{(\w+)}/', '([^/]+)', $route['pattern']);
-            if ($pattern === null) {
+            if ($pattern === null)
+            {
                 continue;
             }
 
-            if (preg_match_all('#^' . $pattern . '$#', $uri, $matches)) {
-                $params = array_map('urldecode', array_slice($matches, 1));
+            if (preg_match_all('#^' . $pattern . '$#', $uri, $matches))
+            {
+                /** @var list<string> $paramsRaw */
+                $paramsRaw = array_slice($matches, 1);
+                $params = array_map('urldecode', $paramsRaw);
 
-                if (!$this->executeMiddlewares($route['middlewares'])) {
+                if (!$this->executeMiddlewares($route['middlewares']))
+                {
                     return 1;
                 }
 
                 $this->invoke($route['fn'], $params);
                 ++$countHandled;
 
-                if ($quitAfterRun) {
+                if ($quitAfterRun)
+                {
                     break;
                 }
             }
@@ -286,16 +316,19 @@ class Router implements RouterInterface
      */
     private function executeMiddlewares(array $middlewareNames): bool
     {
-        foreach ($middlewareNames as $name) {
+        foreach ($middlewareNames as $name)
+        {
             $class = $this->middlewareNamespace . '\\' . ucfirst($name) . 'Middleware';
 
-            if (!class_exists($class)) {
+            if (!class_exists($class))
+            {
                 throw new RouterException('Middleware '.$class.' not found.');
             }
 
             $middleware = new $class();
 
-            if (method_exists($middleware, 'handle') && !$middleware->handle()) {
+            if (method_exists($middleware, 'handle') && !$middleware->handle())
+            {
                 return false;
             }
         }
@@ -309,22 +342,28 @@ class Router implements RouterInterface
      */
     private function loadRoutesFromConfig(): array
     {
-        try {
+        try
+        {
             $config = (array)Config::get($this->getConfigName());
-        } catch (ConfigLoadException) {
+        }
+        catch (ConfigLoadException)
+        {
             throw new RouterException('Config file not found!');
         }
 
         $newConfig = [];
 
-        foreach ($config as $version => $group) {
+        foreach ($config as $version => $group)
+        {
             $groupMiddlewares = $group['middleware'] ?? [];
             unset($group['middleware']);
 
-            foreach ($group as $route => $handlers) {
+            foreach ($group as $route => $handlers)
+            {
                 $fullRoute = '/' . $version . '/' . ltrim($route, '/');
 
-                foreach ($handlers as $handler) {
+                foreach ($handlers as $handler)
+                {
                     [$method, $action] = $handler;
                     $meta = $handler[2] ?? [];
 

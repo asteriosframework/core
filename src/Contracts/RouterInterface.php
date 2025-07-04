@@ -47,11 +47,11 @@ interface RouterInterface
     public function setConfigName(string $configName): Router;
 
     /**
-     * @param $callback
+     * @param callable|null $callback
      * @return bool
      * @throws RouterException
      */
-    public function run($callback = null): bool;
+    public function run(callable $callback = null): bool;
 
     /**
      * @return string
