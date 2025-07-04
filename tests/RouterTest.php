@@ -3,39 +3,75 @@ declare(strict_types=1);
 
 namespace Asterios\Test;
 
-use Asterios\Core\Asterios;
-use Asterios\Core\Config;
+use Asterios\Core\Exception\ConfigLoadException;
+use Asterios\Core\Exception\RouterException;
 use Asterios\Core\Router;
+use Mockery as m;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
-/**
- * @runTestsInSeparateProcesses
- */
 class RouterTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function prepare_routes(): void
+    public function testConstructorLoadsRoutesFromConfig(): void
     {
-        $expected_value = [
-            '/v1/foo/(\w+)' => [
-                ['GET', 'ControllerFoo/current_one'],
-            ],
-            '/v1/foo/bar/(\w+)' => [
-                ['GET', 'ControllerFoo/bar'],
-            ],
-            '/v2/foo/bar/(\d+)' => [
-                ['GET', 'ControllerFoo/bar_one'],
+        $fakeRoutes = [
+            'v1' => [
+                'middleware' => ['auth'],
+                'test' => [
+                    ['GET', 'TestController@index'],
+                    ['POST', 'TestController@store', ['middleware' => ['log']]],
+                ],
             ],
         ];
 
-        Asterios::setEnvironment(Asterios::DEVELOPMENT);
-        Config::set_config_path(getcwd() . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'testdata' . DIRECTORY_SEPARATOR . 'config');
+        $mock = m::mock('alias:Asterios\Core\Config');
 
-        $router = new Router('routes_router');
-        $result = $router->get_routes();
+        $mock->shouldReceive('get')
+            ->once()
+            ->with('routes')
+            ->andReturn($fakeRoutes);
 
-        self::assertEquals($expected_value, $result);
+        $mock->shouldReceive('get_config_path')
+            ->andReturn('/fake/path');
+
+        $router = new Router('routes');
+
+        $reflection = new ReflectionClass($router);
+        $property = $reflection->getProperty('afterRoutes');
+        /** @noinspection PhpExpressionResultUnusedInspection */
+        $property->setAccessible(true);
+        $afterRoutes = $property->getValue($router);
+
+        $this->assertArrayHasKey('GET', $afterRoutes);
+        $this->assertArrayHasKey('POST', $afterRoutes);
+        $this->assertCount(1, $afterRoutes['GET']);
+        $this->assertEquals('/v1/test', $afterRoutes['GET'][0]['pattern']);
+        $this->assertEquals('TestController@index', $afterRoutes['GET'][0]['fn']);
+        $this->assertEquals(['auth'], $afterRoutes['GET'][0]['middlewares']);
+
+        $this->assertEquals(['auth', 'log'], $afterRoutes['POST'][0]['middlewares']);
+    }
+
+    public function testConstructorThrowsRouterExceptionWhenConfigFails(): void
+    {
+        $mock = m::mock('alias:Asterios\Core\Config');
+        $mock->shouldReceive('get')
+            ->once()
+            ->with('routes')
+            ->andThrow(new ConfigLoadException());
+
+        $mock->shouldReceive('get_config_path')
+            ->andReturn('/fake/path');
+
+        $this->expectException(RouterException::class);
+        $this->expectExceptionMessage('Config file not found!');
+
+        new Router('routes');
+    }
+
+    protected function tearDown(): void
+    {
+        m::close();
+        parent::tearDown();
     }
 }
