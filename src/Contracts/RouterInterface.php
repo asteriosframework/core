@@ -36,17 +36,6 @@ interface RouterInterface
     public function setRoutes(array $routes): Router;
 
     /**
-     * @return string
-     */
-    public function getConfigName(): string;
-
-    /**
-     * @param string $configName
-     * @return Router
-     */
-    public function setConfigName(string $configName): Router;
-
-    /**
      * @param callable|null $callback
      * @return bool
      * @throws RouterException
