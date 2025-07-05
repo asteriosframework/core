@@ -283,6 +283,22 @@ class SchemaBuilder implements SchemaBuilderInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function double(string $name, int $precision = 10, int $scale = 2): ColumnDefinitionBuilder
+    {
+        return $this->column($name, 'DOUBLE(' . $precision . ', ' . $scale . ')');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function decimal(string $name, int $precision = 10, int $scale = 2): ColumnDefinitionBuilder
+    {
+        return $this->column($name, 'DECIMAL(' . $precision . ', ' . $scale . ')');
+    }
+
+    /**
      * @param string $column
      * @return string
      */

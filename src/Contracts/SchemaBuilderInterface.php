@@ -193,4 +193,20 @@ interface SchemaBuilderInterface
      * @return array
      */
     public function build(): array;
+
+    /**
+     * @param string $name
+     * @param int $precision
+     * @param int $scale
+     * @return ColumnDefinitionBuilder
+     */
+    public function double(string $name, int $precision = 10, int $scale = 2): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @param int $precision
+     * @param int $scale
+     * @return ColumnDefinitionBuilder
+     */
+    public function decimal(string $name, int $precision = 10, int $scale = 2): ColumnDefinitionBuilder;
 }
