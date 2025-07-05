@@ -3,75 +3,143 @@ declare(strict_types=1);
 
 namespace Asterios\Test;
 
-use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\RouterException;
 use Asterios\Core\Router;
-use Mockery as m;
+use Asterios\Core\Support\Route;
+use Asterios\Test\Stubs\CategoriesController;
+use Asterios\Test\Stubs\IndexController;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 
 class RouterTest extends TestCase
 {
-    public function testConstructorLoadsRoutesFromConfig(): void
+    protected function setUp(): void
     {
-        $fakeRoutes = [
-            'v1' => [
-                'middleware' => ['auth'],
-                'test' => [
-                    ['GET', 'TestController@index'],
-                    ['POST', 'TestController@store', ['middleware' => ['log']]],
-                ],
-            ],
+        parent::setUp();
+
+        // Reset Routes & $_SERVER
+        Route::$routes = [];
+        $_SERVER = [];
+
+        // Beispielrouten wie aus routes.php
+        Route::group(['prefix' => 'v1', 'middleware' => ['auth']], static function () {
+            Route::get('/', [IndexController::class, 'index'], ['middleware' => ['version']]);
+            Route::get('categories', [CategoriesController::class, 'index']);
+        });
+    }
+
+    public function testNamespaceSetterGetter(): void
+    {
+        $router = new Router();
+        $router->setNamespace('App\\Http\\Controllers');
+        $this->assertSame('App\\Http\\Controllers', $router->getNamespace());
+    }
+
+    public function testMiddlewareNamespaceSetterGetter(): void
+    {
+        $router = new Router();
+        $router->setMiddlewareNamespace('Asterios\\Test\\Stubs');
+        $this->assertSame('Asterios\\Test\\Stubs', $router->getMiddlewareNamespace());
+    }
+
+    public function testRequestMethodGet(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $router = new Router();
+        $this->assertSame('GET', $router->getRequestMethod());
+    }
+
+    public function testRequestMethodOverride(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $router = $this->getMockBuilder(Router::class)
+            ->onlyMethods(['getRequestHeaders'])
+            ->getMock();
+
+        $router->method('getRequestHeaders')->willReturn([
+            'X-HTTP-Method-Override' => 'PUT',
+        ]);
+
+        $this->assertSame('PUT', $router->getRequestMethod());
+    }
+
+    public function testCurrentUriParsing(): void
+    {
+        $_SERVER['SCRIPT_NAME'] = '/index.php';
+        $_SERVER['REQUEST_URI'] = '/v1/categories?foo=bar';
+
+        $router = new Router();
+        $this->assertSame('/v1/categories', $router->getCurrentUri());
+    }
+
+    public function testSuccessfulRouteExecution(): void
+    {
+        require_once __DIR__ . '/Stubs/AuthMiddleware.php';
+        require_once __DIR__ . '/Stubs/VersionMiddleware.php';
+        require_once __DIR__ . '/Stubs/IndexController.php';
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/v1';
+
+        $router = new Router();
+        $router->setMiddlewareNamespace('Asterios\\Test\\Stubs');
+
+        ob_start();
+        $success = $router->run();
+        $output = ob_get_clean();
+
+        $this->assertTrue($success);
+        $this->assertSame('IndexController@index', trim($output));
+    }
+
+    public function testRouteReturns404(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/not-found';
+
+        $router = new Router();
+        $router->setMiddlewareNamespace('Asterios\\Test\\Stubs');
+
+        ob_start();
+        $success = $router->run();
+        ob_end_clean();
+
+        $this->assertFalse($success);
+        $this->assertSame(404, http_response_code());
+    }
+
+    public function testInvalidMiddlewareThrowsException(): void
+    {
+        Route::$routes[] = [
+            'method' => 'GET',
+            'route' => '/fail',
+            'action' => fn () => null,
+            'middlewares' => ['doesNotExist'],
         ];
 
-        $mock = m::mock('alias:Asterios\Core\Config');
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/fail';
 
-        $mock->shouldReceive('get')
-            ->once()
-            ->with('routes')
-            ->andReturn($fakeRoutes);
-
-        $mock->shouldReceive('get_config_path')
-            ->andReturn('/fake/path');
-
-        $router = new Router('routes');
-
-        $reflection = new ReflectionClass($router);
-        $property = $reflection->getProperty('afterRoutes');
-        /** @noinspection PhpExpressionResultUnusedInspection */
-        $property->setAccessible(true);
-        $afterRoutes = $property->getValue($router);
-
-        $this->assertArrayHasKey('GET', $afterRoutes);
-        $this->assertArrayHasKey('POST', $afterRoutes);
-        $this->assertCount(1, $afterRoutes['GET']);
-        $this->assertEquals('/v1/test', $afterRoutes['GET'][0]['pattern']);
-        $this->assertEquals('TestController@index', $afterRoutes['GET'][0]['fn']);
-        $this->assertEquals(['auth'], $afterRoutes['GET'][0]['middlewares']);
-
-        $this->assertEquals(['auth', 'log'], $afterRoutes['POST'][0]['middlewares']);
-    }
-
-    public function testConstructorThrowsRouterExceptionWhenConfigFails(): void
-    {
-        $mock = m::mock('alias:Asterios\Core\Config');
-        $mock->shouldReceive('get')
-            ->once()
-            ->with('routes')
-            ->andThrow(new ConfigLoadException());
-
-        $mock->shouldReceive('get_config_path')
-            ->andReturn('/fake/path');
+        $router = new Router();
+        $router->setMiddlewareNamespace('Asterios\\Test\\Stubs');
 
         $this->expectException(RouterException::class);
-        $this->expectExceptionMessage('Config file not found!');
-
-        new Router('routes');
+        $router->run();
     }
 
-    protected function tearDown(): void
+    public function testRequestMethodHeadStripsOutput(): void
     {
-        m::close();
-        parent::tearDown();
+        $_SERVER['REQUEST_METHOD'] = 'HEAD';
+        $_SERVER['REQUEST_URI'] = '/v1';
+
+        $router = new Router();
+        $router->setMiddlewareNamespace('Asterios\\Test\\Stubs');
+
+        ob_start();
+        $result = $router->run();
+        $output = ob_get_clean();
+
+        $this->assertTrue($result);
+        $this->assertEmpty($output);
     }
 }
