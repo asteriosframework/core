@@ -2,129 +2,185 @@
 
 namespace Asterios\Core;
 
+use Asterios\Core\Exception\ConfigLoadException;
+use Asterios\Core\Exception\EnvException;
+use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Exception\ViewTemplateAccessException;
 
 class View
 {
-    /**
-     * @var  string  The template name
-     */
-    protected $template;
+    protected string $template;
+    protected string $extension;
+    protected string $templateFile;
+    protected bool $autoRender;
+    protected array $data = [];
+
+    protected string $envFile = '.env';
+
+    protected ?Env $env = null;
 
     /**
-     * @var  string  The template extension
-     */
-    protected $extension;
-
-    /**
-     * @var  string  The template file
-     */
-    protected $template_file;
-
-    /**
-     * @throws Exception\ConfigLoadException
+     * @param string $template
+     * @param bool $autoRender
+     * @param array $data
+     * @param string $envFile
+     * @return View
+     * @throws ConfigLoadException
      * @throws ViewTemplateAccessException
      */
-    public static function forge(string $template): View
+    public static function forge(string $template, bool $autoRender = true, array $data = [], string $envFile = '.env'): View
     {
-        return new self($template);
+        return new self($template, $autoRender, $data, $envFile);
     }
 
     /**
-     * @throws Exception\ConfigLoadException
+     * @param string $template
+     * @param bool $autoRender
+     * @param array $data
+     * @param string $envFile
+     * @throws ConfigLoadException
      * @throws ViewTemplateAccessException
      */
-    protected function __construct(string $template)
+    protected function __construct(string $template, bool $autoRender = true, array $data = [], string $envFile = '.env')
     {
+        $this->envFile = Asterios::getBasePath() . DIRECTORY_SEPARATOR . $envFile;
+
+        if (null === $this->env)
+        {
+            $this->env = new Env($this->envFile);
+        }
+
         $this->extension = Asterios::config('template.extension');
         $this->template = $template;
-        $this->set_template_file();
+        $this->data = $data;
+        $this->autoRender = $autoRender;
+        $this->setTemplateFile();
 
-        try
-        {
-            $this->render();
-        }
-        catch (ViewTemplateAccessException $e)
-        {
-            $this->view_error_tpl(404);
+        if ($this->autoRender) {
+            try {
+                $this->render();
+            } catch (ViewTemplateAccessException) {
+                $this->viewErrorTemplate();
+            }
         }
     }
 
     /**
-     * View error template if given template could not be found
-     * @param int $http_error
+     * @return void
      * @throws ViewTemplateAccessException
      */
-    private function view_error_tpl(int $http_error): void
+    private function viewErrorTemplate(): void
     {
-        if (!file_exists($this->get_tpl_path() . $http_error . '.' . $this->extension))
+        $error_template = $this->getTemplatePath() . 404 . '.' . $this->extension;
+
+        if (!file_exists($error_template))
         {
             ob_end_clean();
-            throw new ViewTemplateAccessException('FATAL ERROR: Could not load error-template "' . $http_error . '"!');
+            throw new ViewTemplateAccessException('FATAL ERROR: Could not load error-template "' . 404 . '"!');
         }
-        else
-        {
-            include $this->get_tpl_path() . $http_error . '.' . $this->extension;
-        }
+
+        include $error_template;
     }
 
     /**
-     * Captures the output that is generated when a view is included.
-     * The view data will be extracted to make local variables.
-     *
-     *     $output = $this->process_file();
-     * @return false|string
+     * @param string $overrideFile
+     * @return string|false
      * @throws ViewTemplateAccessException
      */
-    protected function process_template(bool $file_override = false)
+    protected function processTemplate(string $overrideFile = ''): string|false
     {
-        $clean_room = function ($__file_name) {
+        $data = $this->data;
 
-            // Capture the view output
+        $cleanRoom = function ($templateFile) use ($data) {
+            extract($data, EXTR_SKIP);
             ob_start();
 
-            try
-            {
-                if (!file_exists($__file_name))
+            try {
+                if (!file_exists($templateFile))
                 {
                     throw new ViewTemplateAccessException('404');
                 }
-                else
-                {
-                    include $__file_name;
-                }
-            }
-            catch (ViewTemplateAccessException $e)
+                include $templateFile;
+            } catch (ViewTemplateAccessException)
             {
-                $this->view_error_tpl(404);
+                $this->viewErrorTemplate();
             }
 
-            // Get the captured output and close the buffer
             return ob_get_clean();
         };
 
-        // import and process the view file
-        return $clean_room($file_override ?: $this->template_file);
-    }
-
-    private function set_template_file(): void
-    {
-        $this->template_file = $this->get_tpl_path() . $this->template . '.' . $this->extension;
+        return $cleanRoom($overrideFile ?: $this->templateFile);
     }
 
     /**
+     * @return void
+     * @throws ViewTemplateAccessException
+     */
+    private function setTemplateFile(): void
+    {
+        $this->templateFile = $this->getTemplatePath() . $this->template . '.' . $this->extension;
+    }
+
+    /**
+     * @return string
+     * @throws ViewTemplateAccessException
+     */
+    public function renderAsString(): string
+    {
+        return $this->processTemplate() ?: '';
+    }
+
+    /**
+     * @return void
      * @throws ViewTemplateAccessException
      */
     public function render(): void
     {
-        echo $this->process_template();
+        echo $this->renderAsString();
+    }
+
+    /**
+     * @return string
+     * @throws ViewTemplateAccessException
+     */
+    protected function getTemplatePath(): string
+    {
+        $templatePath = $this->getEnvData('TEMPLATE_PATH');
+
+        return $templatePath ? $this->getProtectedPath() . $templatePath : '';
+    }
+
+    /**
+     * @return string
+     * @throws ViewTemplateAccessException
+     */
+    protected function getTemplateExtension(): string
+    {
+        return $this->getEnvData('TEMPLATE_EXTENSION');
+    }
+
+    /**
+     * @param string $key
+     * @return string
+     * @throws ViewTemplateAccessException
+     */
+    protected function getEnvData(string $key): string
+    {
+        try
+        {
+            return $this->env->get($key);
+        }
+        catch (EnvException|EnvLoadException $e)
+        {
+            throw new ViewTemplateAccessException($e->getMessage());
+        }
     }
 
     /**
      * @return string
      */
-    protected function get_tpl_path(): string
+    protected function getProtectedPath(): string
     {
-        return Config::get_memory('TPLPATH', '');
+        return Asterios::getBasePath();
     }
 }
