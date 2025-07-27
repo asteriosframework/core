@@ -99,10 +99,17 @@ class Route implements RouteInterface
         array_pop(self::$groupStack);
     }
 
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param string|array $action
+     * @param array $options
+     * @return void
+     */
     private static function addRoute(string $method, string $uri, string|array $action, array $options = []): void
     {
         $middlewaresArrays = [];
-        $prefix = '';
+        $prefixParts = [];
 
         foreach (self::$groupStack as $group)
         {
@@ -110,18 +117,25 @@ class Route implements RouteInterface
             {
                 $middlewaresArrays[] = (array)$group['middleware'];
             }
+
             if (!empty($group['prefix']))
             {
-                $prefix = rtrim($group['prefix'], '/') . '/';
+                $prefixParts[] = trim($group['prefix'], '/');
             }
         }
+
+        $prefix = $prefixParts ? implode('/', $prefixParts) . '/' : '';
 
         if (!empty($options['middleware']))
         {
             $middlewaresArrays[] = (array)$options['middleware'];
         }
 
-        $middlewares = array_merge(...$middlewaresArrays);
+        $middlewares = [];
+        if (!empty($middlewaresArrays))
+        {
+            $middlewares = array_merge(...$middlewaresArrays);
+        }
 
         $uri = $prefix . ltrim($uri, '/');
 
