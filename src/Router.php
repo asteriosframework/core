@@ -170,6 +170,18 @@ class Router implements RouterInterface
      */
     protected function prepareRoutes(): void
     {
+        usort($this->routes, static function ($a, $b) {
+            $aDynamicCount = substr_count($a['route'], '{');
+            $bDynamicCount = substr_count($b['route'], '{');
+
+            if ($aDynamicCount === $bDynamicCount)
+            {
+                return strlen($b['route']) <=> strlen($a['route']);
+            }
+
+            return $aDynamicCount <=> $bDynamicCount;
+        });
+
         foreach ($this->routes as $route)
         {
             $method = strtoupper($route['method']);
@@ -182,6 +194,7 @@ class Router implements RouterInterface
             ];
         }
     }
+
 
     /**
      * @return string
