@@ -10,11 +10,9 @@ use Asterios\Core\Exception\ViewTemplateAccessException;
 class View
 {
     protected string $template;
-    protected string $extension;
     protected string $templateFile;
     protected bool $autoRender;
     protected array $data = [];
-
     protected string $envFile = '.env';
 
     protected ?Env $env = null;
@@ -50,7 +48,6 @@ class View
             $this->env = new Env($this->envFile);
         }
 
-        $this->extension = Asterios::config('template.extension');
         $this->template = $template;
         $this->data = $data;
         $this->autoRender = $autoRender;
@@ -71,7 +68,7 @@ class View
      */
     private function viewErrorTemplate(): void
     {
-        $error_template = $this->getTemplatePath() . 404 . '.' . $this->extension;
+        $error_template = $this->getTemplatePath() . 404 . '.' . $this->getTemplateExtension();
 
         if (!file_exists($error_template))
         {
@@ -118,7 +115,7 @@ class View
      */
     private function setTemplateFile(): void
     {
-        $this->templateFile = $this->getTemplatePath() . $this->template . '.' . $this->extension;
+        $this->templateFile = $this->getTemplatePath() . $this->template . '.' . $this->getTemplateExtension();
     }
 
     /**
