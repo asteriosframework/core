@@ -185,7 +185,7 @@ class Router implements RouterInterface
         foreach ($this->routes as $route)
         {
             $method = strtoupper($route['method']);
-            $pattern = rtrim($this->baseRoute . '/' . ltrim($route['route'], '/'), '/');
+            $pattern = '/' . trim($this->baseRoute . '/' . ltrim($route['route'], '/'), '/');
 
             $this->afterRoutes[$method][] = [
                 'pattern' => $pattern,
