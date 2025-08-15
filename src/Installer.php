@@ -78,7 +78,9 @@ class Installer implements InstallerInterface
      */
     public function createMediaFolders(): self
     {
-        $env = (new Env($this->envFile));
+        $envFile = Asterios::getBasePath() . DIRECTORY_SEPARATOR . $this->envFile;
+
+        $env = (new Env($envFile));
 
         try
         {
