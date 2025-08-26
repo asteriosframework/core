@@ -38,6 +38,14 @@ class Route implements RouteInterface
     /**
      * @inheritDoc
      */
+    public static function patch(string $uri, string|array $action, array $options = []): void
+    {
+        self::addRoute('PATCH', $uri, $action, $options);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public static function delete(string $uri, string|array $action, array $options = []): void
     {
         self::addRoute('DELETE', $uri, $action, $options);

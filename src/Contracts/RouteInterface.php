@@ -34,6 +34,14 @@ interface RouteInterface
      * @param array $options
      * @return void
      */
+    public static function patch(string $uri, string|array $action, array $options = []): void;
+
+    /**
+     * @param string $uri
+     * @param string|array $action
+     * @param array $options
+     * @return void
+     */
     public static function delete(string $uri, string|array $action, array $options = []): void;
 
     /**
