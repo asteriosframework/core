@@ -62,12 +62,8 @@ class Db
 
     public function __destruct()
     {
-        // @phpstan-ignore-next-line
-        if ($this->get_connection() !== null)
-        {
-            $this->get_connection()
-                ->close();
-        }
+        $this->get_connection()
+            ->close();
     }
 
     public function get_connection(): \mysqli
@@ -299,7 +295,6 @@ class Db
             ++$count;
         }
 
-        // @phpstan-ignore-next-line
         return $count !== 0;
     }
 
@@ -340,6 +335,18 @@ class Db
 
             self::write($sql);
         }
+    }
+
+    /**
+     * @return bool
+     * @throws Exception\ConfigLoadException
+     */
+    public static function isMariaDb(): bool
+    {
+        $info = mysqli_get_server_info(self::forge()
+            ->get_connection());
+
+        return stripos($info, 'mariadb') !== false;
     }
 
     private function set_host(string $host): void

@@ -384,7 +384,6 @@ class File
                 throw new FileAccessException('Cannot compare empty folders!');
             }
 
-            // @phpstan-ignore-next-line
             if ((false !== $folder1_content && count($folder1_content) > 0) && (false !== $folder2_content && count($folder2_content) > 0))
             {
                 $_difference = array_diff($folder1_content, $folder2_content);

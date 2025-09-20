@@ -28,6 +28,15 @@ class SchemaBuilder implements SchemaBuilderInterface
     /**
      * @inheritDoc
      */
+    public function uuid(string $name = 'uuid', bool $native = true): ColumnDefinitionBuilder
+    {
+        $type = $native ? 'UUID' : 'CHAR(36)';
+        return $this->column($name, $type);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function string(string $name, int $length = 255): ColumnDefinitionBuilder
     {
         return $this->column($name, "VARCHAR($length)");

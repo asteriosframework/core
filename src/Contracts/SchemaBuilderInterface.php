@@ -18,6 +18,13 @@ interface SchemaBuilderInterface
 
     /**
      * @param string $name
+     * @param bool $native
+     * @return ColumnDefinitionBuilder
+     */
+    public function uuid(string $name = 'uuid', bool $native = true): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
      * @param int $length
      * @return ColumnDefinitionBuilder
      */
