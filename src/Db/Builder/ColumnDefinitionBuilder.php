@@ -3,6 +3,8 @@
 namespace Asterios\Core\Db\Builder;
 
 use Asterios\Core\Contracts\ColumnDefinitionBuilderInterface;
+use Asterios\Core\Db;
+use Asterios\Core\Exception\ConfigLoadException;
 
 class ColumnDefinitionBuilder implements ColumnDefinitionBuilderInterface
 {
@@ -68,22 +70,32 @@ class ColumnDefinitionBuilder implements ColumnDefinitionBuilderInterface
      */
     public function build(): void
     {
-        $sql = '`' . $this->name . '` ' . $this->type;
+        $type = strtoupper($this->type);
+
+        $sqlType = match (true) {
+            $type === 'UUID' && Db::isMariaDb() => 'UUID',
+            $type === 'UUID'  => 'CHAR(36)',
+            default => $this->type,
+        };
+
+        $sql = '`' . $this->name . '` ' . $sqlType;
         $sql .= $this->notNull ? ' NOT NULL' : ' NULL';
-        if ($this->default !== null)
-        {
+
+        if ($this->default !== null) {
             $sql .= ' DEFAULT \'' . addslashes((string)$this->default) . '\'';
         }
 
         $this->builder->addColumn($sql);
 
-        if ($this->isUnique)
-        {
+        if ($this->isUnique) {
             $index = "UNIQUE INDEX `unique_{$this->name}` (`{$this->name}`)";
             $this->builder->addIndex($index);
         }
     }
 
+    /**
+     * @throws ConfigLoadException
+     */
     public function __destruct()
     {
         $this->build();

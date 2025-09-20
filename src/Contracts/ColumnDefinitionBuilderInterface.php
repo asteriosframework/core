@@ -2,6 +2,8 @@
 
 namespace Asterios\Core\Contracts;
 
+use Asterios\Core\Exception\ConfigLoadException;
+
 interface ColumnDefinitionBuilderInterface
 {
     /**
@@ -27,6 +29,6 @@ interface ColumnDefinitionBuilderInterface
 
     /**
      * @return void
-     */
+     * @throws ConfigLoadException     */
     public function build(): void;
 }
