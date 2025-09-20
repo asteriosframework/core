@@ -18,10 +18,10 @@ interface SchemaBuilderInterface
 
     /**
      * @param string $name
-     * @param bool $native
+     * @param string $mode
      * @return ColumnDefinitionBuilder
      */
-    public function uuid(string $name = 'uuid', bool $native = true): ColumnDefinitionBuilder;
+    public function uuid(string $name = 'uuid', string $mode = 'char'): ColumnDefinitionBuilder;
 
     /**
      * @param string $name
