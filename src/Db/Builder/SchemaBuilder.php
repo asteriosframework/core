@@ -28,10 +28,23 @@ class SchemaBuilder implements SchemaBuilderInterface
     /**
      * @inheritDoc
      */
-    public function uuid(string $name = 'uuid', bool $native = true): ColumnDefinitionBuilder
+    public function uuid(string $name = 'uuid', string $mode = 'native'): ColumnDefinitionBuilder
     {
-        $type = $native ? 'UUID' : 'CHAR(36)';
-        return $this->column($name, $type);
+        $type = match (strtolower($mode))
+        {
+            'native' => 'UUID',
+            'binary' => 'BINARY(16)',
+            default  => 'CHAR(36)',
+        };
+
+        $column = $this->column($name, $type)->unique();
+
+        if (in_array($type, ['CHAR(36)', 'UUID']))
+        {
+            $column->default('UUID()', true);
+        }
+
+        return $column;
     }
 
     /**

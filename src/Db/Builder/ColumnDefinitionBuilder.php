@@ -13,7 +13,7 @@ class ColumnDefinitionBuilder implements ColumnDefinitionBuilderInterface
     protected string $type;
     protected bool $notNull = true;
     protected bool $isNullable = false;
-    protected string|int|null $default = null;
+    protected string|int|null|object $default = null; // kann jetzt auch Funktionsausdruck sein
     protected bool $isUnique = false;
 
     public function __construct(SchemaBuilder $builder, string $name, string $type)
@@ -30,7 +30,6 @@ class ColumnDefinitionBuilder implements ColumnDefinitionBuilderInterface
     {
         $this->notNull = false;
         $this->isNullable = true;
-
         return $this;
     }
 
@@ -41,16 +40,30 @@ class ColumnDefinitionBuilder implements ColumnDefinitionBuilderInterface
     {
         $this->notNull = true;
         $this->isNullable = false;
-
         return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function default(string|int|null $value): self
+    public function default(string|int|null $value, bool $isExpression = false): self
     {
-        $this->default = $value;
+        if ($value === null)
+        {
+            $this->default = null;
+        }
+        elseif ($isExpression)
+        {
+            // SQL-Funktion
+            $obj = new \stdClass();
+            $obj->expr = $value;
+            $this->default = $obj;
+        }
+        else
+        {
+            // Literalwert
+            $this->default = $value;
+        }
 
         return $this;
     }
@@ -61,7 +74,6 @@ class ColumnDefinitionBuilder implements ColumnDefinitionBuilderInterface
     public function unique(): self
     {
         $this->isUnique = true;
-
         return $this;
     }
 
@@ -72,22 +84,32 @@ class ColumnDefinitionBuilder implements ColumnDefinitionBuilderInterface
     {
         $type = strtoupper($this->type);
 
-        $sqlType = match (true) {
+        $sqlType = match (true)
+        {
             $type === 'UUID' && Db::isMariaDb() => 'UUID',
-            $type === 'UUID'  => 'CHAR(36)',
+            $type === 'UUID' => 'CHAR(36)',
             default => $this->type,
         };
 
         $sql = '`' . $this->name . '` ' . $sqlType;
         $sql .= $this->notNull ? ' NOT NULL' : ' NULL';
 
-        if ($this->default !== null) {
-            $sql .= ' DEFAULT \'' . addslashes((string)$this->default) . '\'';
+        if ($this->default !== null)
+        {
+            if (is_object($this->default) && isset($this->default->expr))
+            {
+                $sql .= ' DEFAULT ' . $this->default->expr;
+            }
+            else
+            {
+                $sql .= ' DEFAULT \'' . addslashes((string)$this->default) . '\'';
+            }
         }
 
         $this->builder->addColumn($sql);
 
-        if ($this->isUnique) {
+        if ($this->isUnique)
+        {
             $index = "UNIQUE INDEX `unique_{$this->name}` (`{$this->name}`)";
             $this->builder->addIndex($index);
         }

@@ -18,9 +18,10 @@ interface ColumnDefinitionBuilderInterface
 
     /**
      * @param string|int|null $value
+     * @param bool $isExpression
      * @return self
      */
-    public function default(string|int|null $value): self;
+    public function default(string|int|null $value, bool $isExpression = false): self;
 
     /**
      * @return self
@@ -29,6 +30,7 @@ interface ColumnDefinitionBuilderInterface
 
     /**
      * @return void
-     * @throws ConfigLoadException     */
+     * @throws ConfigLoadException
+     */
     public function build(): void;
 }
