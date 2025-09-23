@@ -425,6 +425,13 @@ class Model
         return $this;
     }
 
+    public function reset_select(): Model
+    {
+        $this->select_statement = '';
+
+        return $this;
+    }
+
     public function order_by(string $column, string $direction = self::SQL_ORDER_BY_ASC, bool $backticks = true): Model
     {
 
