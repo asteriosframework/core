@@ -427,7 +427,7 @@ class Model
 
     public function reset_select(): Model
     {
-        $this->select_statement = '';
+        $this->select_statement = null;
 
         return $this;
     }
