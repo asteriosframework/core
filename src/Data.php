@@ -9,14 +9,10 @@ use ReflectionProperty;
 
 abstract class Data
 {
-    /**
-     * @var array
-     */
     protected static array $requiredFields = [];
 
-    /**
-     * @return array
-     */
+    protected static array $validationRules = [];
+
     public function toArray(): array
     {
         $data = [];
@@ -47,10 +43,7 @@ abstract class Data
 
         foreach ($ref->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
             $name = $prop->getName();
-
-            if (!array_key_exists($name, $data) || $data[$name] === null) {
-                continue;
-            }
+            if (!array_key_exists($name, $data) || $data[$name] === null) continue;
 
             $type = $prop->getType()?->getName();
             $value = $data[$name];
@@ -72,7 +65,6 @@ abstract class Data
                 } else {
                     $this->{$name} = $value;
                 }
-
                 continue;
             }
 
@@ -82,70 +74,65 @@ abstract class Data
         return $this;
     }
 
-    /**
-     * @param string $docComment
-     * @param ReflectionProperty $prop
-     * @return string|null
-     */
     private function extractDataClassFromVarDoc(string $docComment, ReflectionProperty $prop): ?string
     {
         if (preg_match('/@var\s+([\\\\\w]+)\[\]/', $docComment, $matches)) {
             $className = $matches[1];
-
             if ($className[0] !== '\\') {
                 $className = $prop->getDeclaringClass()->getNamespaceName() . '\\' . $className;
             }
-
             return $className;
         }
-
         return null;
     }
 
-    /**
-     * @param array $data
-     * @param string $key
-     * @param callable $setter
-     * @return void
-     */
-    protected function setIfExists(array $data, string $key, callable $setter): void
-    {
-        if (array_key_exists($key, $data) && $data[$key] !== null) {
-            $setter($data[$key]);
-        }
-    }
-
-    /**
-     * @return array
-     */
     public function validate(): array
     {
         $errors = [];
-        $ref = new ReflectionClass($this);
 
-        foreach ($ref->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
-            $name = $prop->getName();
-            $value = $this->{$name};
-
-            if (null === $value && in_array($name, static::$requiredFields, true)) {
-                $errors[] = "Property '$name' is required but is null.";
-                continue;
+        foreach (static::$requiredFields as $field) {
+            if (!property_exists($this, $field) || $this->{$field} === null) {
+                $errors[] = "Field '$field' is required.";
             }
+        }
 
-            $type = $prop->getType()?->getName();
-            if ($type !== null && $value !== null) {
-                if (is_subclass_of($type, self::class) && !($value instanceof $type)) {
-                    $errors[] = "Property '$name' must be instance of $type.";
-                } elseif ($type === 'array' && is_array($value)) {
-                    $docComment = $prop->getDocComment() ?: '';
-                    $dtoClass = $this->extractDataClassFromVarDoc($docComment, $prop);
-                    if ($dtoClass !== null) {
-                        foreach ($value as $i => $item) {
-                            if (!($item instanceof $dtoClass)) {
-                                $errors[] = "Item $i in '$name' must be instance of $dtoClass.";
+        foreach (static::$validationRules as $field => $rules) {
+            $value = $this->{$field} ?? null;
+
+            foreach ($rules as $rule) {
+                switch ($rule) {
+                    case 'required':
+                        if ($value === null) {
+                            $errors[] = "Field '$field' is required.";
+                        }
+                        break;
+
+                    case 'not_empty':
+                        if (is_string($value) && trim($value) === '') {
+                            $errors[] = "Field '$field' must not be empty.";
+                        }
+                        break;
+
+                    case 'email':
+                        if ($value !== null && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                            $errors[] = "Field '$field' must be a valid email address.";
+                        }
+                        break;
+
+                    case 'numeric':
+                        if ($value !== null && !is_numeric($value)) {
+                            $errors[] = "Field '$field' must be numeric.";
+                        }
+                        break;
+
+                    default:
+                        if (str_starts_with($rule, 'regex:')) {
+                            $pattern = substr($rule, 6);
+                            if ($value !== null && !preg_match($pattern, (string)$value)) {
+                                $errors[] = "Field '$field' does not match pattern $pattern.";
                             }
                         }
-                    }
+                        break;
                 }
             }
         }
