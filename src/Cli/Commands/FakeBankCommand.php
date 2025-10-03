@@ -8,8 +8,9 @@ use Random\RandomException;
 
 #[Command(
     name: 'fake:bank',
-    description: 'Generiert zufällige Bank-Testdaten (IBAN, BIC, Institut)',
-    group: 'Testdaten',
+    description: 'Generate random bank test data (IBAN, BIC, Institute)',
+    group: 'Testdata',
+    aliases: ['--fb']
 )]
 class FakeBankCommand extends BaseCommand
 {
@@ -21,7 +22,7 @@ class FakeBankCommand extends BaseCommand
         $institute = $this->randomInstitute();
 
         $this->printDataTable([
-            'Bank Testdaten' => [
+            'Bank Testdata' => [
                 'IBAN'      => $iban,
                 'BIC'       => $bic,
                 'Institut'  => $institute,

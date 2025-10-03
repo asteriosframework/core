@@ -8,8 +8,9 @@ use Random\RandomException;
 
 #[Command(
     name: 'fake:uuid',
-    description: 'Generiert eine zufällige UUID',
-    group: 'Testdaten',
+    description: 'Generate a random UUID',
+    group: 'Testdata',
+    aliases: ['--fuuid']
 )]
 class FakeUuidCommand extends BaseCommand
 {
