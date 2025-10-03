@@ -25,7 +25,7 @@ class FakeBankCommand extends BaseCommand
             'Bank Testdata' => [
                 'IBAN'      => $iban,
                 'BIC'       => $bic,
-                'Institut'  => $institute,
+                'Institute'  => $institute,
             ]
         ]);
     }
@@ -83,8 +83,8 @@ class FakeBankCommand extends BaseCommand
         $institutes = [
             'Deutsche Bank',
             'Commerzbank',
-            'Sparkasse Musterstadt',
-            'Volksbank Beispiel',
+            'Sparkasse ACME Town',
+            'Volksbank Example',
             'N26 Bank',
             'DKB',
             'HypoVereinsbank',
