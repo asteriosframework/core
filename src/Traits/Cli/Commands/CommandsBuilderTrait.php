@@ -351,4 +351,56 @@ trait CommandsBuilderTrait
             throw new \RuntimeException(sprintf('Migration directory "%s" was not created', $dir));
         }
     }
+
+    /**
+     *
+     * @param string $message
+     * @param bool $newline
+     */
+    protected function writeLn(string $message = '', bool $newline = true): void
+    {
+        echo $message;
+
+        if ($newline)
+        {
+            echo PHP_EOL;
+        }
+    }
+
+    /**
+     * @param string $message
+     * @return void
+     */
+    protected function info(string $message): void
+    {
+        $this->writeLn($this->color()->cyan()->apply($message));
+    }
+
+    /**
+     * @param string $message
+     * @return void
+     */
+    protected function success(string $message): void
+    {
+        $this->writeLn($this->color()->green()->apply('✔ ' . $message));
+    }
+
+    /**
+     * @param string $message
+     * @return void
+     */
+    protected function warning(string $message): void
+    {
+        $this->writeLn($this->color()->yellow()->apply('⚠ ' . $message));
+    }
+
+    /**
+     * @param string $message
+     * @return void
+     */
+    protected function error(string $message): void
+    {
+        $this->writeLn($this->color()->red()->apply('❌ ' . $message));
+    }
+
 }
