@@ -178,19 +178,19 @@ namespace Asterios\Test
         {
             return [
                 [
-                    (new AssetsDto)->set_file('lu.js')
+                    (new AssetsDto())->set_file('lu.js')
                         ->set_path('folder'),
                     true,
                     '<script type="text/javascript" src="folder/lu.js?12345678"></script>' . PHP_EOL,
                 ],
                 [
-                    (new AssetsDto)->set_file('lu.css')
+                    (new AssetsDto())->set_file('lu.css')
                         ->set_path('folder'),
                     true,
                     false,
                 ],
                 [
-                    (new AssetsDto)->set_file('lu.js')
+                    (new AssetsDto())->set_file('lu.js')
                         ->set_path('folder'),
                     false,
                     false,
@@ -244,33 +244,33 @@ namespace Asterios\Test
         {
             return [
                 [
-                    (new AssetsDto)->set_file('lu.css')
+                    (new AssetsDto())->set_file('lu.css')
                         ->set_path('folder'),
                     true,
                     false,
                 ],
                 [
-                    (new AssetsDto)->set_file('lu.ico')
+                    (new AssetsDto())->set_file('lu.ico')
                         ->set_path('folder'),
                     false,
                     false,
                 ],
                 [
-                    (new AssetsDto)->set_file('lu.ico')
+                    (new AssetsDto())->set_file('lu.ico')
                         ->set_path('folder')
                         ->set_document_type(Assets::DOCTYPE_HTML4),
                     true,
                     '<link rel="shortcut icon" type="image/x-icon" href=folder/lu.ico">' . PHP_EOL,
                 ],
                 [
-                    (new AssetsDto)->set_file('lu.ico')
+                    (new AssetsDto())->set_file('lu.ico')
                         ->set_path('folder')
                         ->set_document_type(Assets::DOCTYPE_HTML5),
                     true,
                     '<link rel="shortcut icon" type="image/x-icon" href=folder/lu.ico">' . PHP_EOL,
                 ],
                 [
-                    (new AssetsDto)->set_file('lu.ico')
+                    (new AssetsDto())->set_file('lu.ico')
                         ->set_path('folder')
                         ->set_document_type(Assets::DOCTYPE_XHTML),
                     true,
@@ -290,7 +290,7 @@ namespace Asterios\Test
                     '<link rel="stylesheet" type="text/css" href="folder/style.css?12345678">' . PHP_EOL,
                 ],
                 [
-                    (new AssetsDto)->set_file('lu.js')
+                    (new AssetsDto())->set_file('lu.js')
                         ->set_path('folder'),
                     true,
                     '<script type="text/javascript" src="folder/lu.js?12345678"></script>' . PHP_EOL,
@@ -304,7 +304,7 @@ namespace Asterios\Test
                     '<img src="folder/lu.png?12345678" class="img_css">' . PHP_EOL,
                 ],
                 [
-                    (new AssetsDto)->set_file('lu.ico')
+                    (new AssetsDto())->set_file('lu.ico')
                         ->set_path('folder')
                         ->set_document_type(Assets::DOCTYPE_HTML5),
                     true,

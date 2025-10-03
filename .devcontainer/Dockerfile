@@ -52,6 +52,8 @@ RUN apk add php83 \
     php83-xmlreader \
     php83-xmlwriter \
     php83-pecl-ast \
+    php83-pcntl \
+    php83-posix \
     --repository https://dl-cdn.alpinelinux.org/alpine/edge/community
 
 RUN apk add libcurl \
@@ -79,5 +81,8 @@ WORKDIR /var/www
 USER $UNAME
 
 EXPOSE 9000
+EXPOSE 9003
+EXPOSE 9081
+EXPOSE 9080
 
 CMD ["php-fpm83", "--nodaemonize", "--fpm-config", "/etc/php83/php-fpm.conf"]

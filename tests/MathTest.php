@@ -16,7 +16,7 @@ class MathTest extends TestCase
     {
         parent::setUp();
 
-        $this->dto = new MathDto;
+        $this->dto = new MathDto();
         $this->dto->setTax(19);
         $this->dto->setCurrency('EUR');
 
