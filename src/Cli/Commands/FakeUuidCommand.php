@@ -19,7 +19,7 @@ class FakeUuidCommand extends BaseCommand
     public function handle(?string $argument): void
     {
         $uuid = $this->generateUuidV4();
-        $this->info("<info>Generated UUID:</info> {$uuid}");
+        $this->info("Generated UUID: {$uuid}");
     }
 
     /**
