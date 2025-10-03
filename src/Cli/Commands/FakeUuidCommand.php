@@ -21,7 +21,7 @@ class FakeUuidCommand extends BaseCommand
     {
 
         $this->printDataTable([
-            'UUID Testdaten' => [
+            'UUID Testdata' => [
                 'UUID' => $this->generateUuidV4(),
             ]
         ]);
