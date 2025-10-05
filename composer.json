@@ -40,7 +40,11 @@
     "mobiledetect/mobiledetectlib": "4.8.09",
     "ext-mysqli": "*",
     "ext-curl": "*",
-    "firebase/php-jwt": "^6.10"
+    "firebase/php-jwt": "^6.10",
+    "symfony/mailer": "^7.3",
+    "symfony/mime": "^7.3",
+    "twig/twig": "^3.21",
+    "symfony/twig-bridge": "^7.3"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
