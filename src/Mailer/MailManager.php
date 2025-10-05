@@ -9,7 +9,7 @@ class MailManager
 {
     private static ?MailManager $instance = null;
     private MailService $mailService;
-    private array $templates;
+    private array $templates = [];
 
     /**
      * @param array $templates
@@ -18,7 +18,7 @@ class MailManager
      */
     private function __construct(array $templates, string $envFile)
     {
-        $this->mailService = MailService::getInstance($envFile);
+        $this->mailService = MailService::getInstance();
         $this->templates = $templates;
     }
 
@@ -28,7 +28,7 @@ class MailManager
      * @return MailManager
      * @throws MailServiceException
      */
-    public static function getInstance(array $templates, string $envFile = '.env'): MailManager
+    public static function getInstance(array $templates = [], string $envFile = '.env'): MailManager
     {
         if (self::$instance === null)
         {
@@ -38,6 +38,8 @@ class MailManager
     }
 
     /**
+     * Sendet eine Template-Mail
+     *
      * @param string|array $to
      * @param string $templateKey
      * @param array $context
@@ -53,15 +55,13 @@ class MailManager
         if (!isset($this->templates[$templateKey]))
         {
             $this->logError('MailManager: Template '.$templateKey.' not found.');
-
             return false;
         }
 
         $tpl = $this->templates[$templateKey];
 
-        // Subject ggf. mit Platzhaltern ersetzen
         $subject = $this->replacePlaceholders($tpl['subject'], $context);
-        $templateFile = $tpl['template'];
+        $templateFile = $tpl['template'] ?? null;
 
         return $this->mailService->send(
             $to,
@@ -74,12 +74,6 @@ class MailManager
         );
     }
 
-    /**
-     * @param string $key
-     * @param string $templateFile
-     * @param string $subject
-     * @return void
-     */
     public function registerTemplate(string $key, string $templateFile, string $subject): void
     {
         $this->templates[$key] = [
@@ -88,27 +82,18 @@ class MailManager
         ];
     }
 
-    /**
-     * @param string $text
-     * @param array $context
-     * @return string
-     */
     private function replacePlaceholders(string $text, array $context): string
     {
         foreach ($context as $key => $value)
         {
             if (is_scalar($value))
             {
-                $text = str_replace('{{' . $key . '}}', $value, $text);
+                $text = str_replace('{{'.$key.'}}', $value, $text);
             }
         }
         return $text;
     }
 
-    /**
-     * @param string $msg
-     * @return void
-     */
     protected function logError(string $msg): void
     {
         Logger::forge()->error($msg);

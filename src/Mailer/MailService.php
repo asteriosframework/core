@@ -130,28 +130,59 @@ class MailService
 
         if ($template && $this->twig)
         {
-            $email = $this->getTemplatedEmail()
-                ->from($this->getAddress($this->fromAddress, $this->fromName))
-                ->to(...$recipients)
-                ->subject($subject)
-                ->htmlTemplate($template)
-                ->context($context);
+            try
+            {
+                $htmlBody = $this->twig->render($template, $context);
+            }
+            catch (\Throwable $e)
+            {
+                $this->logError('Twig render error: '.$e->getMessage());
+                $htmlBody = null;
+            }
+
+            if (class_exists(TemplatedEmail::class))
+            {
+                $email = $this->getTemplatedEmail()
+                    ->from($this->getAddress($this->fromAddress, $this->fromName))
+                    ->to(...$recipients)
+                    ->subject($subject)
+                    ->html($htmlBody ?? '');
+            }
+            else
+            {
+                $email = $this->getEmail()
+                    ->from($this->getAddress($this->fromAddress, $this->fromName))
+                    ->to(...$recipients)
+                    ->subject($subject)
+                    ->html($htmlBody ?? '');
+            }
         }
         else
         {
-            $email = ($this->getEmail())
+
+            $email = $this->getEmail()
                 ->from($this->getAddress($this->fromAddress, $this->fromName))
                 ->to(...$recipients)
                 ->subject($subject);
+
 
             if ($htmlBody)
             {
                 $email->html($htmlBody);
             }
+            else
+            {
+                $email->html('');
+            }
+
 
             if ($plainText)
             {
                 $email->text($plainText);
+            }
+            else
+            {
+                $email->text(strip_tags($htmlBody ?? ''));
             }
         }
 
