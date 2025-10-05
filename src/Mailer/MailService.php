@@ -245,7 +245,7 @@ class MailService
     {
         try
         {
-            return $this->env->get('MAIL_TEMPLATES_PATH');
+            return $this->getProtectedPath() . $this->env->get('MAIL_TEMPLATES_PATH');
         }
         catch (EnvException|EnvLoadException $e)
         {
@@ -313,5 +313,10 @@ class MailService
     protected function logError(string $msg): void
     {
         Logger::forge()->error($msg);
+    }
+
+    protected function getProtectedPath(): string
+    {
+        return Asterios::getBasePath();
     }
 }
