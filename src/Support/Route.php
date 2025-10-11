@@ -54,6 +54,14 @@ class Route implements RouteInterface
     /**
      * @inheritDoc
      */
+    public static function options(string $uri, string|array $action, array $options = []): void
+    {
+        self::addRoute('OPTIONS', $uri, $action, $options);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public static function match(array|string $methods, string $uri, string|array $action, array $options = []): void
     {
         $methods = is_array($methods) ? $methods : [$methods];

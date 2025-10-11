@@ -45,6 +45,14 @@ interface RouteInterface
     public static function delete(string $uri, string|array $action, array $options = []): void;
 
     /**
+     * @param string $uri
+     * @param string|array $action
+     * @param array $options
+     * @return void
+     */
+    public static function options(string $uri, string|array $action, array $options = []): void;
+
+    /**
      * @param array|string $methods
      * @param string $uri
      * @param string|array $action
