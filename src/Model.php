@@ -185,32 +185,48 @@ class Model
     }
 
     /**
-     * This function set backticks to prevent reserved keywords in sql syntax.
+     * This function returns the backticks for given value.
      * @param string $value
      * @return string
      */
     private function backticks(string $value): string
     {
-        if (strpos($value, 'MD5') !== false)
+        if (stripos($value, ' AS ') !== false)
         {
-            preg_match_all('/(?<=\().*?(?=\))/m', $value, $matches, PREG_SET_ORDER);
-            if (strpos($matches[0][0], '`') === false)
+            [$col, $alias] = preg_split('/\s+AS\s+/i', $value);
+            return $this->backticks(trim($col)) . ' AS ' . $alias;
+        }
+
+        if (preg_match('/^(.+)\s+([a-zA-Z0-9_]+)$/', $value, $m))
+        {
+            $col = trim($m[1]);
+            $alias = trim($m[2]);
+
+            return $this->backticks($col) . ' AS ' . $alias;
+        }
+
+        if (str_contains($value, 'MD5'))
+        {
+            preg_match('/MD5\((.*?)\)/i', $value, $m);
+
+            if (!empty($m[1]) && !str_contains($m[1], '`'))
             {
-                return 'MD5(`' . $matches[0][0] . '`)';
+                return 'MD5(`' . $m[1] . '`)';
             }
 
             return $value;
         }
 
-        if (strpos($value, '.') !== false)
+        if (str_contains($value, '.'))
         {
-            preg_match_all('/([0-9,a-zA-Z$_]*)\.([0-9,a-zA-Z$_]*)/i', $value, $matches, PREG_SET_ORDER);
-
-            return sprintf('`%s`.`%s`', $matches[0][1], $matches[0][2]);
+            preg_match('/([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/', $value, $m);
+            return '`' . $m[1] . '`.`' . $m[2] . '`';
         }
+
 
         return '`' . $value . '`';
     }
+
 
     /**
      * @param array $options
