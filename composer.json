@@ -44,7 +44,8 @@
     "symfony/mailer": "^7.3",
     "symfony/mime": "^7.3",
     "twig/twig": "^3.21",
-    "symfony/twig-bridge": "^7.3"
+    "symfony/twig-bridge": "^7.3",
+    "spomky-labs/otphp": "^11.3"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
