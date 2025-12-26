@@ -16,7 +16,7 @@ use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Writer\Result\ResultInterface;
 
-class EndroidQrCodeBuilderFactory implements QrCodeBuilderFactoryInterface
+class QrCodeBuilderFactory implements QrCodeBuilderFactoryInterface
 {
     public function build(QrCodeData $data): QCodeBuilderResultInterface
     {
@@ -33,7 +33,7 @@ class EndroidQrCodeBuilderFactory implements QrCodeBuilderFactoryInterface
             labelText: $data->labelText,
             labelFont: new OpenSans($data->labelFontSize),
             labelAlignment: LabelAlignment::Center,
-            logoPath: $data->logoPath,
+            logoPath: $data->logoPath ?? '',
             logoResizeToWidth: $data->logoResizeToWidth,
             logoPunchoutBackground: $data->logoPunchoutBackground
         );
