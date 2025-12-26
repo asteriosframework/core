@@ -6,6 +6,8 @@ namespace Asterios\Core;
 
 use Asterios\Core\Contracts\SingletonInterface;
 use Asterios\Core\Contracts\StrInterface;
+use Asterios\Core\Exception\StrRandomBytesException;
+use Random\RandomException;
 
 class Str implements StrInterface, SingletonInterface
 {
@@ -204,5 +206,40 @@ class Str implements StrInterface, SingletonInterface
         }
 
         return $remove ? $array : $return;
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    public function generateBase32Secret(int $length = 16): string
+    {
+        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+        try
+        {
+            $randomBytes = random_bytes($length);
+        }
+        // @codeCoverageIgnoreStart
+        catch (RandomException $e)
+        {
+            throw new StrRandomBytesException($e->getMessage());
+        }
+        /// @codeCoverageIgnoreEnd
+        $binaryString = '';
+
+        foreach (str_split($randomBytes) as $char)
+        {
+            $binaryString .= str_pad(decbin(ord($char)), 8, '0', STR_PAD_LEFT);
+        }
+
+        $encoded = '';
+        foreach (str_split($binaryString, 5) as $chunk)
+        {
+            $chunk = str_pad($chunk, 5, '0');
+            $encoded .= $alphabet[bindec($chunk)];
+        }
+
+        return $encoded;
     }
 }
