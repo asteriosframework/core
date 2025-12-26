@@ -2,6 +2,6 @@
 
 namespace Asterios\Core\Exception;
 
-class GoogleAuthenticatorRandomBytesException extends AsteriosException
+class StrRandomBytesException extends AsteriosException
 {
 }

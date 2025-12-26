@@ -2,6 +2,7 @@
 
 namespace Asterios\Test;
 
+use Asterios\Core\Exception\StrRandomBytesException;
 use Asterios\Core\Str;
 use PHPUnit\Framework\TestCase;
 
@@ -334,6 +335,34 @@ class StrTest extends TestCase
         }
 
         self::assertEquals($expected, $actual);
+    }
+
+    /**
+     * @throws StrRandomBytesException
+     */
+    public function testGenerateBase32SecretReturnsValidString(): void
+    {
+
+        $length = 16;
+        $secret = Str::getInstance()->generateBase32Secret($length);
+
+        $this->assertMatchesRegularExpression('/^[A-Z2-7]+$/', $secret);
+
+        $expectedLength = (int) ceil(($length * 8) / 5);
+        $this->assertEquals($expectedLength, strlen($secret));
+    }
+
+    /**
+     * @throws StrRandomBytesException
+     */
+    public function testGenerateBase32SecretWithDifferentLength(): void
+    {
+
+        $length = 10;
+        $secret = Str::getInstance()->generateBase32Secret($length);
+
+        $expectedLength = (int) ceil(($length * 8) / 5);
+        $this->assertEquals($expectedLength, strlen($secret));
     }
 
     ########## Provider ##########

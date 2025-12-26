@@ -2,6 +2,8 @@
 
 namespace Asterios\Core\Contracts;
 
+use Asterios\Core\Exception\StrRandomBytesException;
+
 interface StrInterface
 {
     /**
@@ -34,5 +36,12 @@ interface StrInterface
     public function isHtml(string $value): bool;
 
     public function filterKeys(array $array, array $keys, bool $remove = false): array;
+
+    /**
+     * @param int $length
+     * @return string
+     * @throws StrRandomBytesException
+     */
+    public function generateBase32Secret(int $length = 16): string;
 
 }
