@@ -16,7 +16,7 @@ class DateTest extends TestCase
     {
         parent::tearDown();
         Date::set_timezone(Date::DEFAULT_TIMEZONE);
-        (new Date)->setTimezone(Date::DEFAULT_TIMEZONE);
+        (new Date())->setTimezone(Date::DEFAULT_TIMEZONE);
     }
 
     /**
@@ -57,9 +57,9 @@ class DateTest extends TestCase
      */
     public function setTimezone(string $timezone, string $expected): void
     {
-        (new Date)->setTimezone($timezone);
+        (new Date())->setTimezone($timezone);
 
-        $actual = (new Date)->getTimezone();
+        $actual = (new Date())->getTimezone();
 
         self::assertEquals($expected, $actual);
     }
@@ -74,7 +74,7 @@ class DateTest extends TestCase
      */
     public function daysInMonth(int $month, int $year, int $expected): void
     {
-        $actual = (new Date)->daysInMonth($month, $year);
+        $actual = (new Date())->daysInMonth($month, $year);
 
         self::assertEquals($expected, $actual);
     }
@@ -96,7 +96,7 @@ class DateTest extends TestCase
      */
     public function getTimestamp(string $date, $expected): void
     {
-        $actual = (new Date)->getTimestamp($date);
+        $actual = (new Date())->getTimestamp($date);
 
         self::assertEquals($expected, $actual);
     }
@@ -108,7 +108,7 @@ class DateTest extends TestCase
     {
         $this->expectException(DateException::class);
 
-        (new Date)->getTimestamp('32.12.2022');
+        (new Date())->getTimestamp('32.12.2022');
     }
 
     /**
@@ -118,7 +118,7 @@ class DateTest extends TestCase
      */
     public function format(string $date, string $format, string $expected): void
     {
-        $actual = (new Date)->format($date, $format);
+        $actual = (new Date())->format($date, $format);
 
         self::assertEquals($expected, $actual);
     }
@@ -131,7 +131,7 @@ class DateTest extends TestCase
     {
         $this->expectException(DateException::class);
 
-        (new Date)->format('2022-12-32', 'd.m.Y');
+        (new Date())->format('2022-12-32', 'd.m.Y');
     }
 
     ########## Provider ##########

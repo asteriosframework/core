@@ -53,10 +53,14 @@ class View
         $this->autoRender = $autoRender;
         $this->setTemplateFile();
 
-        if ($this->autoRender) {
-            try {
+        if ($this->autoRender)
+        {
+            try
+            {
                 $this->render();
-            } catch (ViewTemplateAccessException) {
+            }
+            catch (ViewTemplateAccessException)
+            {
                 $this->viewErrorTemplate();
             }
         }
@@ -92,13 +96,15 @@ class View
             extract($data, EXTR_SKIP);
             ob_start();
 
-            try {
+            try
+            {
                 if (!file_exists($templateFile))
                 {
                     throw new ViewTemplateAccessException('404');
                 }
                 include $templateFile;
-            } catch (ViewTemplateAccessException)
+            }
+            catch (ViewTemplateAccessException)
             {
                 $this->viewErrorTemplate();
             }
