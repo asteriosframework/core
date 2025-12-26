@@ -153,14 +153,14 @@ class Logger
         {
             return;
         }
-        /** @var false|string $time */
+
         $time = date($this->options['logFormat']);
 
         $context = json_encode($args['context'], JSON_THROW_ON_ERROR);
 
         $currentEnv = strtolower(Asterios::getEnvironment());
 
-        $timeLog = (false === $time) ? "[N/A] " : "[{$time}] ";
+        $timeLog = "[{$time}] ";
         $severityLog = $currentEnv . '.';
         $severityLog .= is_null($args['severity']) ? 'N/A' : $args['severity'];
         $messageLog = is_null($args['message']) ? "N/A" : (string)($args['message']);

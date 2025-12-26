@@ -384,7 +384,7 @@ class File
                 throw new FileAccessException('Cannot compare empty folders!');
             }
 
-            if ((false !== $folder1_content && count($folder1_content) > 0) && (false !== $folder2_content && count($folder2_content) > 0))
+            if ((is_array($folder1_content) && count($folder1_content) > 0) && (is_array($folder2_content) && count($folder2_content) > 0))
             {
                 $_difference = array_diff($folder1_content, $folder2_content);
                 $_total_differences = count($_difference);
@@ -404,7 +404,7 @@ class File
 
             return (object)$content_difference;
         }
-        catch (FileAccessException $e)
+        catch (FileAccessException)
         {
             Debug::backtrace();
 

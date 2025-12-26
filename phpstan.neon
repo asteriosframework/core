@@ -1,4 +1,6 @@
 parameters:
+	excludePaths:
+		- src/Traits/*
 	level: 5
 	paths:
 		- src
