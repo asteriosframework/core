@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Asterios\Core\Factory;
+namespace Asterios\Core\GoogleAuthenticator\Factory;
 
-use Asterios\Core\DTO\GoogleAuthenticatorData;
-use Asterios\Core\GoogleAuthenticator;
+use Asterios\Core\Dto\GoogleAuthenticator\GoogleAuthenticatorData;
+use Asterios\Core\GoogleAuthenticator\GoogleAuthenticator;
 use OTPHP\TOTP;
 
 final class GoogleAuthenticatorFactory

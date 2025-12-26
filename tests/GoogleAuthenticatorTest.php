@@ -2,7 +2,7 @@
 
 namespace Asterios\Test;
 
-use Asterios\Core\GoogleAuthenticator;
+use Asterios\Core\GoogleAuthenticator\GoogleAuthenticator;
 use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use OTPHP\TOTPInterface;
@@ -53,5 +53,34 @@ class GoogleAuthenticatorTest extends MockeryTestCase
 
         $this->assertSame('SECRET123', $authenticator->getSecret());
         $this->assertSame('otpauth://totp/...', $authenticator->getProvisioningUri());
+    }
+
+    public function testGenerateBase32SecretReturnsValidString(): void
+    {
+        $mockTOTP = m::mock(TOTPInterface::class);
+        $authenticator = new GoogleAuthenticator($mockTOTP);
+
+        $length = 16;
+        $secret = $authenticator->generateBase32Secret($length);
+
+        // Base32 Alphabet Check
+        $this->assertMatchesRegularExpression('/^[A-Z2-7]+$/', $secret);
+
+        // Die Länge des resultierenden Strings bei Base32 ist (bytes * 8) / 5, aufgerundet.
+        // Für 16 Bytes: (16 * 8) / 5 = 128 / 5 = 25.6 -> 26 Zeichen.
+        $expectedLength = (int) ceil(($length * 8) / 5);
+        $this->assertEquals($expectedLength, strlen($secret));
+    }
+
+    public function testGenerateBase32SecretWithDifferentLength(): void
+    {
+        $mockTOTP = m::mock(TOTPInterface::class);
+        $authenticator = new GoogleAuthenticator($mockTOTP);
+
+        $length = 10;
+        $secret = $authenticator->generateBase32Secret($length);
+
+        $expectedLength = (int) ceil(($length * 8) / 5);
+        $this->assertEquals($expectedLength, strlen($secret));
     }
 }
