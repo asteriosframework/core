@@ -14,8 +14,8 @@ use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
-use Twig\Loader\FilesystemLoader;
 use Twig\Environment as Twig;
+use Twig\Loader\FilesystemLoader;
 
 class MailService
 {

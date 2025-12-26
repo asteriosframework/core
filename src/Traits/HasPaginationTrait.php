@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Asterios\Core\Traits;
 
+use Asterios\Core\Exception\ModelException;
 use Asterios\Core\Exception\ModelInvalidArgumentException;
+use Asterios\Core\Logger;
 use Asterios\Core\Model;
 use Asterios\Core\Support\PaginateResult;
-use Asterios\Core\Exception\ModelException;
-use Asterios\Core\Logger;
 
 /**
  * @mixin Model

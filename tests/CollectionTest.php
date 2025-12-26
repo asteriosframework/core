@@ -385,7 +385,7 @@ class CollectionTest extends MockeryTestCase
 
         $this->testedClass = Collection::forge($data);
 
-        $result = $this->testedClass->findIn('options', static fn() => true);
+        $result = $this->testedClass->findIn('options', static fn () => true);
 
         self::assertNull($result);
     }

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Asterios\Core\Dto;
+namespace Asterios\Core\Dto\GoogleAuthenticator;
 
 use Asterios\Core\Data;
 

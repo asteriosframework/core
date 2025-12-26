@@ -254,9 +254,10 @@ class Db
             return false;
         }
 
-        $hasTable = self::forge()
+        $tableCheckQuery = self::forge()
             ->get_connection()
-            ->query('SHOW TABLES LIKE "' . $table . '"')->num_rows === 1;
+            ->query('SHOW TABLES LIKE "' . $table . '"');
+        $hasTable = ($tableCheckQuery instanceof \mysqli_result) && $tableCheckQuery->num_rows > 0;
 
         if ($dropTable)
         {
@@ -286,7 +287,7 @@ class Db
             ->get_connection()
             ->multi_query($sqlScript);
 
-        $count = 1;
+        $count = 0;
 
         while (self::forge()
             ->get_connection()

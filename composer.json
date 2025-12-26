@@ -45,7 +45,8 @@
     "symfony/mime": "^7.3",
     "twig/twig": "^3.21",
     "symfony/twig-bridge": "^7.3",
-    "spomky-labs/otphp": "^11.3"
+    "spomky-labs/otphp": "^11.3",
+    "endroid/qr-code": "^6.0"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",

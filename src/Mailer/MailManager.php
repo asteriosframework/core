@@ -9,14 +9,13 @@ class MailManager
 {
     private static ?MailManager $instance = null;
     private MailService $mailService;
-    private array $templates = [];
+    private array $templates;
 
     /**
      * @param array $templates
-     * @param string $envFile
      * @throws MailServiceException
      */
-    private function __construct(array $templates, string $envFile)
+    private function __construct(array $templates)
     {
         $this->mailService = MailService::getInstance();
         $this->templates = $templates;
@@ -24,15 +23,14 @@ class MailManager
 
     /**
      * @param array $templates
-     * @param string $envFile
      * @return MailManager
      * @throws MailServiceException
      */
-    public static function getInstance(array $templates = [], string $envFile = '.env'): MailManager
+    public static function getInstance(array $templates = []): MailManager
     {
         if (self::$instance === null)
         {
-            self::$instance = new MailManager($templates, $envFile);
+            self::$instance = new MailManager($templates);
         }
         return self::$instance;
     }
