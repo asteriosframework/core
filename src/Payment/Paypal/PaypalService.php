@@ -2,6 +2,7 @@
 
 namespace Asterios\Core\Payment\Paypal;
 
+use Asterios\Core\Contracts\Payment\Paypal\PaypalOAuthTokenProviderInterface;
 use Asterios\Core\Contracts\Payment\Paypal\PaypalServiceInterface;
 use Asterios\Core\Dto\Payment\Paypal\PaypalConfigData;
 use Asterios\Core\Dto\Payment\Paypal\PaypalPurchaseData;
@@ -13,7 +14,7 @@ final readonly class PaypalService implements PaypalServiceInterface
 {
     public function __construct(
         private PaypalConfigData $config,
-        private PaypalOAuthTokenProvider $tokenProvider,
+        private PaypalOAuthTokenProviderInterface $tokenProvider,
         private Request $request
     ) {
     }
@@ -53,11 +54,12 @@ final readonly class PaypalService implements PaypalServiceInterface
                 $this->config->baseUrl . '/v2/checkout/orders',
                 json_encode($payload, JSON_THROW_ON_ERROR)
             );
-        }
+        } // @codeCoverageIgnoreStart
         catch (JsonException $e)
         {
             throw new PaypalException($e->getMessage(), $e->getCode(), $e);
         }
+        // @codeCoverageIgnoreEnd
 
         if (!$response)
         {
@@ -67,11 +69,11 @@ final readonly class PaypalService implements PaypalServiceInterface
         try
         {
             $data = json_decode($response->body, true, 512, JSON_THROW_ON_ERROR);
-        }
+        }  // @codeCoverageIgnoreStart
         catch (JsonException $e)
         {
             throw new PaypalException($e->getMessage(), $e->getCode(), $e);
-        }
+        } // @codeCoverageIgnoreEnd
 
         return [
             'paypalOrderId' => $data['id'],
