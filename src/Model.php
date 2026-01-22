@@ -72,6 +72,7 @@ class Model
     protected $limit_statement;
     /** @var false | mixed */
     protected $result = false;
+    protected bool $select_distinct = false;
     protected $select_statement;
     protected $from_statement;
     protected $join_statement;
@@ -401,7 +402,7 @@ class Model
      * @param null|array|string $columns
      * @return Model
      */
-    public function select($columns = null): Model
+    public function select($columns = null): self
     {
         if (empty($columns))
         {
@@ -441,7 +442,13 @@ class Model
         return $this;
     }
 
-    public function reset_select(): Model
+    public function distinct(bool $value = true): self
+    {
+        $this->select_distinct = $value;
+        return $this;
+    }
+
+    public function reset_select(): self
     {
         $this->select_statement = null;
 
@@ -504,6 +511,11 @@ class Model
         if (null === $this->query_statement)
         {
             $this->query_statement = self::SQL_COMMAND_SELECT . ' ';
+
+            if ($this->select_distinct)
+            {
+                $this->query_statement .= 'DISTINCT ';
+            }
 
             if (null === $this->from_statement)
             {
