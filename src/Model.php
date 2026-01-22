@@ -712,6 +712,35 @@ class Model
     }
 
     /**
+     * Query builder: This function appends the JOIN
+     * @param string $column1
+     * @param string $column2
+     * @return Model
+     * @throws ModelInvalidArgumentException
+     */
+    public function or_on(string $column1, string $column2): Model
+    {
+        if (!empty($column1) && !empty($column2))
+        {
+            if (!str_contains($column1, '.'))
+            {
+                throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column1 value "' . $column1 . '" must have table name and column name separated with a dot! Example: "table_name.row"');
+            }
+
+            if (!str_contains($column2, '.'))
+            {
+                throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column2 value "' . $column2 . '" must have table name and column name separated with a dot! Example: "table_name.row"');
+            }
+
+            $this->join_statement .= ' OR ' . $this->backticks($column1) . ' = ' . $this->backticks($column2) . ' ';
+
+            return $this;
+        }
+
+        throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column1 and Column2 must have table name and column name separated with a dot! Example: "table_name.row"');
+    }
+
+    /**
      * Query builder: This function set the OR condition.
      * Hint: If you want only to set a simple = condition, you can use only 2 parameters:
      * Example: ->or_where('column', 1)
