@@ -56,4 +56,19 @@ class CastTest extends MockeryTestCase
 
         self::assertIsObject($actual);
     }
+
+    public function testIsStringToArray(): void
+    {
+        $actual = Cast::forge()->stringToArray('one,two,three');
+
+        self::assertEquals(['one', 'two', 'three'], $actual);
+    }
+
+    public function testIsArrayToString(): void
+    {
+        $actual = Cast::forge()->arrayToString(['one','two','three']);
+        $expected = 'one,two,three';
+
+        self::assertEquals($expected, $actual);
+    }
 }
