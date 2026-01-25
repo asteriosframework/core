@@ -12,7 +12,7 @@ class Cast implements CastInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function int(mixed $value): int
     {
@@ -20,7 +20,7 @@ class Cast implements CastInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function string(mixed $value): string
     {
@@ -28,7 +28,7 @@ class Cast implements CastInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function bool(mixed $value): bool
     {
@@ -40,7 +40,7 @@ class Cast implements CastInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function double(mixed $value): float
     {
@@ -48,7 +48,7 @@ class Cast implements CastInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function float(mixed $value): float
     {
@@ -56,10 +56,26 @@ class Cast implements CastInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function object(array $value): object
     {
         return (object)$value;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function stringToArray(string $value, string $separator = ','): array
+    {
+        return explode($separator, $value);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function arrayToString(array $value, string $separator = ','): string
+    {
+        return implode($separator, $value);
     }
 }

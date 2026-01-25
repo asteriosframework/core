@@ -40,4 +40,17 @@ interface CastInterface
      */
     public function object(array $value): object;
 
+    /**
+     * @param string $value
+     * @param string $separator
+     * @return array
+     */
+    public function stringToArray(string $value, string $separator = ','): array;
+
+    /**
+     * @param array $value
+     * @param string $separator
+     * @return string
+     */
+    public function arrayToString(array $value, string $separator = ','): string;
 }
