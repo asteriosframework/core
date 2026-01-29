@@ -9,52 +9,52 @@ use Asterios\Core\Exception\ModelPropertyException;
 
 class Model
 {
-    public const SQL_COMMAND_SELECT = 'SELECT';
-    public const SQL_COMMAND_FROM = 'FROM';
-    public const SQL_COMMAND_UPDATE = 'UPDATE';
-    public const SQL_COMMAND_DELETE = 'DELETE';
-    public const SQL_COMMAND_INSERT = 'INSERT INTO';
-    public const SQL_COMMAND_VALUES = 'VALUES';
-    public const SQL_COMMAND_SET = 'SET';
+    public const string SQL_COMMAND_SELECT = 'SELECT';
+    public const string SQL_COMMAND_FROM = 'FROM';
+    public const string SQL_COMMAND_UPDATE = 'UPDATE';
+    public const string SQL_COMMAND_DELETE = 'DELETE';
+    public const string SQL_COMMAND_INSERT = 'INSERT INTO';
+    public const string SQL_COMMAND_VALUES = 'VALUES';
+    public const string SQL_COMMAND_SET = 'SET';
 
-    public const SQL_ORDER_BY_ASC = 'ASC';
-    public const SQL_ORDER_BY_DESC = 'DESC';
+    public const string SQL_ORDER_BY_ASC = 'ASC';
+    public const string SQL_ORDER_BY_DESC = 'DESC';
 
-    public const SQL_CLAUSE_JOIN = 'JOIN';
-    public const SQL_CLAUSE_ON = 'ON';
-    public const SQL_CLAUSE_INNER = 'INNER';
-    public const SQL_CLAUSE_LIMIT = 'LIMIT';
+    public const string SQL_CLAUSE_JOIN = 'JOIN';
+    public const string SQL_CLAUSE_ON = 'ON';
+    public const string SQL_CLAUSE_INNER = 'INNER';
+    public const string SQL_CLAUSE_LIMIT = 'LIMIT';
 
-    public const JOIN_LEFT = 'LEFT';
-    public const JOIN_RIGHT = 'RIGHT';
-    public const JOIN_INNER = 'INNER';
+    public const string JOIN_LEFT = 'LEFT';
+    public const string JOIN_RIGHT = 'RIGHT';
+    public const string JOIN_INNER = 'INNER';
 
-    public const SQL_STATEMENT_WHERE = 'WHERE';
-    public const SQL_STATEMENT_AND = 'AND';
-    public const SQL_STATEMENT_OR = 'OR';
-    public const SQL_STATEMENT_EMPTY = '';
-    public const SQL_STATEMENT_GROUP_BY = 'GROUP BY';
-    public const SQL_STATEMENT_ORDER_BY = 'ORDER BY';
+    public const string SQL_STATEMENT_WHERE = 'WHERE';
+    public const string SQL_STATEMENT_AND = 'AND';
+    public const string SQL_STATEMENT_OR = 'OR';
+    public const string SQL_STATEMENT_EMPTY = '';
+    public const string SQL_STATEMENT_GROUP_BY = 'GROUP BY';
+    public const string SQL_STATEMENT_ORDER_BY = 'ORDER BY';
 
-    public const OPERATOR_EQUAL = '=';
-    public const OPERATOR_NOT_EQUAL = '!=';
-    public const OPERATOR_GT = '>';
-    public const OPERATOR_GT_OR_EQUAL = '>=';
-    public const OPERATOR_LT = '<';
-    public const OPERATOR_LT_OR_EQUAL = '<=';
-    public const OPERATOR_BETWEEN = 'BETWEEN';
-    public const OPERATOR_LIKE = 'LIKE';
-    public const OPERATOR_IN = 'IN';
-    public const OPERATOR_NOT_IN = 'NOT IN';
-    public const OPERATOR_IS_NULL = 'IS NULL';
-    public const OPERATOR_IS_NOT_NULL = 'IS NOT NULL';
+    public const string OPERATOR_EQUAL = '=';
+    public const string OPERATOR_NOT_EQUAL = '!=';
+    public const string OPERATOR_GT = '>';
+    public const string OPERATOR_GT_OR_EQUAL = '>=';
+    public const string OPERATOR_LT = '<';
+    public const string OPERATOR_LT_OR_EQUAL = '<=';
+    public const string OPERATOR_BETWEEN = 'BETWEEN';
+    public const string OPERATOR_LIKE = 'LIKE';
+    public const string OPERATOR_IN = 'IN';
+    public const string OPERATOR_NOT_IN = 'NOT IN';
+    public const string OPERATOR_IS_NULL = 'IS NULL';
+    public const string OPERATOR_IS_NOT_NULL = 'IS NOT NULL';
 
-    public const EXECUTE_MODE_READ = 'read';
-    public const EXECUTE_MODE_WRITE = 'write';
+    public const string EXECUTE_MODE_READ = 'read';
+    public const string EXECUTE_MODE_WRITE = 'write';
 
-    public const DEFAULT_CACHE_LIFETIME = 60;
+    public const int DEFAULT_CACHE_LIFETIME = 60;
 
-    protected $connection = 'default';
+    protected string $connection = 'default';
 
     protected $class;
     protected $table_name = '';
@@ -119,7 +119,7 @@ class Model
         return $model;
     }
 
-    public static function forge(): Model
+    public static function forge(): self
     {
         $model = static::class;
 
@@ -131,7 +131,7 @@ class Model
      * @return Model
      * @throws ModelException
      */
-    public function find_all(array $options = []): Model
+    public function find_all(array $options = []): self
     {
         $this->select($options['columns'] ?? null)
             ->from()
@@ -151,7 +151,7 @@ class Model
      * @param array $group_by
      * @return Model
      */
-    public function group_by(array $group_by): Model
+    public function group_by(array $group_by): self
     {
         if (!empty($group_by))
         {
@@ -233,7 +233,7 @@ class Model
      * @param array $options
      * @return Model
      */
-    private function apply_where_options(array $options): Model
+    private function apply_where_options(array $options): self
     {
         if (isset($options['where']))
         {
@@ -272,7 +272,7 @@ class Model
      * @param bool $formatValue
      * @return Model
      */
-    public function where(string $column, $operator = null, $value = null, bool $backticks = true, bool $formatValue = true): Model
+    public function where(string $column, $operator = null, $value = null, bool $backticks = true, bool $formatValue = true): self
     {
         if (\func_num_args() === 2)
         {
@@ -320,6 +320,83 @@ class Model
     }
 
     /**
+     * @param string|array $columns
+     * @param string $search
+     * @param bool $booleanMode
+     * @param bool $withWildcards
+     * @return $this
+     */
+    public function fulltext(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
+    {
+        if (is_array($columns))
+        {
+            $cols = implode(',', array_map([$this, 'backticks'], $columns));
+        }
+        else
+        {
+            $cols = $this->backticks($columns);
+        }
+
+        if ($withWildcards)
+        {
+            $search = implode(' ', array_map(fn($w) => '+' . $w . '*', explode(' ', $search)));
+        }
+
+        $mode = $booleanMode ? ' IN BOOLEAN MODE' : '';
+        $condition = 'MATCH('.$cols.') AGAINST (' . $this->format_value($search) . $mode . ')';
+
+        if (empty($this->where_statement))
+        {
+            $this->where_statement[] = self::SQL_STATEMENT_WHERE . ' ' . $condition;
+        }
+        else
+        {
+            $this->where_statement[] = ' ' . self::SQL_STATEMENT_AND . ' ' . $condition;
+        }
+
+        return $this;
+    }
+
+    public function fulltextWithScore(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
+    {
+        if (is_array($columns))
+        {
+            $cols = implode(',', array_map([$this, 'backticks'], $columns));
+        }
+        else
+        {
+            $cols = $this->backticks($columns);
+        }
+
+        if ($booleanMode && $withWildcards)
+        {
+            $search = implode(' ', array_map(static fn($w) => '+' . $w . '*', preg_split('/\s+/', trim($search))));
+        }
+
+        $mode = $booleanMode ? ' IN BOOLEAN MODE' : '';
+
+        $matchExpr = 'MATCH('.$cols.') AGAINST (' . $this->format_value($search) . $mode . ')';
+
+        if (empty($this->select_statement))
+        {
+            $this->select_statement = '*';
+        }
+
+        $this->select_statement .= ', ' . $matchExpr . ' AS relevance';
+
+        if (empty($this->where_statement))
+        {
+            $this->where_statement[] = self::SQL_STATEMENT_WHERE . ' ' . $matchExpr;
+        }
+        else
+        {
+            $this->where_statement[] = ' ' . self::SQL_STATEMENT_AND . ' ' . $matchExpr;
+        }
+
+        return $this;
+    }
+
+    /**
      * This function format value, if operator is IN operator
      * @param string $value
      * @return string
@@ -351,7 +428,7 @@ class Model
      * @return Model
      * @throws ModelException
      */
-    public function from(?string $table_name = null, ?string $alias = null): Model
+    public function from(?string $table_name = null, ?string $alias = null): self
     {
         if (null === $table_name)
         {
@@ -382,10 +459,10 @@ class Model
             return $this->table_name;
         }
 
-        throw new ModelException(__CLASS__ . '::' . __FUNCTION__ . '(): Model ' . $this->class . ' has no Table property!');
+        throw new ModelException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . $this->class . ' has no Table property!');
     }
 
-    public function set_table_alias(string $alias): Model
+    public function set_table_alias(string $alias): self
     {
         $this->table_alias = $alias;
 
@@ -455,7 +532,7 @@ class Model
         return $this;
     }
 
-    public function order_by(string $column, string $direction = self::SQL_ORDER_BY_ASC, bool $backticks = true): Model
+    public function order_by(string $column, string $direction = self::SQL_ORDER_BY_ASC, bool $backticks = true): self
     {
 
         if (null === $this->order_by_statement)
@@ -487,7 +564,7 @@ class Model
      * @return Model
      * @throws ModelException
      */
-    public function execute(string $option = self::EXECUTE_MODE_READ): Model
+    public function execute(string $option = self::EXECUTE_MODE_READ): self
     {
         if ($option === self::EXECUTE_MODE_WRITE)
         {
@@ -567,7 +644,7 @@ class Model
      * @throws ModelException
      * @throws ModelInvalidArgumentException
      */
-    public function find_first(array $options = []): Model
+    public function find_first(array $options = []): self
     {
         return $this->select($options['columns'] ?? null)
             ->from()
@@ -582,7 +659,7 @@ class Model
     /**
      * @return $this
      */
-    public function prepare_find_result(): Model
+    public function prepare_find_result(): self
     {
         $find_result = $this->get_result();
 
@@ -619,7 +696,7 @@ class Model
      * @return Model
      * @throws ModelInvalidArgumentException
      */
-    public function limit(int $limit, int $offset = 0): Model
+    public function limit(int $limit, int $offset = 0): self
     {
         if ($limit === 0 && $offset === 0)
         {
@@ -645,7 +722,7 @@ class Model
      * @throws ModelException
      * @throws ModelInvalidArgumentException
      */
-    public function find_last(array $options = []): Model
+    public function find_last(array $options = []): self
     {
         return $this->select($options['columns'] ?? null)
             ->from()
@@ -662,7 +739,7 @@ class Model
      * @return Model
      * @throws ModelException
      */
-    public function find_by_primary_key($id): Model
+    public function find_by_primary_key($id): self
     {
         return $this->select()
             ->from()
@@ -678,7 +755,7 @@ class Model
      * @param null|string $alias
      * @return Model
      */
-    public function join(string $table, string $direction = self::JOIN_LEFT, ?string $alias = null): Model
+    public function join(string $table, string $direction = self::JOIN_LEFT, ?string $alias = null): self
     {
         if (!empty($table))
         {
@@ -701,7 +778,7 @@ class Model
      * @return Model
      * @throws ModelInvalidArgumentException
      */
-    public function on(string $column1, string $column2): Model
+    public function on(string $column1, string $column2): self
     {
         if (!empty($column1) && !empty($column2))
         {
@@ -730,7 +807,7 @@ class Model
      * @return Model
      * @throws ModelInvalidArgumentException
      */
-    public function or_on(string $column1, string $column2): Model
+    public function or_on(string $column1, string $column2): self
     {
         if (!empty($column1) && !empty($column2))
         {
@@ -763,7 +840,7 @@ class Model
      * @param bool $backticks
      * @return Model
      */
-    public function or_where(string $column, ?string $operator = null, $value = null, bool $backticks = true): Model
+    public function or_where(string $column, ?string $operator = null, $value = null, bool $backticks = true): self
     {
         if (func_num_args() === 2)
         {
@@ -807,7 +884,7 @@ class Model
      * @param bool $backticks
      * @return Model
      */
-    public function or_where_open(string $column, $operator = null, $value = null, bool $backticks = true): Model
+    public function or_where_open(string $column, $operator = null, $value = null, bool $backticks = true): self
     {
         if (func_num_args() === 2)
         {
@@ -825,7 +902,7 @@ class Model
      * @param bool $backticks
      * @return Model
      */
-    public function where_open_by_condition(string $where_condition, string $column, $operator, $value = null, bool $backticks = true): Model
+    public function where_open_by_condition(string $where_condition, string $column, $operator, $value = null, bool $backticks = true): self
     {
         if ($operator === null)
         {
@@ -864,14 +941,14 @@ class Model
         return '(';
     }
 
-    public function or_where_close(): Model
+    public function or_where_close(): self
     {
         $this->where_close();
 
         return $this;
     }
 
-    public function where_close(): Model
+    public function where_close(): self
     {
         $this->where_statement[] = $this->_close();
 
@@ -891,7 +968,7 @@ class Model
      * @param bool $backticks
      * @return Model
      */
-    public function and_where_open(string $column, $operator, $value = null, bool $backticks = true): Model
+    public function and_where_open(string $column, $operator, $value = null, bool $backticks = true): self
     {
         if (func_num_args() === 2)
         {
@@ -901,7 +978,7 @@ class Model
         return $this->where_open_by_condition(self::SQL_STATEMENT_AND, $column, $operator, $value, $backticks);
     }
 
-    public function and_where_close(): Model
+    public function and_where_close(): self
     {
         $this->where_close();
 
@@ -914,14 +991,14 @@ class Model
      * SQL statement: AND (
      * @return Model
      */
-    public function where_open(): Model
+    public function where_open(): self
     {
         $this->where_statement[] = ' ' . self::SQL_STATEMENT_AND . ' ' . $this->_open();
 
         return $this;
     }
 
-    public function query($query = null): Model
+    public function query($query = null): self
     {
         if (null !== $query)
         {
@@ -978,7 +1055,7 @@ class Model
      * @throws ModelPrimaryKeyException
      * @throws ModelPropertyException
      */
-    public function set($property, $value = null): Model
+    public function set($property, $value = null): self
     {
         if (is_array($property))
         {
@@ -1011,7 +1088,7 @@ class Model
 
         if (!$this->property_exists($property))
         {
-            throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): Model ' . $this->class . ' has no property "' . $property . '"!');
+            throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . $this->class . ' has no property "' . $property . '"!');
         }
         $this->data[$property] = $value;
     }
@@ -1109,7 +1186,7 @@ class Model
         {
             if (!$this->property_exists($key))
             {
-                throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): Model ' . $this->class . ' has no property "' . $key . '"!');
+                throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . $this->class . ' has no property "' . $key . '"!');
             }
         }
     }
@@ -1243,14 +1320,14 @@ class Model
         return Db::write($sql, $this->connection);
     }
 
-    public function open(): Model
+    public function open(): self
     {
         $this->where_statement[] = '(';
 
         return $this;
     }
 
-    public function close(): Model
+    public function close(): self
     {
         $this->where_statement[] = ')';
 
