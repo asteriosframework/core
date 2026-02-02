@@ -83,6 +83,8 @@ class Model
     /** @var null|int */
     protected static $app_id = null;
 
+    protected string $next_where_boolean = self::SQL_STATEMENT_AND;
+
     /**
      * This method can be used in three ways: find a specific id (primary key), find first or all entries with conditions.
      * @param mixed $id
@@ -307,14 +309,8 @@ class Model
             $where .= ' ' . $condition;
         }
 
-        if (empty($this->where_statement))
-        {
-            $this->where_statement[] = self::SQL_STATEMENT_WHERE . ' ' . $where;
-        }
-        else
-        {
-            $this->where_statement[] = ' ' . self::SQL_STATEMENT_AND . ' ' . $where;
-        }
+        $this->appendWhere($where);
+
 
         return $this;
     }
@@ -328,73 +324,74 @@ class Model
      */
     public function fulltext(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
     {
-        if (is_array($columns))
-        {
-            $cols = implode(',', array_map([$this, 'backticks'], $columns));
-        }
-        else
-        {
-            $cols = $this->backticks($columns);
-        }
+        $cols = is_array($columns)
+            ? implode(',', array_map([$this, 'backticks'], $columns))
+            : $this->backticks($columns);
 
-        if ($withWildcards)
+        if ($booleanMode && $withWildcards)
         {
-            $search = implode(' ', array_map(fn($w) => '+' . $w . '*', explode(' ', $search)));
+            $search = implode(' ', array_map(static fn($w) => '+' . $w . '*',
+                preg_split('/\s+/', trim($search))
+            ));
         }
 
         $mode = $booleanMode ? ' IN BOOLEAN MODE' : '';
-        $condition = 'MATCH('.$cols.') AGAINST (' . $this->format_value($search) . $mode . ')';
+        $expr = 'MATCH('.$cols.') AGAINST (' . $this->format_value($search) . $mode . ')';
 
-        if (empty($this->where_statement))
-        {
-            $this->where_statement[] = self::SQL_STATEMENT_WHERE . ' ' . $condition;
-        }
-        else
-        {
-            $this->where_statement[] = ' ' . self::SQL_STATEMENT_AND . ' ' . $condition;
-        }
+        $this->appendWhere($expr);
 
         return $this;
     }
 
+    /**
+     * @param string|array $columns
+     * @param string $search
+     * @param bool $booleanMode
+     * @param bool $withWildcards
+     * @return $this
+     */
     public function fulltextWithScore(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
     {
-        if (is_array($columns))
-        {
-            $cols = implode(',', array_map([$this, 'backticks'], $columns));
-        }
-        else
-        {
-            $cols = $this->backticks($columns);
-        }
+        $cols = is_array($columns)
+            ? implode(',', array_map([$this, 'backticks'], $columns))
+            : $this->backticks($columns);
 
         if ($booleanMode && $withWildcards)
         {
-            $search = implode(' ', array_map(static fn($w) => '+' . $w . '*', preg_split('/\s+/', trim($search))));
+            $search = implode(' ', array_map(static fn($w) => '+' . $w . '*',
+                preg_split('/\s+/', trim($search))
+            ));
         }
 
         $mode = $booleanMode ? ' IN BOOLEAN MODE' : '';
+        $expr = 'MATCH('.$cols.') AGAINST (' . $this->format_value($search) . $mode . ')';
 
-        $matchExpr = 'MATCH('.$cols.') AGAINST (' . $this->format_value($search) . $mode . ')';
 
         if (empty($this->select_statement))
         {
             $this->select_statement = '*';
         }
 
-        $this->select_statement .= ', ' . $matchExpr . ' AS relevance';
+        $this->select_statement .= ', ' . $expr . ' AS relevance';
 
-        if (empty($this->where_statement))
-        {
-            $this->where_statement[] = self::SQL_STATEMENT_WHERE . ' ' . $matchExpr;
-        }
-        else
-        {
-            $this->where_statement[] = ' ' . self::SQL_STATEMENT_AND . ' ' . $matchExpr;
-        }
+        $this->appendWhere($expr);
 
         return $this;
     }
+
+
+    public function and(): self
+    {
+        $this->next_where_boolean = self::SQL_STATEMENT_AND;
+        return $this;
+    }
+
+    public function or(): self
+    {
+        $this->next_where_boolean = self::SQL_STATEMENT_OR;
+        return $this;
+    }
+
 
     /**
      * This function format value, if operator is IN operator
@@ -1495,5 +1492,19 @@ class Model
     private function is_operator_null($operator): bool
     {
         return \in_array($operator, [self::OPERATOR_IS_NULL, self::OPERATOR_IS_NOT_NULL], true);
+    }
+
+    protected function appendWhere(string $condition): void
+    {
+        if (empty($this->where_statement))
+        {
+            $this->where_statement[] = self::SQL_STATEMENT_WHERE . ' ' . $condition;
+        }
+        else
+        {
+            $this->where_statement[] = ' ' . $this->next_where_boolean . ' ' . $condition;
+        }
+
+        $this->next_where_boolean = self::SQL_STATEMENT_AND;
     }
 }
