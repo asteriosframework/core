@@ -216,4 +216,10 @@ interface SchemaBuilderInterface
      * @return ColumnDefinitionBuilder
      */
     public function decimal(string $name, int $precision = 10, int $scale = 2): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
+    public function fullText(string $name): ColumnDefinitionBuilder;
 }
