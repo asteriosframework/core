@@ -10,6 +10,11 @@ interface IndexBuilderInterface
     public function unique(): self;
 
     /**
+     * @return self
+     */
+    public function fullText(): self;
+
+    /**
      * @return void
      */
     public function add(): void;

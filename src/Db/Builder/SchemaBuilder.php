@@ -321,6 +321,15 @@ class SchemaBuilder implements SchemaBuilderInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function fullText(string $name): ColumnDefinitionBuilder
+    {
+        return $this->column($name, 'TEXT');
+    }
+
+
+    /**
      * @param string $column
      * @return string
      */
