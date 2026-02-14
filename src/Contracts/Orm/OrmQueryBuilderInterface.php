@@ -196,6 +196,15 @@ interface OrmQueryBuilderInterface
     /**
      * @return self
      */
+    public function open(): self;
+
+    /**
+     * @return self
+     */
+    public function close(): self;
+    /**
+     * @return self
+     */
     public function and(): self;
 
     /**

@@ -760,6 +760,20 @@ class Model
         return $this;
     }
 
+    public function open(): self
+    {
+        $this->queryBuilder->open();
+
+        return $this;
+    }
+
+    public function close(): self
+    {
+        $this->queryBuilder->close();
+
+        return $this;
+    }
+
     public function query($query = null): self
     {
         $this->queryBuilder->query($query);

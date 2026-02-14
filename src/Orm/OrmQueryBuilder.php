@@ -691,4 +691,24 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
 
         return $this;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function open(): OrmQueryBuilderInterface
+    {
+        $this->whereStatement[] = '(';
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function close(): OrmQueryBuilderInterface
+    {
+        $this->whereStatement[] = ')';
+
+        return $this;
+    }
 }
