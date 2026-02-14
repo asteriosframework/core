@@ -211,7 +211,7 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
     {
         if (empty($this->whereStatement))
         {
-            $this->whereStatement[] = ' ' . $condition;
+            $this->whereStatement[] = 'WHERE ' . $condition;
         }
         else
         {
