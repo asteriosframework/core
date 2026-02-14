@@ -2,40 +2,19 @@
 
 namespace Asterios\Core;
 
+use Asterios\Core\Contracts\Orm\OrmQueryBuilderInterface;
+use Asterios\Core\Contracts\Orm\OrmSqlFormatterInterface;
+use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\ModelException;
 use Asterios\Core\Exception\ModelInvalidArgumentException;
 use Asterios\Core\Exception\ModelPrimaryKeyException;
 use Asterios\Core\Exception\ModelPropertyException;
+use Asterios\Core\Orm\OrmMetadata;
+use Asterios\Core\Orm\OrmQueryBuilder;
+use Asterios\Core\Orm\OrmSqlFormatter;
 
 class Model
 {
-    public const string SQL_COMMAND_SELECT = 'SELECT';
-    public const string SQL_COMMAND_FROM = 'FROM';
-    public const string SQL_COMMAND_UPDATE = 'UPDATE';
-    public const string SQL_COMMAND_DELETE = 'DELETE';
-    public const string SQL_COMMAND_INSERT = 'INSERT INTO';
-    public const string SQL_COMMAND_VALUES = 'VALUES';
-    public const string SQL_COMMAND_SET = 'SET';
-
-    public const string SQL_ORDER_BY_ASC = 'ASC';
-    public const string SQL_ORDER_BY_DESC = 'DESC';
-
-    public const string SQL_CLAUSE_JOIN = 'JOIN';
-    public const string SQL_CLAUSE_ON = 'ON';
-    public const string SQL_CLAUSE_INNER = 'INNER';
-    public const string SQL_CLAUSE_LIMIT = 'LIMIT';
-
-    public const string JOIN_LEFT = 'LEFT';
-    public const string JOIN_RIGHT = 'RIGHT';
-    public const string JOIN_INNER = 'INNER';
-
-    public const string SQL_STATEMENT_WHERE = 'WHERE';
-    public const string SQL_STATEMENT_AND = 'AND';
-    public const string SQL_STATEMENT_OR = 'OR';
-    public const string SQL_STATEMENT_EMPTY = '';
-    public const string SQL_STATEMENT_GROUP_BY = 'GROUP BY';
-    public const string SQL_STATEMENT_ORDER_BY = 'ORDER BY';
-
     public const string OPERATOR_EQUAL = '=';
     public const string OPERATOR_NOT_EQUAL = '!=';
     public const string OPERATOR_GT = '>';
@@ -51,39 +30,73 @@ class Model
 
     public const string EXECUTE_MODE_READ = 'read';
     public const string EXECUTE_MODE_WRITE = 'write';
-
-    public const int DEFAULT_CACHE_LIFETIME = 60;
-
     protected string $connection = 'default';
-
     protected $class;
-    protected $table_name = '';
-    /** @var null|string $table_alias */
-    protected $table_alias;
-    protected $primary_key = '';
-    /** @var array */
-    protected $properties = [];
-    /** @var array */
-    protected $update = [];
-    /** @var array */
-    protected $where_statement = [];
-    protected $group_by_statement;
-    protected $order_by_statement;
-    protected $limit_statement;
-    /** @var false | mixed */
-    protected $result = false;
-    protected bool $select_distinct = false;
-    protected $select_statement;
-    protected $from_statement;
-    protected $join_statement;
-    protected $query_statement;
-    protected $data = [];
+    protected string $table_name = '';
+    protected ?string $table_alias;
+    protected string $primary_key = '';
+    protected array $properties = [];
+    protected array $update = [];
+
+    protected array|bool $result = false;
+    protected array $data = [];
     protected $_id;
     protected $db_schema = [];
-    /** @var null|int */
-    protected static $app_id = null;
 
-    protected string $next_where_boolean = self::SQL_STATEMENT_AND;
+    protected OrmQueryBuilderInterface $queryBuilder;
+    protected OrmSqlFormatterInterface $formatter;
+
+    /**
+     * @throws ModelException
+     */
+    public function __construct(?OrmSqlFormatterInterface $formatter = null)
+    {
+        $this->reset();
+
+        $this->formatter = $formatter ?? new OrmSqlFormatter();
+
+        $this->rebuildQueryBuilder();
+    }
+
+    public function reset(): self
+    {
+        $this->queryBuilder->reset();
+
+        return $this;
+    }
+
+    /**
+     * @return void
+     * @throws ModelException
+     */
+    private function rebuildQueryBuilder(): void
+    {
+        $metadata = new OrmMetadata(
+            $this->table(),
+            $this->table_alias,
+            $this->connection
+        );
+
+        $this->queryBuilder = new OrmQueryBuilder(
+            $metadata,
+            $this->formatter
+        );
+    }
+
+    /**
+     * This method returns the table name for current model.
+     * @return string
+     * @throws ModelException
+     */
+    public function table(): string
+    {
+        if ($this->table_name !== '')
+        {
+            return $this->table_name;
+        }
+
+        throw new ModelException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . $this->class . ' has no Table property!');
+    }
 
     /**
      * This method can be used in three ways: find a specific id (primary key), find first or all entries with conditions.
@@ -149,87 +162,27 @@ class Model
     }
 
     /**
-     * Query builder: This function set GROUP BY.
-     * @param array $group_by
+     * @param array $groupBy
      * @return Model
+     * @deprecated Use groupBy() instead
      */
-    public function group_by(array $group_by): self
+    public function group_by(array $groupBy): self
     {
-        if (!empty($group_by))
-        {
-            if (null === $this->group_by_statement)
-            {
-                $this->group_by_statement = ' ' . self::SQL_STATEMENT_GROUP_BY . ' ';
-            }
-
-            $total_group_by = count($group_by);
-
-            $count = 1;
-
-            foreach ($group_by as $value)
-            {
-                if ($total_group_by === 1)
-                {
-                    $this->group_by_statement .= $this->backticks($value);
-                }
-                elseif ($count < $total_group_by)
-                {
-                    $this->group_by_statement .= $this->backticks($value) . ', ';
-                }
-                else
-                {
-                    $this->group_by_statement .= $this->backticks($value);
-                }
-                $count++;
-            }
-        }
+        $this->queryBuilder->groupBy($groupBy);
 
         return $this;
     }
 
     /**
-     * This function returns the backticks for given value.
-     * @param string $value
-     * @return string
+     * @param array $groupBy
+     * @return $this
      */
-    private function backticks(string $value): string
+    public function groupBy(array $groupBy): self
     {
-        if (stripos($value, ' AS ') !== false)
-        {
-            [$col, $alias] = preg_split('/\s+AS\s+/i', $value);
-            return $this->backticks(trim($col)) . ' AS ' . $alias;
-        }
+        $this->queryBuilder->groupBy($groupBy);
 
-        if (preg_match('/^(.+)\s+([a-zA-Z0-9_]+)$/', $value, $m))
-        {
-            $col = trim($m[1]);
-            $alias = trim($m[2]);
-
-            return $this->backticks($col) . ' AS ' . $alias;
-        }
-
-        if (str_contains($value, 'MD5'))
-        {
-            preg_match('/MD5\((.*?)\)/i', $value, $m);
-
-            if (!empty($m[1]) && !str_contains($m[1], '`'))
-            {
-                return 'MD5(`' . $m[1] . '`)';
-            }
-
-            return $value;
-        }
-
-        if (str_contains($value, '.'))
-        {
-            preg_match('/([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/', $value, $m);
-            return '`' . $m[1] . '`.`' . $m[2] . '`';
-        }
-
-
-        return '`' . $value . '`';
+        return $this;
     }
-
 
     /**
      * @param array $options
@@ -274,201 +227,31 @@ class Model
      * @param bool $formatValue
      * @return Model
      */
-    public function where(string $column, $operator = null, $value = null, bool $backticks = true, bool $formatValue = true): self
+    public function where(
+        string $column,
+        string|int|null $operator = null,
+        string|int|float $value = null,
+        bool $backticks = true,
+        bool $formatValue = true
+    ): self
     {
-        if (\func_num_args() === 2)
-        {
-            $value = $operator;
-            $operator = self::OPERATOR_EQUAL;
-        }
-
-        if ($operator === self::OPERATOR_IN)
-        {
-            $condition = $this->format_operator($value);
-        }
-        elseif ($formatValue)
-        {
-            $condition = $this->format_value($value);
-        }
-        else
-        {
-            $condition = $value;
-        }
-
-        $_column = $column;
-
-        if ($backticks)
-        {
-            $_column = $this->backticks($column);
-        }
-
-        $where = $_column . ' ' . $operator;
-
-        if (!$this->is_operator_null($operator))
-        {
-            $where .= ' ' . $condition;
-        }
-
-        $this->appendWhere($where);
-
+        $this->queryBuilder->where($column, $operator, $value, $backticks, $formatValue);
 
         return $this;
-    }
-
-    /**
-     * @param string|array $columns
-     * @param string $search
-     * @param bool $booleanMode
-     * @param bool $withWildcards
-     * @return $this
-     */
-    public function fulltext(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
-    {
-        $cols = is_array($columns)
-            ? implode(',', array_map([$this, 'backticks'], $columns))
-            : $this->backticks($columns);
-
-        if ($booleanMode && $withWildcards)
-        {
-            $search = implode(' ', array_map(static fn($w) => '+' . $w . '*',
-                preg_split('/\s+/', trim($search))
-            ));
-        }
-
-        $mode = $booleanMode ? ' IN BOOLEAN MODE' : '';
-        $expr = 'MATCH('.$cols.') AGAINST (' . $this->format_value($search) . $mode . ')';
-
-        $this->appendWhere($expr);
-
-        return $this;
-    }
-
-    /**
-     * @param string|array $columns
-     * @param string $search
-     * @param bool $booleanMode
-     * @param bool $withWildcards
-     * @return $this
-     */
-    public function fulltextWithScore(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
-    {
-        $cols = is_array($columns)
-            ? implode(',', array_map([$this, 'backticks'], $columns))
-            : $this->backticks($columns);
-
-        if ($booleanMode && $withWildcards)
-        {
-            $search = implode(' ', array_map(static fn($w) => '+' . $w . '*',
-                preg_split('/\s+/', trim($search))
-            ));
-        }
-
-        $mode = $booleanMode ? ' IN BOOLEAN MODE' : '';
-        $expr = 'MATCH('.$cols.') AGAINST (' . $this->format_value($search) . $mode . ')';
-
-
-        if (empty($this->select_statement))
-        {
-            $this->select_statement = '*';
-        }
-
-        $this->select_statement .= ', ' . $expr . ' AS relevance';
-
-        $this->appendWhere($expr);
-
-        return $this;
-    }
-
-
-    public function and(): self
-    {
-        $this->next_where_boolean = self::SQL_STATEMENT_AND;
-        return $this;
-    }
-
-    public function or(): self
-    {
-        $this->next_where_boolean = self::SQL_STATEMENT_OR;
-        return $this;
-    }
-
-
-    /**
-     * This function format value, if operator is IN operator
-     * @param string $value
-     * @return string
-     */
-    private function format_operator(string $value): string
-    {
-        return '(' . $value . ')';
-    }
-
-    /**
-     * This function format the given value to numeric or string.
-     * @param int|float|string $value
-     * @return string|int
-     */
-    private function format_value($value)
-    {
-        if (is_numeric($value))
-        {
-            return $value;
-        }
-
-        return '"' . $value . '"';
     }
 
     /**
      * Query builder: This function appends the table to select FROM.
-     * @param null|string $table_name
+     * @param null|string $tableName
      * @param string|null $alias
      * @return Model
      * @throws ModelException
      */
-    public function from(?string $table_name = null, ?string $alias = null): self
+    public function from(?string $tableName = null, ?string $alias = null): self
     {
-        if (null === $table_name)
-        {
-            $this->from_statement = ' ' . self::SQL_COMMAND_FROM . ' ' . $this->backticks($this->table());
-        }
-        else
-        {
-            $this->from_statement = ' ' . self::SQL_COMMAND_FROM . ' ' . $this->backticks($table_name);
-
-            if (null !== $alias)
-            {
-                $this->from_statement .= ' ' . $alias;
-            }
-        }
+        $this->queryBuilder->from($tableName, $alias);
 
         return $this;
-    }
-
-    /**
-     * This method returns the table name for current model.
-     * @return string
-     * @throws ModelException
-     */
-    public function table(): string
-    {
-        if (is_string($this->table_name) && $this->table_name !== '')
-        {
-            return $this->table_name;
-        }
-
-        throw new ModelException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . $this->class . ' has no Table property!');
-    }
-
-    public function set_table_alias(string $alias): self
-    {
-        $this->table_alias = $alias;
-
-        return $this;
-    }
-
-    protected function get_table_alias(): ?string
-    {
-        return $this->table_alias;
     }
 
     /**
@@ -476,81 +259,36 @@ class Model
      * @param null|array|string $columns
      * @return Model
      */
-    public function select($columns = null): self
+    public function select(null|array|string $columns = null): self
     {
-        if (empty($columns))
-        {
-            $this->select_statement .= '*';
-        }
-        else
-        {
-            $count = 1;
-
-            if (is_array($columns))
-            {
-                $total_columns = count($columns);
-
-                foreach ($columns as $value)
-                {
-                    if ($total_columns === 1)
-                    {
-                        $this->select_statement .= $this->backticks($value);
-                    }
-                    elseif ($count < $total_columns)
-                    {
-                        $this->select_statement .= $this->backticks($value) . ', ';
-                    }
-                    else
-                    {
-                        $this->select_statement .= $this->backticks($value);
-                    }
-                    $count++;
-                }
-            }
-            else
-            {
-                $this->select_statement = $columns;
-            }
-        }
+        $this->queryBuilder->select($columns);
 
         return $this;
     }
 
-    public function distinct(bool $value = true): self
+    /**
+     * @param string $column
+     * @param string $direction
+     * @param bool $backticks
+     * @return $this
+     * @deprecated Use orderBy() instead
+     */
+    public function order_by(string $column, string $direction = 'ASC', bool $backticks = true): self
     {
-        $this->select_distinct = $value;
+        $this->queryBuilder->orderBy($column, $direction, $backticks);
+
         return $this;
     }
 
-    public function reset_select(): self
+    /**
+     * @param string $column
+     * @param string $direction
+     * @param bool $backticks
+     * @return $this
+     */
+    public function orderBy(string $column, string $direction = 'ASC', bool $backticks = true): self
     {
-        $this->select_statement = null;
-
-        return $this;
-    }
-
-    public function order_by(string $column, string $direction = self::SQL_ORDER_BY_ASC, bool $backticks = true): self
-    {
-
-        if (null === $this->order_by_statement)
-        {
-            $separator = '';
-            $order_by_sql = self::SQL_STATEMENT_ORDER_BY;
-        }
-        else
-        {
-            $separator = ',';
-            $order_by_sql = '';
-        }
-
-        $_column = $column;
-
-        if ($backticks)
-        {
-            $_column = $this->backticks($column);
-        }
-
-        $this->order_by_statement .= $separator . ' ' . $order_by_sql . ' ' . $_column . ' ' . $direction;
+        $this->queryBuilder->orderBy($column, $direction, $backticks);
 
         return $this;
     }
@@ -582,57 +320,7 @@ class Model
      */
     public function compile(): ?string
     {
-        if (null === $this->query_statement)
-        {
-            $this->query_statement = self::SQL_COMMAND_SELECT . ' ';
-
-            if ($this->select_distinct)
-            {
-                $this->query_statement .= 'DISTINCT ';
-            }
-
-            if (null === $this->from_statement)
-            {
-                $this->from();
-            }
-
-            if ($this->get_table_alias() !== null)
-            {
-                $this->from_statement .= ' ' . $this->get_table_alias();
-            }
-
-            $this->query_statement .= $this->select_statement . $this->from_statement . ' ';
-
-            if (null !== $this->join_statement)
-            {
-                $this->query_statement .= $this->join_statement . ' ';
-            }
-
-            if (!empty($this->where_statement))
-            {
-                foreach ($this->where_statement as $value)
-                {
-                    $this->query_statement .= $value;
-                }
-            }
-
-            if (null !== $this->group_by_statement)
-            {
-                $this->query_statement .= $this->group_by_statement;
-            }
-
-            if (null !== $this->order_by_statement)
-            {
-                $this->query_statement .= $this->order_by_statement;
-            }
-
-            if (null !== $this->limit_statement)
-            {
-                $this->query_statement .= $this->limit_statement;
-            }
-        }
-
-        return $this->query_statement;
+        return $this->queryBuilder->compile();
     }
 
     /**
@@ -687,25 +375,6 @@ class Model
     }
 
     /**
-     * Query builder: This function set the limit and offset.
-     * @param int $limit
-     * @param int $offset
-     * @return Model
-     * @throws ModelInvalidArgumentException
-     */
-    public function limit(int $limit, int $offset = 0): self
-    {
-        if ($limit === 0 && $offset === 0)
-        {
-            throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Required parameter not given!');
-        }
-
-        $this->limit_statement = ' ' . self::SQL_CLAUSE_LIMIT . ' ' . $offset . ', ' . $limit;
-
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function primary_key(): string
@@ -714,18 +383,43 @@ class Model
     }
 
     /**
+     * @param int $limit
+     * @param int $offset
+     * @return Model
+     * @throws ModelInvalidArgumentException
+     */
+    public function limit(int $limit, int $offset = 0): self
+    {
+        $this->queryBuilder->limit($limit, $offset);
+
+        return $this;
+    }
+
+    /**
      * @param array $options
      * @return Model
      * @throws ModelException
      * @throws ModelInvalidArgumentException
+     * @deprecated Use findLast() instead
      */
     public function find_last(array $options = []): self
+    {
+        return $this->findLast($options);
+    }
+
+    /**
+     * @param array $options
+     * @return self
+     * @throws ModelException
+     * @throws ModelInvalidArgumentException
+     */
+    public function findLast(array $options = []): self
     {
         return $this->select($options['columns'] ?? null)
             ->from()
             ->apply_where_options($options)
-            ->group_by($options['group_by'] ?? [])
-            ->order_by($this->primary_key(), 'DESC')
+            ->groupBy($options['group_by'] ?? [])
+            ->orderBy($this->primary_key(), 'DESC')
             ->limit(1)
             ->execute()
             ->prepare_find_result();
@@ -746,24 +440,50 @@ class Model
     }
 
     /**
+     * @param string|array $columns
+     * @param string $search
+     * @param bool $booleanMode
+     * @param bool $withWildcards
+     * @return $this
+     */
+    public function fulltext(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
+    {
+        $this->queryBuilder->fulltext($columns, $search, $booleanMode, $withWildcards);
+
+        return $this;
+    }
+
+    /**
+     * @param string|array $columns
+     * @param string $search
+     * @param bool $booleanMode
+     * @param bool $withWildcards
+     * @return $this
+     */
+    public function fulltextWithScore(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
+    {
+        $this->queryBuilder->fulltextWithScore($columns, $search, $booleanMode, $withWildcards);
+
+        return $this;
+    }
+
+    public function distinct(bool $value = true): self
+    {
+        $this->queryBuilder->distinct($value);
+
+        return $this;
+    }
+
+    /**
      * Query builder: This function appends the table to JOIN from.
      * @param string $table
      * @param string $direction
      * @param null|string $alias
      * @return Model
      */
-    public function join(string $table, string $direction = self::JOIN_LEFT, ?string $alias = null): self
+    public function join(string $table, string $direction = 'LEFT', ?string $alias = null): self
     {
-        if (!empty($table))
-        {
-
-            $this->join_statement .= $direction . ' ' . self::SQL_CLAUSE_JOIN . ' ' . $this->backticks($table);
-
-            if (null !== $alias)
-            {
-                $this->join_statement .= ' ' . $alias . ' ';
-            }
-        }
+        $this->queryBuilder->join($table, $direction, $alias);
 
         return $this;
     }
@@ -777,24 +497,24 @@ class Model
      */
     public function on(string $column1, string $column2): self
     {
-        if (!empty($column1) && !empty($column2))
-        {
-            if (strpos($column1, '.') === false)
-            {
-                throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column1 value "' . $column1 . '" must have table name and column name separated with a dot! Example: "table_name.row"');
-            }
+        $this->queryBuilder->on($column1, $column2);
 
-            if (strpos($column2, '.') === false)
-            {
-                throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column2 value "' . $column2 . '" must have table name and column name separated with a dot! Example: "table_name.row"');
-            }
+        return $this;
+    }
 
-            $this->join_statement .= self::SQL_CLAUSE_ON . ' ' . $this->backticks($column1) . ' = ' . $this->backticks($column2) . ' ';
+    /**
+     * Query builder: This function appends the JOIN
+     * @param string $column1
+     * @param string $column2
+     * @return Model
+     * @throws ModelInvalidArgumentException
+     * @deprecated Use orOn() instead
+     */
+    public function or_on(string $column1, string $column2): self
+    {
+        $this->queryBuilder->orOn($column1, $column2);
 
-            return $this;
-        }
-
-        throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column1 and Column2 must have table name and column name separated with a dot! Example: "table_name.row"');
+        return $this;
     }
 
     /**
@@ -804,26 +524,11 @@ class Model
      * @return Model
      * @throws ModelInvalidArgumentException
      */
-    public function or_on(string $column1, string $column2): self
+    public function orOn(string $column1, string $column2): self
     {
-        if (!empty($column1) && !empty($column2))
-        {
-            if (!str_contains($column1, '.'))
-            {
-                throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column1 value "' . $column1 . '" must have table name and column name separated with a dot! Example: "table_name.row"');
-            }
+        $this->queryBuilder->orOn($column1, $column2);
 
-            if (!str_contains($column2, '.'))
-            {
-                throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column2 value "' . $column2 . '" must have table name and column name separated with a dot! Example: "table_name.row"');
-            }
-
-            $this->join_statement .= ' OR ' . $this->backticks($column1) . ' = ' . $this->backticks($column2) . ' ';
-
-            return $this;
-        }
-
-        throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column1 and Column2 must have table name and column name separated with a dot! Example: "table_name.row"');
+        return $this;
     }
 
     /**
@@ -833,146 +538,164 @@ class Model
      * SQL statement: OR column = 1
      * @param string $column
      * @param string|null $operator
-     * @param string|int|null $value
+     * @param string|int|float|null $value
      * @param bool $backticks
      * @return Model
+     * @deprecated Use orWhere() instead
      */
-    public function or_where(string $column, ?string $operator = null, $value = null, bool $backticks = true): self
+    public function or_where(string $column, ?string $operator = null, string|int|null $value = null, bool $backticks = true): self
     {
-        if (func_num_args() === 2)
-        {
-            $value = $operator;
-            $operator = self::OPERATOR_EQUAL;
-        }
-
-        if ($operator === self::OPERATOR_IN)
-        {
-            $condition = $this->format_operator($value);
-        }
-        else
-        {
-            $condition = $this->format_value($value);
-        }
-
-        $_column = $column;
-
-        if ($backticks)
-        {
-            $_column = $this->backticks($column);
-        }
-
-        $where = $_column . ' ' . $operator;
-
-        if (!$this->is_operator_null($operator))
-        {
-            $where .= ' ' . $condition;
-        }
-
-        $this->where_statement[] = ' ' . self::SQL_STATEMENT_OR . ' ' . $where;
+        $this->queryBuilder->orWhere($column, $operator, $value, $backticks);
 
         return $this;
     }
 
     /**
-     * Query builder: This function set the OR open condition.
+     * @param string $column
+     * @param string|null $operator
+     * @param string|int|float|null $value
+     * @param bool $backticks
+     * @return $this
+     */
+    public function orWhere(string $column, ?string $operator = null, string|int|float|null $value = null, bool $backticks = true): self
+    {
+        $this->queryBuilder->orWhere($column, $operator, $value, $backticks);
+
+        return $this;
+    }
+
+    /**
      * @param string $column
      * @param string|int|null $operator
-     * @param mixed|null $value
+     * @param string|int|float|null $value
+     * @param bool $backticks
+     * @return Model
+     * @deprecated Use orWhereOpen() instead
+     */
+    public function or_where_open(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): self
+    {
+        $this->queryBuilder->orWhereOpen($column, $operator, $value, $backticks);
+
+        return $this;
+    }
+
+    /**
+     * @param string $column
+     * @param string|int|null $operator
+     * @param string|int|float|null $value
      * @param bool $backticks
      * @return Model
      */
-    public function or_where_open(string $column, $operator = null, $value = null, bool $backticks = true): self
+    public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): self
     {
-        if (func_num_args() === 2)
-        {
-            return $this->where_open_by_condition(self::SQL_STATEMENT_OR, $column, null, $operator, $backticks);
-        }
+        $this->queryBuilder->orWhereOpen($column, $operator, $value, $backticks);
 
-        return $this->where_open_by_condition(self::SQL_STATEMENT_OR, $column, $operator, $value, $backticks);
+        return $this;
     }
 
     /**
      * @param string $where_condition
      * @param string $column
      * @param string|int|null $operator
-     * @param mixed|null $value
+     * @param string|int|float|null $value
      * @param bool $backticks
      * @return Model
+     * @deprecated Use whereOpenByCondition() instead
      */
-    public function where_open_by_condition(string $where_condition, string $column, $operator, $value = null, bool $backticks = true): self
+    public function where_open_by_condition(
+        string $where_condition,
+        string $column,
+        string|int|null $operator,
+        string|int|float|null $value = null,
+        bool $backticks = true
+    ): self
     {
-        if ($operator === null)
-        {
-            $operator = self::OPERATOR_EQUAL;
-        }
-
-        if ($operator === self::OPERATOR_IN)
-        {
-            $condition = $this->format_operator($value);
-        }
-        else
-        {
-            $condition = $this->format_value($value);
-        }
-
-        $_column = $column;
-        if ($backticks)
-        {
-            $_column = $this->backticks($column);
-        }
-
-        $where = $_column . ' ' . $operator;
-
-        if (!$this->is_operator_null($operator))
-        {
-            $where .= ' ' . $condition;
-        }
-
-        $this->where_statement[] = ' ' . $where_condition . ' ' . $this->_open() . $where;
+        $this->queryBuilder->whereOpenByCondition($where_condition, $column, $operator, $value, $backticks);
 
         return $this;
     }
 
-    private function _open(): string
+    /**
+     * @param string $where_condition
+     * @param string $column
+     * @param string|int|null $operator
+     * @param string|int|float|null $value
+     * @param bool $backticks
+     * @return $this
+     */
+    public function whereOpenByCondition(
+        string $where_condition,
+        string $column,
+        string|int|null $operator,
+        string|int|float|null $value = null,
+        bool $backticks = true
+    ): self
     {
-        return '(';
+        $this->queryBuilder->whereOpenByCondition($where_condition, $column, $operator, $value, $backticks);
+
+        return $this;
     }
 
+    /**
+     * @return $this
+     * @deprecated Use orWhereClose() instead
+     */
     public function or_where_close(): self
     {
-        $this->where_close();
+        $this->queryBuilder->orWhereClose();
 
         return $this;
     }
 
-    public function where_close(): self
+    /**
+     * @return $this
+     */
+    public function orWhereClose(): self
     {
-        $this->where_statement[] = $this->_close();
+        $this->queryBuilder->whereClose();
 
         return $this;
     }
 
-    private function _close(): string
+    /**
+     * @return $this
+     */
+    public function whereClose(): self
     {
-        return ')';
+        $this->queryBuilder->whereClose();
+
+        return $this;
     }
 
     /**
      * Query builder: This function set the AND open condition.
      * @param string $column
-     * @param mixed|null $operator
-     * @param mixed|null $value
+     * @param string|int|null $operator
+     * @param string|int|float|null $value
+     * @param bool $backticks
+     * @return Model
+     * @deprecated Use andWhereOpen() instead
+     */
+    public function and_where_open(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): self
+    {
+        $this->queryBuilder->andWhereOpen($column, $operator, $value, $backticks);
+
+        return $this;
+    }
+
+    /**
+     * Query builder: This function set the AND open condition.
+     * @param string $column
+     * @param string|int|null $operator
+     * @param string|int|float|null $value
      * @param bool $backticks
      * @return Model
      */
-    public function and_where_open(string $column, $operator, $value = null, bool $backticks = true): self
+    public function andWhereOpen(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): self
     {
-        if (func_num_args() === 2)
-        {
-            return $this->where_open_by_condition(self::SQL_STATEMENT_AND, $column, null, $operator, $backticks);
-        }
+        $this->queryBuilder->andWhereOpen($column, $operator, $value, $backticks);
 
-        return $this->where_open_by_condition(self::SQL_STATEMENT_AND, $column, $operator, $value, $backticks);
+        return $this;
     }
 
     public function and_where_close(): self
@@ -983,14 +706,39 @@ class Model
     }
 
     /**
+     * @return $this
+     * @deprecated Use whereClose() instead
+     */
+    public function where_close(): self
+    {
+        $this->queryBuilder->whereClose();
+
+        return $this;
+    }
+
+    /**
      * Query builder: This function set the AND open condition.
      * Example: ->where_open()
      * SQL statement: AND (
      * @return Model
+     * @deprecated Use whereOpen() instead
      */
     public function where_open(): self
     {
-        $this->where_statement[] = ' ' . self::SQL_STATEMENT_AND . ' ' . $this->_open();
+        $this->queryBuilder->whereOpen();
+
+        return $this;
+    }
+
+    /**
+     * Query builder: This function set the AND open condition.
+     * Example: ->whereOpen()
+     * SQL statement: AND (
+     * @return Model
+     */
+    public function whereOpen(): self
+    {
+        $this->queryBuilder->whereOpen();
 
         return $this;
     }
@@ -1155,8 +903,7 @@ class Model
      * @param mixed $id
      * @param array $data
      * @return bool
-     * @throws ModelException
-     * @throws ModelPropertyException
+     * @throws ModelException|ModelPropertyException|ConfigLoadException
      */
     public function update($id, array $data = []): bool
     {
@@ -1167,8 +914,7 @@ class Model
 
         $this->has_properties($data);
 
-        $sql = self::SQL_COMMAND_UPDATE . '
-            ' . $this->table() . ' ' . self::SQL_COMMAND_SET . ' ' . $this->prepare_update($data) . ' ' . self::SQL_STATEMENT_WHERE . ' ' . $this->backticks($this->primary_key()) . ' = ' . $id;
+        $sql = 'UPDATE ' . $this->table() . ' SET ' . $this->prepare_update($data) . ' WHERE ' . $this->backticks($this->primary_key()) . ' = ' . $id;
 
         return Db::write($sql, $this->connection);
     }
@@ -1220,6 +966,7 @@ class Model
     /**
      * @param string|int $value
      * @return string
+     * @throws ConfigLoadException
      */
     public function escape($value): string
     {
@@ -1227,7 +974,6 @@ class Model
     }
 
     /**
-     * This function get the data for the model properties.
      * @return array
      */
     private function get_data(): array
@@ -1236,13 +982,13 @@ class Model
     }
 
     /**
-     * Query builder: This function INSERT data into database.
      * @param array $data
-     * @return bool|int
+     * @return false|int|string
      * @throws ModelException
      * @throws ModelPropertyException
+     * @throws ConfigLoadException
      */
-    public function insert(array $data = [])
+    public function insert(array $data = []): false|int|string
     {
         if (empty($data))
         {
@@ -1252,10 +998,10 @@ class Model
         $this->has_properties($data);
         $insert_data = $this->prepare_insert($data);
 
-        $sql = self::SQL_COMMAND_INSERT . '
+        $sql = 'INSERT INTO
                     ' . $this->table() . '
                     ' . $insert_data[0] . '
-                ' . self::SQL_COMMAND_VALUES . '
+                         VALUES
                     ' . $insert_data[1] . '
                 ';
 
@@ -1267,7 +1013,7 @@ class Model
      * @param array $array
      * @return bool|array
      */
-    public function prepare_insert(array $array)
+    public function prepare_insert(array $array): bool|array
     {
         if (empty($array))
         {
@@ -1300,39 +1046,31 @@ class Model
         return [$columns, $columns_data];
     }
 
+    private function _open(): string
+    {
+        return '(';
+    }
+
+    private function _close(): string
+    {
+        return ')';
+    }
+
     /**
-     * Query builder: This function DELETE data from database.
-     * @param mixed $id
+     * @param string|int $id
      * @return bool
      * @throws ModelException
+     * @throws ConfigLoadException
      */
-    public function delete($id): bool
+    public function delete(string|int $id): bool
     {
-        $sql = self::SQL_COMMAND_DELETE . ' ' . self::SQL_COMMAND_FROM . '
-                ' . $this->table() . '
-            ' . self::SQL_STATEMENT_WHERE . '
-                ' . $this->backticks($this->primary_key()) . ' = ' . $id . '
+        $sql = 'DELETE FROM ' . $this->table() . ' WHERE ' . $this->backticks($this->primary_key()) . ' = ' . $id . '
         ';
 
         return Db::write($sql, $this->connection);
     }
 
-    public function open(): self
-    {
-        $this->where_statement[] = '(';
-
-        return $this;
-    }
-
-    public function close(): self
-    {
-        $this->where_statement[] = ')';
-
-        return $this;
-    }
-
     /**
-     * This function returns the data value for current model.
      * @param string $property
      * @return bool|mixed
      */
@@ -1352,7 +1090,6 @@ class Model
     }
 
     /**
-     * This function returns the data type for current model.
      * @param string $property
      * @return bool|mixed
      */
@@ -1371,7 +1108,7 @@ class Model
     /**
      * This function returns the field names from db.
      * @return array
-     * @throws ModelException
+     * @throws ModelException|ConfigLoadException
      */
     public function field_names(): array
     {
@@ -1408,47 +1145,8 @@ class Model
     }
 
     /**
-     * Query builder: This method build the full select query.
-     * @return null|string
-     * @throws ModelException
-     */
-    public function get_count_compile(): ?string
-    {
-        $count_query_statement = self::SQL_COMMAND_SELECT . ' ';
-
-        $this->from();
-
-        if ($this->get_table_alias() !== null)
-        {
-            $this->from_statement .= ' ' . $this->get_table_alias();
-        }
-
-        $count_query_statement .= 'COUNT(*) AS count' . $this->from_statement . ' ';
-
-        if (null !== $this->join_statement)
-        {
-            $count_query_statement .= $this->join_statement . ' ';
-        }
-
-        if (!empty($this->where_statement))
-        {
-            foreach ($this->where_statement as $value)
-            {
-                $count_query_statement .= $value;
-            }
-        }
-
-        if (null !== $this->group_by_statement)
-        {
-            $count_query_statement .= $this->group_by_statement;
-        }
-
-        return $count_query_statement;
-    }
-
-    /**
      * @return $this
-     * @throws ModelException
+     * @throws ModelException|ConfigLoadException
      */
     public function get_count(): self
     {
@@ -1462,6 +1160,34 @@ class Model
         {
             $this->result = false;
         }
+
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     * @throws ModelException
+     */
+    public function get_count_compile(): ?string
+    {
+        return $this->queryBuilder->getCountCompile();
+    }
+
+    public function get_table_alias(): ?string
+    {
+        return $this->table_alias;
+    }
+
+    /**
+     * @param string $alias
+     * @return $this
+     * @throws ModelException
+     */
+    public function set_table_alias(string $alias): self
+    {
+        $this->table_alias = $alias;
+
+        $this->rebuildQueryBuilder();
 
         return $this;
     }
@@ -1484,27 +1210,5 @@ class Model
         }
 
         return $this->properties[$column_name]['default'];
-    }
-
-    /**
-     * @param int|string $operator
-     */
-    private function is_operator_null($operator): bool
-    {
-        return \in_array($operator, [self::OPERATOR_IS_NULL, self::OPERATOR_IS_NOT_NULL], true);
-    }
-
-    protected function appendWhere(string $condition): void
-    {
-        if (empty($this->where_statement))
-        {
-            $this->where_statement[] = self::SQL_STATEMENT_WHERE . ' ' . $condition;
-        }
-        else
-        {
-            $this->where_statement[] = ' ' . $this->next_where_boolean . ' ' . $condition;
-        }
-
-        $this->next_where_boolean = self::SQL_STATEMENT_AND;
     }
 }
