@@ -13,7 +13,7 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
     protected ?string $orderByStatement = null;
     protected ?string $limitStatement = null;
     protected bool $selectDistinct = false;
-    protected string $selectStatement;
+    protected string $selectStatement = '';
     protected ?string $fromStatement = null;
     protected ?string $joinStatement = null;
     protected ?string $queryStatement = null;
