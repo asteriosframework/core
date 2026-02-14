@@ -515,6 +515,11 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
      */
     public function compile(): ?string
     {
+        if (empty($this->selectStatement))
+        {
+            $this->selectStatement = '*';
+        }
+
         if (null === $this->queryStatement)
         {
             $this->queryStatement = 'SELECT ';
@@ -658,7 +663,7 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
         $this->orderByStatement = null;
         $this->limitStatement = null;
         $this->selectDistinct = false;
-        $this->selectStatement = '*';
+        $this->selectStatement = '';
         $this->fromStatement = null;
         $this->joinStatement = null;
         $this->queryStatement = null;

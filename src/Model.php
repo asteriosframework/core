@@ -33,7 +33,7 @@ class Model
     protected string $connection = 'default';
     protected $class;
     protected string $table_name = '';
-    protected ?string $table_alias;
+    protected ?string $table_alias = null;
     protected string $primary_key = '';
     protected array $properties = [];
     protected array $update = [];
@@ -51,16 +51,19 @@ class Model
      */
     public function __construct(?OrmSqlFormatterInterface $formatter = null)
     {
-        $this->reset();
-
         $this->formatter = $formatter ?? new OrmSqlFormatter();
 
         $this->rebuildQueryBuilder();
+
+        $this->reset();
     }
 
     public function reset(): self
     {
-        $this->queryBuilder->reset();
+        if (isset($this->queryBuilder))
+        {
+            $this->queryBuilder->reset();
+        }
 
         return $this;
     }
