@@ -192,4 +192,14 @@ interface OrmQueryBuilderInterface
      * @return self
      */
     public function reset(): self;
+
+    /**
+     * @return self
+     */
+    public function and(): self;
+
+    /**
+     * @return self
+     */
+    public function or(): self;
 }

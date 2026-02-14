@@ -643,6 +643,26 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
     /**
      * @inheritDoc
      */
+    public function and(): self
+    {
+        $this->nextWhereBoolean = 'AND';
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function or(): self
+    {
+        $this->nextWhereBoolean = 'OR';
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function query($query = null): OrmQueryBuilderInterface
     {
         if (null !== $query)
