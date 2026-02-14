@@ -746,12 +746,23 @@ class Model
         return $this;
     }
 
+    public function and(): self
+    {
+        $this->queryBuilder->and();
+
+        return $this;
+    }
+
+    public function or(): self
+    {
+        $this->queryBuilder->or();
+
+        return $this;
+    }
+
     public function query($query = null): self
     {
-        if (null !== $query)
-        {
-            $this->query_statement = $query;
-        }
+        $this->queryBuilder->query($query);
 
         return $this;
     }
