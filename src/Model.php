@@ -32,11 +32,11 @@ class Model
     public const string EXECUTE_MODE_WRITE = 'write';
     protected string $connection = 'default';
     protected $class;
-    protected string $table_name = '';
-    protected ?string $table_alias = null;
-    protected string $primary_key = '';
-    protected array $properties = [];
-    protected array $update = [];
+    protected $table_name = '';
+    protected $table_alias = null;
+    protected $primary_key = '';
+    protected $properties = [];
+    protected $update = [];
 
     protected array|bool $result = false;
     protected array $data = [];
