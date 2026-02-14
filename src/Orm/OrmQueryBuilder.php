@@ -9,14 +9,14 @@ use Asterios\Core\Exception\ModelInvalidArgumentException;
 class OrmQueryBuilder implements OrmQueryBuilderInterface
 {
     protected array $whereStatement = [];
-    protected ?string $groupByStatement;
-    protected ?string $orderByStatement;
-    protected ?string $limitStatement;
+    protected ?string $groupByStatement = null;
+    protected ?string $orderByStatement = null;
+    protected ?string $limitStatement = null;
     protected bool $selectDistinct = false;
     protected string $selectStatement;
-    protected ?string $fromStatement;
-    protected ?string $joinStatement;
-    protected ?string $queryStatement;
+    protected ?string $fromStatement = null;
+    protected ?string $joinStatement = null;
+    protected ?string $queryStatement = null;
     protected string $nextWhereBoolean = 'AND';
     protected OrmMetadata $metadata;
     protected OrmSqlFormatterInterface $formatter;
