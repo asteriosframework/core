@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Asterios\Core;
 
+use Asterios\Core\Contracts\Orm\ModelInterface;
 use Asterios\Core\Contracts\Orm\OrmQueryBuilderInterface;
 use Asterios\Core\Contracts\Orm\OrmSqlFormatterInterface;
 use Asterios\Core\Exception\ConfigLoadException;
@@ -15,7 +16,7 @@ use Asterios\Core\Orm\OrmMetadata;
 use Asterios\Core\Orm\OrmQueryBuilder;
 use Asterios\Core\Orm\OrmSqlFormatter;
 
-class Model
+class Model implements ModelInterface
 {
     public const string EXECUTE_MODE_READ = 'read';
     public const string EXECUTE_MODE_WRITE = 'write';
@@ -23,7 +24,10 @@ class Model
     protected string $tableName = '';
     protected ?string $tableAlias = null;
     protected string $primaryKey = '';
+
+    /** @var array<string, string|array{dataType: string, length?: int, set?: list<string>, default?: string|int|float|null}> */
     protected array $properties = [];
+
     protected array $update = [];
 
     protected array|bool $result = false;
@@ -31,7 +35,7 @@ class Model
     protected int|string $_id;
     protected array $dbSchema = [];
 
-    protected OrmQueryBuilderInterface $queryBuilder;
+    protected ?OrmQueryBuilderInterface $queryBuilder = null;
     protected OrmSqlFormatterInterface $formatter;
 
     /**
@@ -46,7 +50,10 @@ class Model
         $this->reset();
     }
 
-    public function reset(): self
+    /**
+     * @return static
+     */
+    public function reset(): static
     {
         if (isset($this->queryBuilder))
         {
@@ -91,17 +98,18 @@ class Model
     /**
      * @param int|string $id
      * @param array $options
-     * @return Model
+     * @return static
      * @throws ModelException
      * @throws ModelInvalidArgumentException
      * @throws ConfigLoadException
      * @deprecated use findAll() | findFirst() | findLast() | findByPrimaryKey() instead
      */
-    public static function find(int|string $id = 'all', array $options = []): self
+    public static function find(int|string $id = 'all', array $options = []): static
     {
         $model = self::forge();
 
-        match ($id) {
+        match ($id)
+        {
             'all' => $model->findAll($options),
             'first' => $model->findFirst($options),
             'last' => $model->findLast($options),
@@ -111,7 +119,10 @@ class Model
         return $model;
     }
 
-    public static function forge(): self
+    /**
+     * @return static
+     */
+    public static function forge(): static
     {
         $model = static::class;
 
@@ -120,23 +131,23 @@ class Model
 
     /**
      * @param array $options
-     * @return Model
+     * @return static
      * @throws ModelException
      * @throws ConfigLoadException
      * @deprecated Use findAll() instead
      */
-    public function find_all(array $options = []): self
+    public function find_all(array $options = []): static
     {
         return $this->findAll($options);
     }
 
     /**
      * @param array $options
-     * @return $this
+     * @return static
      * @throws ModelException
      * @throws ConfigLoadException
      */
-    public function findAll(array $options = []): self
+    public function findAll(array $options = []): static
     {
         $this->select($options['columns'] ?? null)
             ->from()
@@ -153,10 +164,10 @@ class Model
 
     /**
      * @param array $groupBy
-     * @return Model
+     * @return static
      * @deprecated Use groupBy() instead
      */
-    public function group_by(array $groupBy): self
+    public function group_by(array $groupBy): static
     {
         $this->queryBuilder->groupBy($groupBy);
 
@@ -165,9 +176,9 @@ class Model
 
     /**
      * @param array $groupBy
-     * @return $this
+     * @return static
      */
-    public function groupBy(array $groupBy): self
+    public function groupBy(array $groupBy): static
     {
         $this->queryBuilder->groupBy($groupBy);
 
@@ -176,9 +187,9 @@ class Model
 
     /**
      * @param array $options
-     * @return Model
+     * @return static
      */
-    private function applyWhereOptions(array $options): self
+    private function applyWhereOptions(array $options): static
     {
         $this->queryBuilder->applyWhereOptions($options);
 
@@ -195,7 +206,7 @@ class Model
      * @param string|int|float|null $value
      * @param bool $backticks
      * @param bool $formatValue
-     * @return Model
+     * @return static
      */
     public function where(
         string $column,
@@ -203,8 +214,7 @@ class Model
         string|int|float|null $value = null,
         bool $backticks = true,
         bool $formatValue = true
-    ): self
-    {
+    ): static {
         $this->queryBuilder->where($column, $operator, $value, $backticks, $formatValue);
 
         return $this;
@@ -214,10 +224,10 @@ class Model
      * Query builder: This function appends the table to select FROM.
      * @param null|string $tableName
      * @param string|null $alias
-     * @return Model
+     * @return static
      * @throws ModelException
      */
-    public function from(?string $tableName = null, ?string $alias = null): self
+    public function from(?string $tableName = null, ?string $alias = null): static
     {
         $this->queryBuilder->from($tableName, $alias);
 
@@ -227,9 +237,9 @@ class Model
     /**
      * Query builder: This function set the SELECT statement.
      * @param null|array|string $columns
-     * @return Model
+     * @return static
      */
-    public function select(null|array|string $columns = null): self
+    public function select(null|array|string $columns = null): static
     {
         $this->queryBuilder->select($columns);
 
@@ -240,10 +250,10 @@ class Model
      * @param string $column
      * @param string $direction
      * @param bool $backticks
-     * @return $this
+     * @return static
      * @deprecated Use orderBy() instead
      */
-    public function order_by(string $column, string $direction = 'ASC', bool $backticks = true): self
+    public function order_by(string $column, string $direction = 'ASC', bool $backticks = true): static
     {
         $this->queryBuilder->orderBy($column, $direction, $backticks);
 
@@ -254,9 +264,9 @@ class Model
      * @param string $column
      * @param string $direction
      * @param bool $backticks
-     * @return $this
+     * @return static
      */
-    public function orderBy(string $column, string $direction = 'ASC', bool $backticks = true): self
+    public function orderBy(string $column, string $direction = 'ASC', bool $backticks = true): static
     {
         $this->queryBuilder->orderBy($column, $direction, $backticks);
 
@@ -265,11 +275,11 @@ class Model
 
     /**
      * @param string $option
-     * @return Model
+     * @return static
      * @throws ModelException
      * @throws ConfigLoadException
      */
-    public function execute(string $option = self::EXECUTE_MODE_READ): self
+    public function execute(string $option = self::EXECUTE_MODE_READ): static
     {
         if ($option === self::EXECUTE_MODE_WRITE)
         {
@@ -294,25 +304,25 @@ class Model
 
     /**
      * @param array $options
-     * @return Model
+     * @return static
      * @throws ModelException
      * @throws ModelInvalidArgumentException
      * @throws ConfigLoadException
      * @deprecated Use findFirst() instead
      */
-    public function find_first(array $options = []): self
+    public function find_first(array $options = []): static
     {
         return $this->findFirst($options);
     }
 
     /**
      * @param array $options
-     * @return Model
+     * @return static
      * @throws ModelException
      * @throws ModelInvalidArgumentException
      * @throws ConfigLoadException
      */
-    public function findFirst(array $options = []): self
+    public function findFirst(array $options = []): static
     {
         return $this->select($options['columns'] ?? null)
             ->from()
@@ -325,10 +335,10 @@ class Model
     }
 
     /**
-     * @return $this
+     * @return static
      * @deprecated Use prepareFindResult() instead
      */
-    public function prepare_find_result(): self
+    public function prepare_find_result(): static
     {
         $this->prepareFindResult();
 
@@ -336,9 +346,9 @@ class Model
     }
 
     /**
-     * @return $this
+     * @return static
      */
-    public function prepareFindResult(): self
+    public function prepareFindResult(): static
     {
         $find_result = $this->getResult();
 
@@ -398,10 +408,10 @@ class Model
     /**
      * @param int $limit
      * @param int $offset
-     * @return Model
+     * @return static
      * @throws ModelInvalidArgumentException
      */
-    public function limit(int $limit, int $offset = 0): self
+    public function limit(int $limit, int $offset = 0): static
     {
         $this->queryBuilder->limit($limit, $offset);
 
@@ -410,25 +420,25 @@ class Model
 
     /**
      * @param array $options
-     * @return Model
+     * @return static
      * @throws ModelException
      * @throws ModelInvalidArgumentException
      * @throws ConfigLoadException
      * @deprecated Use findLast() instead
      */
-    public function find_last(array $options = []): self
+    public function find_last(array $options = []): static
     {
         return $this->findLast($options);
     }
 
     /**
      * @param array $options
-     * @return self
+     * @return static
      * @throws ModelException
      * @throws ModelInvalidArgumentException
      * @throws ConfigLoadException
      */
-    public function findLast(array $options = []): self
+    public function findLast(array $options = []): static
     {
         return $this->select($options['columns'] ?? null)
             ->from()
@@ -442,23 +452,23 @@ class Model
 
     /**
      * @param string|int $id
-     * @return Model
+     * @return static
      * @throws ModelException
      * @throws ConfigLoadException
      * @deprecated Use findByPrimaryKey() instead
      */
-    public function find_by_primary_key(string|int $id): self
+    public function find_by_primary_key(string|int $id): static
     {
         return $this->findByPrimaryKey($id);
     }
 
     /**
      * @param string|int $id
-     * @return Model
+     * @return static
      * @throws ModelException
      * @throws ConfigLoadException
      */
-    public function findByPrimaryKey(string|int $id): self
+    public function findByPrimaryKey(string|int $id): static
     {
         return $this->select()
             ->from()
@@ -472,9 +482,9 @@ class Model
      * @param string $search
      * @param bool $booleanMode
      * @param bool $withWildcards
-     * @return $this
+     * @return static
      */
-    public function fulltext(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
+    public function fulltext(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): static
     {
         $this->queryBuilder->fulltext($columns, $search, $booleanMode, $withWildcards);
 
@@ -486,9 +496,9 @@ class Model
      * @param string $search
      * @param bool $booleanMode
      * @param bool $withWildcards
-     * @return $this
+     * @return static
      */
-    public function fulltextWithScore(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
+    public function fulltextWithScore(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): static
     {
         $this->queryBuilder->fulltextWithScore($columns, $search, $booleanMode, $withWildcards);
 
@@ -497,9 +507,9 @@ class Model
 
     /**
      * @param bool $value
-     * @return $this
+     * @return static
      */
-    public function distinct(bool $value = true): self
+    public function distinct(bool $value = true): static
     {
         $this->queryBuilder->distinct($value);
 
@@ -510,9 +520,9 @@ class Model
      * @param string $table
      * @param string $direction
      * @param null|string $alias
-     * @return Model
+     * @return static
      */
-    public function join(string $table, string $direction = 'LEFT', ?string $alias = null): self
+    public function join(string $table, string $direction = 'LEFT', ?string $alias = null): static
     {
         $this->queryBuilder->join($table, $direction, $alias);
 
@@ -522,10 +532,10 @@ class Model
     /**
      * @param string $column1
      * @param string $column2
-     * @return Model
+     * @return static
      * @throws ModelInvalidArgumentException
      */
-    public function on(string $column1, string $column2): self
+    public function on(string $column1, string $column2): static
     {
         $this->queryBuilder->on($column1, $column2);
 
@@ -535,11 +545,11 @@ class Model
     /**
      * @param string $column1
      * @param string $column2
-     * @return Model
+     * @return static
      * @throws ModelInvalidArgumentException
      * @deprecated Use orOn() instead
      */
-    public function or_on(string $column1, string $column2): self
+    public function or_on(string $column1, string $column2): static
     {
         $this->queryBuilder->orOn($column1, $column2);
 
@@ -549,10 +559,10 @@ class Model
     /**
      * @param string $column1
      * @param string $column2
-     * @return Model
+     * @return static
      * @throws ModelInvalidArgumentException
      */
-    public function orOn(string $column1, string $column2): self
+    public function orOn(string $column1, string $column2): static
     {
         $this->queryBuilder->orOn($column1, $column2);
 
@@ -564,10 +574,10 @@ class Model
      * @param string|null $operator
      * @param string|int|float|null $value
      * @param bool $backticks
-     * @return Model
+     * @return static
      * @deprecated Use orWhere() instead
      */
-    public function or_where(string $column, ?string $operator = null, string|int|float|null $value = null, bool $backticks = true): self
+    public function or_where(string $column, ?string $operator = null, string|int|float|null $value = null, bool $backticks = true): static
     {
         $this->queryBuilder->orWhere($column, $operator, $value, $backticks);
 
@@ -579,9 +589,9 @@ class Model
      * @param string|null $operator
      * @param string|int|float|null $value
      * @param bool $backticks
-     * @return $this
+     * @return static
      */
-    public function orWhere(string $column, ?string $operator = null, string|int|float|null $value = null, bool $backticks = true): self
+    public function orWhere(string $column, ?string $operator = null, string|int|float|null $value = null, bool $backticks = true): static
     {
         $this->queryBuilder->orWhere($column, $operator, $value, $backticks);
 
@@ -593,10 +603,10 @@ class Model
      * @param string|int|null $operator
      * @param string|int|float|null $value
      * @param bool $backticks
-     * @return Model
+     * @return static
      * @deprecated Use orWhereOpen() instead
      */
-    public function or_where_open(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): self
+    public function or_where_open(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): static
     {
         $this->queryBuilder->orWhereOpen($column, $operator, $value, $backticks);
 
@@ -608,9 +618,9 @@ class Model
      * @param string|int|null $operator
      * @param string|int|float|null $value
      * @param bool $backticks
-     * @return Model
+     * @return static
      */
-    public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): self
+    public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): static
     {
         $this->queryBuilder->orWhereOpen($column, $operator, $value, $backticks);
 
@@ -623,7 +633,7 @@ class Model
      * @param string|int|null $operator
      * @param string|int|float|null $value
      * @param bool $backticks
-     * @return Model
+     * @return static
      * @deprecated Use whereOpenByCondition() instead
      */
     public function where_open_by_condition(
@@ -632,8 +642,7 @@ class Model
         string|int|null $operator,
         string|int|float|null $value = null,
         bool $backticks = true
-    ): self
-    {
+    ): static {
         $this->queryBuilder->whereOpenByCondition($where_condition, $column, $operator, $value, $backticks);
 
         return $this;
@@ -645,7 +654,7 @@ class Model
      * @param string|int|null $operator
      * @param string|int|float|null $value
      * @param bool $backticks
-     * @return $this
+     * @return static
      */
     public function whereOpenByCondition(
         string $where_condition,
@@ -653,18 +662,17 @@ class Model
         string|int|null $operator,
         string|int|float|null $value = null,
         bool $backticks = true
-    ): self
-    {
+    ): static {
         $this->queryBuilder->whereOpenByCondition($where_condition, $column, $operator, $value, $backticks);
 
         return $this;
     }
 
     /**
-     * @return $this
+     * @return static
      * @deprecated Use orWhereClose() instead
      */
-    public function or_where_close(): self
+    public function or_where_close(): static
     {
         $this->queryBuilder->orWhereClose();
 
@@ -672,9 +680,9 @@ class Model
     }
 
     /**
-     * @return $this
+     * @return static
      */
-    public function orWhereClose(): self
+    public function orWhereClose(): static
     {
         $this->queryBuilder->whereClose();
 
@@ -682,9 +690,9 @@ class Model
     }
 
     /**
-     * @return $this
+     * @return static
      */
-    public function whereClose(): self
+    public function whereClose(): static
     {
         $this->queryBuilder->whereClose();
 
@@ -697,10 +705,10 @@ class Model
      * @param string|int|null $operator
      * @param string|int|float|null $value
      * @param bool $backticks
-     * @return Model
+     * @return static
      * @deprecated Use andWhereOpen() instead
      */
-    public function and_where_open(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): self
+    public function and_where_open(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): static
     {
         $this->queryBuilder->andWhereOpen($column, $operator, $value, $backticks);
 
@@ -713,9 +721,9 @@ class Model
      * @param string|int|null $operator
      * @param string|int|float|null $value
      * @param bool $backticks
-     * @return Model
+     * @return static
      */
-    public function andWhereOpen(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): self
+    public function andWhereOpen(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): static
     {
         $this->queryBuilder->andWhereOpen($column, $operator, $value, $backticks);
 
@@ -723,10 +731,10 @@ class Model
     }
 
     /**
-     * @return $this
+     * @return static
      * @deprecated Use andWhereClose() instead
      */
-    public function and_where_close(): self
+    public function and_where_close(): static
     {
         $this->whereClose();
 
@@ -734,9 +742,9 @@ class Model
     }
 
     /**
-     * @return $this
+     * @return static
      */
-    public function andWhereClose(): self
+    public function andWhereClose(): static
     {
         $this->whereClose();
 
@@ -744,10 +752,10 @@ class Model
     }
 
     /**
-     * @return $this
+     * @return static
      * @deprecated Use whereClose() instead
      */
-    public function where_close(): self
+    public function where_close(): static
     {
         $this->queryBuilder->whereClose();
 
@@ -755,10 +763,10 @@ class Model
     }
 
     /**
-     * @return Model
+     * @return static
      * @deprecated Use whereOpen() instead
      */
-    public function where_open(): self
+    public function where_open(): static
     {
         $this->queryBuilder->whereOpen();
 
@@ -766,9 +774,9 @@ class Model
     }
 
     /**
-     * @return Model
+     * @return static
      */
-    public function whereOpen(): self
+    public function whereOpen(): static
     {
         $this->queryBuilder->whereOpen();
 
@@ -776,9 +784,9 @@ class Model
     }
 
     /**
-     * @return $this
+     * @return static
      */
-    public function and(): self
+    public function and(): static
     {
         $this->queryBuilder->and();
 
@@ -786,9 +794,9 @@ class Model
     }
 
     /**
-     * @return $this
+     * @return static
      */
-    public function or(): self
+    public function or(): static
     {
         $this->queryBuilder->or();
 
@@ -796,9 +804,9 @@ class Model
     }
 
     /**
-     * @return $this
+     * @return static
      */
-    public function open(): self
+    public function open(): static
     {
         $this->queryBuilder->open();
 
@@ -806,9 +814,9 @@ class Model
     }
 
     /**
-     * @return $this
+     * @return static
      */
-    public function close(): self
+    public function close(): static
     {
         $this->queryBuilder->close();
 
@@ -817,9 +825,9 @@ class Model
 
     /**
      * @param ?string $query
-     * @return $this
+     * @return static
      */
-    public function query(string $query = null): self
+    public function query(string $query = null): static
     {
         $this->queryBuilder->query($query);
 
@@ -884,12 +892,12 @@ class Model
      * Query builder: This function set property for INSERT or UPDATE data.
      * @param string|array $property
      * @param string|int|float|null $value
-     * @return Model
+     * @return static
      * @throws ModelException
      * @throws ModelPrimaryKeyException
      * @throws ModelPropertyException
      */
-    public function set(string|array $property, string|int|float|null $value = null): self
+    public function set(string|array $property, string|int|float|null $value = null): static
     {
         if (is_array($property))
         {
@@ -907,7 +915,6 @@ class Model
     }
 
     /**
-     * This function set the data for the model properties.
      * @param string $property
      * @param string|int|float|null $value
      * @throws ModelPrimaryKeyException
@@ -978,12 +985,12 @@ class Model
      */
     public function save(): bool|int|string
     {
-        if (!is_null($this->getId()))
+        if (!empty($this->getId()))
         {
-            return $this->update($this->getId(), $this->get_data());
+            return $this->update($this->getId(), $this->getData());
         }
 
-        return $this->insert($this->get_data());
+        return $this->insert($this->getData());
     }
 
     /**
@@ -1040,7 +1047,7 @@ class Model
      */
     public function prepare_update(array $array): string|false
     {
-       return $this->prepareUpdate($array);
+        return $this->prepareUpdate($array);
     }
 
     /**
@@ -1085,7 +1092,7 @@ class Model
     /**
      * @return array
      */
-    private function get_data(): array
+    private function getData(): array
     {
         return $this->data;
     }
@@ -1105,7 +1112,7 @@ class Model
         }
 
         $this->hasProperties($data);
-        $insert_data = $this->prepare_insert($data);
+        $insert_data = $this->prepareInsert($data);
 
         $sql = 'INSERT INTO
                     ' . $this->table() . '
@@ -1121,8 +1128,19 @@ class Model
      * @param array $array
      * @return bool|array
      * @throws ConfigLoadException
+     * @deprecated Use prepareInsert() instead
      */
     public function prepare_insert(array $array): bool|array
+    {
+        return $this->prepareInsert($array);
+    }
+
+    /**
+     * @param array $array
+     * @return bool|array
+     * @throws ConfigLoadException
+     */
+    public function prepareInsert(array $array): bool|array
     {
         if (empty($array))
         {
@@ -1287,22 +1305,22 @@ class Model
     }
 
     /**
-     * @return $this
+     * @return static
      * @throws ConfigLoadException
      * @throws ModelException
      * @deprecated Use getCount() instead
      */
-    public function get_count() :self
+    public function get_count(): static
     {
         return $this->getCount();
     }
 
     /**
-     * @return $this
+     * @return static
      * @throws ConfigLoadException
      * @throws ModelException
      */
-    public function getCount(): self
+    public function getCount(): static
     {
         $dataFromDb = Db::read($this->getCountCompile(), $this->connection);
 
@@ -1356,11 +1374,11 @@ class Model
 
     /**
      * @param string $alias
-     * @return $this
+     * @return static
      * @throws ModelException
      * @deprecated Use setTableAlias() instead
      */
-    public function set_table_alias(string $alias): self
+    public function set_table_alias(string $alias): static
     {
         $this->setTableAlias($alias);
 
@@ -1369,10 +1387,10 @@ class Model
 
     /**
      * @param string $alias
-     * @return $this
+     * @return static
      * @throws ModelException
      */
-    public function setTableAlias(string $alias): self
+    public function setTableAlias(string $alias): static
     {
         $this->tableAlias = $alias;
 
@@ -1383,21 +1401,21 @@ class Model
 
     /**
      * @param string $columnName
-     * @return array
+     * @return string|int|float|null
      * @throws ModelException
      * @deprecated Use getDefault() instead
      */
-    public function get_default(string $columnName): array
+    public function get_default(string $columnName): string|int|float|null
     {
         return $this->getDefault($columnName);
     }
 
     /**
      * @param string $columnName
-     * @return array
+     * @return string|int|float|null
      * @throws ModelException
      */
-    public function getDefault(string $columnName): array
+    public function getDefault(string $columnName): string|int|float|null
     {
         if (!$this->propertyExists($columnName))
         {
