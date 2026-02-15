@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Asterios\Core\Traits;
 
+use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\ModelException;
 use Asterios\Core\Exception\ModelInvalidArgumentException;
 use Asterios\Core\Logger;
@@ -24,13 +25,13 @@ trait HasPaginationTrait
 
         try
         {
-            $countModel->get_count();
-            if ($countModel->has_result())
+            $countModel->getCount();
+            if ($countModel->hasResult())
             {
-                return (int) $countModel->as_array()[0]['count'];
+                return (int) $countModel->asArray()[0]['count'];
             }
         }
-        catch (ModelException $e)
+        catch (ModelException|ConfigLoadException $e)
         {
             Logger::forge()->fatal(
                 'Could not get total count in HasPaginationTrait!',
@@ -73,6 +74,7 @@ trait HasPaginationTrait
      * @return PaginateResult
      * @throws ModelException
      * @throws ModelInvalidArgumentException
+     * @throws ConfigLoadException
      */
     public function paginate(int $page = 1, int $perPage = 15): PaginateResult
     {
@@ -83,7 +85,7 @@ trait HasPaginationTrait
         $itemsModel = clone $this;
         $itemsModel->limit($perPage, $offset)->execute();
 
-        $items = $itemsModel->has_result() ? $itemsModel->as_array() : [];
+        $items = $itemsModel->hasResult() ? $itemsModel->asArray() : [];
 
         return new PaginateResult(
             $items,
