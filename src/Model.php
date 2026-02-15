@@ -51,7 +51,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return static
+     * @inheritDoc
      */
     public function reset(): static
     {
@@ -82,8 +82,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return string
-     * @throws ModelException
+     * @inheritDoc
      */
     public function table(): string
     {
@@ -96,13 +95,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param int|string $id
-     * @param array $options
-     * @return static
-     * @throws ModelException
-     * @throws ModelInvalidArgumentException
-     * @throws ConfigLoadException
-     * @deprecated use findAll() | findFirst() | findLast() | findByPrimaryKey() instead
+     * @inheritDoc
      */
     public static function find(int|string $id = 'all', array $options = []): static
     {
@@ -120,7 +113,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return static
+     * @inheritDoc
      */
     public static function forge(): static
     {
@@ -142,10 +135,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param array $options
-     * @return static
-     * @throws ModelException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function findAll(array $options = []): static
     {
@@ -175,8 +165,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param array $groupBy
-     * @return static
+     * @inheritDoc
      */
     public function groupBy(array $groupBy): static
     {
@@ -197,16 +186,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * Query builder: This function set the WHERE / AND condition.
-     * Hint: If you want only to set a simple = condition, you can use only 2 parameters:
-     * Example: ->where('column', 1)
-     * SQL statement: WHERE column = 1 or AND column = 1
-     * @param string $column
-     * @param string|int|null $operator
-     * @param string|int|float|null $value
-     * @param bool $backticks
-     * @param bool $formatValue
-     * @return static
+     * @inheritDoc
      */
     public function where(
         string $column,
@@ -221,11 +201,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * Query builder: This function appends the table to select FROM.
-     * @param null|string $tableName
-     * @param string|null $alias
-     * @return static
-     * @throws ModelException
+     * @inheritDoc
      */
     public function from(?string $tableName = null, ?string $alias = null): static
     {
@@ -235,9 +211,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * Query builder: This function set the SELECT statement.
-     * @param null|array|string $columns
-     * @return static
+     * @inheritDoc
      */
     public function select(null|array|string $columns = null): static
     {
@@ -261,10 +235,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $column
-     * @param string $direction
-     * @param bool $backticks
-     * @return static
+     * @inheritDoc
      */
     public function orderBy(string $column, string $direction = 'ASC', bool $backticks = true): static
     {
@@ -274,10 +245,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $option
-     * @return static
-     * @throws ModelException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function execute(string $option = self::EXECUTE_MODE_READ): static
     {
@@ -294,8 +262,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return null|string
-     * @throws ModelException
+     * @inheritDoc
      */
     public function compile(): ?string
     {
@@ -316,11 +283,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param array $options
-     * @return static
-     * @throws ModelException
-     * @throws ModelInvalidArgumentException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function findFirst(array $options = []): static
     {
@@ -346,7 +309,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return static
+     * @inheritDoc
      */
     public function prepareFindResult(): static
     {
@@ -371,7 +334,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return array|false
+     * @inheritDoc
      */
     public function getResult(): array|false
     {
@@ -398,7 +361,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function primaryKey(): string
     {
@@ -406,10 +369,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param int $limit
-     * @param int $offset
-     * @return static
-     * @throws ModelInvalidArgumentException
+     * @inheritDoc
      */
     public function limit(int $limit, int $offset = 0): static
     {
@@ -432,11 +392,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param array $options
-     * @return static
-     * @throws ModelException
-     * @throws ModelInvalidArgumentException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function findLast(array $options = []): static
     {
@@ -463,10 +419,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string|int $id
-     * @return static
-     * @throws ModelException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function findByPrimaryKey(string|int $id): static
     {
@@ -478,11 +431,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string|array $columns
-     * @param string $search
-     * @param bool $booleanMode
-     * @param bool $withWildcards
-     * @return static
+     * @inheritDoc
      */
     public function fulltext(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): static
     {
@@ -492,11 +441,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string|array $columns
-     * @param string $search
-     * @param bool $booleanMode
-     * @param bool $withWildcards
-     * @return static
+     * @inheritDoc
      */
     public function fulltextWithScore(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): static
     {
@@ -506,8 +451,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param bool $value
-     * @return static
+     * @inheritDoc
      */
     public function distinct(bool $value = true): static
     {
@@ -517,10 +461,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $table
-     * @param string $direction
-     * @param null|string $alias
-     * @return static
+     * @inheritDoc
      */
     public function join(string $table, string $direction = 'LEFT', ?string $alias = null): static
     {
@@ -530,10 +471,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $column1
-     * @param string $column2
-     * @return static
-     * @throws ModelInvalidArgumentException
+     * @inheritDoc
      */
     public function on(string $column1, string $column2): static
     {
@@ -557,10 +495,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $column1
-     * @param string $column2
-     * @return static
-     * @throws ModelInvalidArgumentException
+     * @inheritDoc
      */
     public function orOn(string $column1, string $column2): static
     {
@@ -585,11 +520,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $column
-     * @param string|null $operator
-     * @param string|int|float|null $value
-     * @param bool $backticks
-     * @return static
+     * @inheritDoc
      */
     public function orWhere(string $column, ?string $operator = null, string|int|float|null $value = null, bool $backticks = true): static
     {
@@ -614,11 +545,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $column
-     * @param string|int|null $operator
-     * @param string|int|float|null $value
-     * @param bool $backticks
-     * @return static
+     * @inheritDoc
      */
     public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): static
     {
@@ -649,12 +576,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $where_condition
-     * @param string $column
-     * @param string|int|null $operator
-     * @param string|int|float|null $value
-     * @param bool $backticks
-     * @return static
+     * @inheritDoc
      */
     public function whereOpenByCondition(
         string $where_condition,
@@ -680,7 +602,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return static
+     * @inheritDoc
      */
     public function orWhereClose(): static
     {
@@ -690,7 +612,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return static
+     * @inheritDoc
      */
     public function whereClose(): static
     {
@@ -716,12 +638,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * Query builder: This function set the AND open condition.
-     * @param string $column
-     * @param string|int|null $operator
-     * @param string|int|float|null $value
-     * @param bool $backticks
-     * @return static
+     * @inheritDoc
      */
     public function andWhereOpen(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): static
     {
@@ -742,7 +659,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return static
+     * @inheritDoc
      */
     public function andWhereClose(): static
     {
@@ -774,7 +691,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return static
+     * @inheritDoc
      */
     public function whereOpen(): static
     {
@@ -784,7 +701,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return static
+     * @inheritDoc
      */
     public function and(): static
     {
@@ -794,7 +711,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return static
+     * @inheritDoc
      */
     public function or(): static
     {
@@ -804,7 +721,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return static
+     * @inheritDoc
      */
     public function open(): static
     {
@@ -814,7 +731,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return static
+     * @inheritDoc
      */
     public function close(): static
     {
@@ -824,8 +741,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param ?string $query
-     * @return static
+     * @inheritDoc
      */
     public function query(string $query = null): static
     {
@@ -844,7 +760,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return array|false
+     * @inheritDoc
      */
     public function asArray(): array|false
     {
@@ -871,7 +787,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return object|false
+     * @inheritDoc
      */
     public function asObject(): object|false
     {
@@ -889,13 +805,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * Query builder: This function set property for INSERT or UPDATE data.
-     * @param string|array $property
-     * @param string|int|float|null $value
-     * @return static
-     * @throws ModelException
-     * @throws ModelPrimaryKeyException
-     * @throws ModelPropertyException
+     * @inheritDoc
      */
     public function set(string|array $property, string|int|float|null $value = null): static
     {
@@ -945,18 +855,15 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $property
-     * @return bool
+     * @inheritDoc
      */
     public function propertyExists(string $property): bool
     {
         return array_key_exists($property, $this->properties());
     }
 
-
     /**
-     * @param bool $keysOnly
-     * @return array
+     * @inheritDoc
      */
     public function properties(bool $keysOnly = false): array
     {
@@ -978,10 +885,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return bool|int|string
-     * @throws ModelException
-     * @throws ModelPropertyException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function save(): bool|int|string
     {
@@ -1002,12 +906,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param int|string $id
-     * @param array $data
-     * @return bool
-     * @throws ConfigLoadException
-     * @throws ModelException
-     * @throws ModelPropertyException
+     * @inheritDoc
      */
     public function update(int|string $id, array $data = []): bool
     {
@@ -1051,9 +950,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param array $array
-     * @return string|false
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function prepareUpdate(array $array): false|string
     {
@@ -1080,9 +977,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string|int|float|null $value
-     * @return string
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function escape(string|int|float|null $value): string
     {
@@ -1098,11 +993,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param array $data
-     * @return false|int|string
-     * @throws ModelException
-     * @throws ModelPropertyException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function insert(array $data = []): false|int|string
     {
@@ -1136,9 +1027,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param array $array
-     * @return bool|array
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function prepareInsert(array $array): bool|array
     {
@@ -1174,10 +1063,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string|int $id
-     * @return bool
-     * @throws ModelException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function delete(string|int $id): bool
     {
@@ -1197,8 +1083,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $property
-     * @return false|array
+     * @inheritDoc
      */
     public function dataValue(string $property): false|array
     {
@@ -1227,8 +1112,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $property
-     * @return false|array
+     * @inheritDoc
      */
     public function DataType(string $property): false|array
     {
@@ -1254,9 +1138,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return array
-     * @throws ConfigLoadException
-     * @throws ModelException
+     * @inheritDoc
      */
     public function fieldNames(): array
     {
@@ -1297,7 +1179,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return bool
+     * @inheritDoc
      */
     public function hasResult(): bool
     {
@@ -1316,9 +1198,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return static
-     * @throws ConfigLoadException
-     * @throws ModelException
+     * @inheritDoc
      */
     public function getCount(): static
     {
@@ -1347,8 +1227,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return string|null
-     * @throws ModelException
+     * @inheritDoc
      */
     public function getCountCompile(): ?string
     {
@@ -1365,7 +1244,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return string|null
+     * @inheritDoc
      */
     public function getTableAlias(): ?string
     {
@@ -1386,9 +1265,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $alias
-     * @return static
-     * @throws ModelException
+     * @inheritDoc
      */
     public function setTableAlias(string $alias): static
     {
@@ -1411,9 +1288,7 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $columnName
-     * @return string|int|float|null
-     * @throws ModelException
+     * @inheritDoc
      */
     public function getDefault(string $columnName): string|int|float|null
     {

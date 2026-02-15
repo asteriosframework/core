@@ -65,6 +65,11 @@ interface ModelInterface
     public function findFirst(array $options = []): static;
 
     /**
+     * @return static
+     */
+    public function prepareFindResult(): static;
+
+    /**
      * @param array $options
      * @return static
      * @throws ModelException
@@ -200,9 +205,10 @@ interface ModelInterface
     public function join(string $table, string $direction = 'LEFT', ?string $alias = null): static;
 
     /**
-     * @param string $column1
+     * @param string $column1^
      * @param string $column2
      * @return static
+     * @throws ModelInvalidArgumentException
      */
     public function on(string $column1, string $column2): static;
 
@@ -257,6 +263,11 @@ interface ModelInterface
         string|int|float|null $value = null,
         bool $backticks = true
     ): static;
+
+    /**
+     * @return static
+     */
+    public function orWhereClose(): static;
 
     /**
      * @return static
