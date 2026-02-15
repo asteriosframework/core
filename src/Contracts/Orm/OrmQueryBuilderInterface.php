@@ -183,10 +183,10 @@ interface OrmQueryBuilderInterface
     public function getCountCompile(): ?string;
 
     /**
-     * @param $query
+     * @param ?string $query
      * @return self
      */
-    public function query($query = null): self;
+    public function query(string $query = null): self;
 
     /**
      * @return self
@@ -211,4 +211,10 @@ interface OrmQueryBuilderInterface
      * @return self
      */
     public function or(): self;
+
+    /**
+     * @param array $options
+     * @return self
+     */
+    public function applyWhereOptions(array $options): self;
 }

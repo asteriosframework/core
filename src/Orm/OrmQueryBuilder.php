@@ -663,7 +663,7 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
     /**
      * @inheritDoc
      */
-    public function query($query = null): OrmQueryBuilderInterface
+    public function query(string $query = null): OrmQueryBuilderInterface
     {
         if (null !== $query)
         {
@@ -708,6 +708,36 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
     public function close(): OrmQueryBuilderInterface
     {
         $this->whereStatement[] = ')';
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function applyWhereOptions(array $options): OrmQueryBuilderInterface
+    {
+        if (isset($options['where']))
+        {
+            foreach ($options['where'] as $column => $value)
+            {
+                if (is_array($value))
+                {
+                    if (count($value) === 2)
+                    {
+                        $this->where($value[0], $value[1]);
+                    }
+                    elseif (count($value) === 3)
+                    {
+                        $this->where($value[0], $value[1], $value[2]);
+                    }
+                }
+                else
+                {
+                    $this->where($column, $value);
+                }
+            }
+        }
 
         return $this;
     }

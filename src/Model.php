@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection PhpUnused */
+
+declare(strict_types=1);
 
 namespace Asterios\Core;
 
@@ -15,33 +17,19 @@ use Asterios\Core\Orm\OrmSqlFormatter;
 
 class Model
 {
-    public const string OPERATOR_EQUAL = '=';
-    public const string OPERATOR_NOT_EQUAL = '!=';
-    public const string OPERATOR_GT = '>';
-    public const string OPERATOR_GT_OR_EQUAL = '>=';
-    public const string OPERATOR_LT = '<';
-    public const string OPERATOR_LT_OR_EQUAL = '<=';
-    public const string OPERATOR_BETWEEN = 'BETWEEN';
-    public const string OPERATOR_LIKE = 'LIKE';
-    public const string OPERATOR_IN = 'IN';
-    public const string OPERATOR_NOT_IN = 'NOT IN';
-    public const string OPERATOR_IS_NULL = 'IS NULL';
-    public const string OPERATOR_IS_NOT_NULL = 'IS NOT NULL';
-
     public const string EXECUTE_MODE_READ = 'read';
     public const string EXECUTE_MODE_WRITE = 'write';
     protected string $connection = 'default';
-    protected $class;
-    protected $table_name = '';
-    protected $table_alias = null;
-    protected $primary_key = '';
-    protected $properties = [];
-    protected $update = [];
+    protected string $tableName = '';
+    protected ?string $tableAlias = null;
+    protected string $primaryKey = '';
+    protected array $properties = [];
+    protected array $update = [];
 
     protected array|bool $result = false;
     protected array $data = [];
-    protected $_id;
-    protected $db_schema = [];
+    protected int|string $_id;
+    protected array $dbSchema = [];
 
     protected OrmQueryBuilderInterface $queryBuilder;
     protected OrmSqlFormatterInterface $formatter;
@@ -76,7 +64,7 @@ class Model
     {
         $metadata = new OrmMetadata(
             $this->table(),
-            $this->table_alias,
+            $this->tableAlias,
             $this->connection
         );
 
@@ -87,52 +75,38 @@ class Model
     }
 
     /**
-     * This method returns the table name for current model.
      * @return string
      * @throws ModelException
      */
     public function table(): string
     {
-        if ($this->table_name !== '')
+        if ($this->tableName !== '')
         {
-            return $this->table_name;
+            return $this->tableName;
         }
 
-        throw new ModelException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . $this->class . ' has no Table property!');
+        throw new ModelException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . static::class . ' has no Table property!');
     }
 
     /**
-     * This method can be used in three ways: find a specific id (primary key), find first or all entries with conditions.
-     * @param mixed $id
+     * @param int|string $id
      * @param array $options
      * @return Model
      * @throws ModelException
      * @throws ModelInvalidArgumentException
-     * @deprecated use find_all | find_first | find_last | find_by_primary_key
+     * @throws ConfigLoadException
+     * @deprecated use findAll() | findFirst() | findLast() | findByPrimaryKey() instead
      */
-    public static function find($id = 'all', array $options = []): self
+    public static function find(int|string $id = 'all', array $options = []): self
     {
         $model = self::forge();
 
-        // Find all entries
-        if ('all' === $id)
-        {
-            $model->find_all($options);
-        }
-        // find first/last entry
-        elseif ('first' === $id)
-        {
-            $model->find_first($options);
-        }
-        elseif ('last' === $id)
-        {
-            $model->find_last($options);
-        }
-        // find entry for given primary key
-        else
-        {
-            $model->find_by_primary_key($id);
-        }
+        match ($id) {
+            'all' => $model->findAll($options),
+            'first' => $model->findFirst($options),
+            'last' => $model->findLast($options),
+            default => $model->findByPrimaryKey($id),
+        };
 
         return $model;
     }
@@ -148,17 +122,30 @@ class Model
      * @param array $options
      * @return Model
      * @throws ModelException
+     * @throws ConfigLoadException
+     * @deprecated Use findAll() instead
      */
     public function find_all(array $options = []): self
     {
+        return $this->findAll($options);
+    }
+
+    /**
+     * @param array $options
+     * @return $this
+     * @throws ModelException
+     * @throws ConfigLoadException
+     */
+    public function findAll(array $options = []): self
+    {
         $this->select($options['columns'] ?? null)
             ->from()
-            ->apply_where_options($options)
-            ->group_by($options['group_by'] ?? []);
+            ->applyWhereOptions($options)
+            ->groupBy($options['group_by'] ?? []);
 
         if (isset($options['order_by']))
         {
-            $this->order_by($options['order_by'][0], $options['order_by'][1]);
+            $this->orderBy($options['order_by'][0], $options['order_by'][1]);
         }
 
         return $this->execute();
@@ -191,29 +178,9 @@ class Model
      * @param array $options
      * @return Model
      */
-    private function apply_where_options(array $options): self
+    private function applyWhereOptions(array $options): self
     {
-        if (isset($options['where']))
-        {
-            foreach ($options['where'] as $column => $value)
-            {
-                if (is_array($value))
-                {
-                    if (count($value) === 2)
-                    {
-                        $this->where($value[0], $value[1]);
-                    }
-                    elseif (count($value) === 3)
-                    {
-                        $this->where($value[0], $value[1], $value[2]);
-                    }
-                }
-                else
-                {
-                    $this->where($column, $value);
-                }
-            }
-        }
+        $this->queryBuilder->applyWhereOptions($options);
 
         return $this;
     }
@@ -225,7 +192,7 @@ class Model
      * SQL statement: WHERE column = 1 or AND column = 1
      * @param string $column
      * @param string|int|null $operator
-     * @param string|int|float $value
+     * @param string|int|float|null $value
      * @param bool $backticks
      * @param bool $formatValue
      * @return Model
@@ -233,7 +200,7 @@ class Model
     public function where(
         string $column,
         string|int|null $operator = null,
-        string|int|float $value = null,
+        string|int|float|null $value = null,
         bool $backticks = true,
         bool $formatValue = true
     ): self
@@ -297,10 +264,10 @@ class Model
     }
 
     /**
-     * Query builder: This function execute the compiled statement.
      * @param string $option
      * @return Model
      * @throws ModelException
+     * @throws ConfigLoadException
      */
     public function execute(string $option = self::EXECUTE_MODE_READ): self
     {
@@ -317,7 +284,6 @@ class Model
     }
 
     /**
-     * Query builder: This method build the full select query.
      * @return null|string
      * @throws ModelException
      */
@@ -331,58 +297,102 @@ class Model
      * @return Model
      * @throws ModelException
      * @throws ModelInvalidArgumentException
+     * @throws ConfigLoadException
+     * @deprecated Use findFirst() instead
      */
     public function find_first(array $options = []): self
     {
+        return $this->findFirst($options);
+    }
+
+    /**
+     * @param array $options
+     * @return Model
+     * @throws ModelException
+     * @throws ModelInvalidArgumentException
+     * @throws ConfigLoadException
+     */
+    public function findFirst(array $options = []): self
+    {
         return $this->select($options['columns'] ?? null)
             ->from()
-            ->apply_where_options($options)
-            ->group_by($options['group_by'] ?? [])
-            ->order_by($this->primary_key())
+            ->applyWhereOptions($options)
+            ->groupBy($options['group_by'] ?? [])
+            ->orderBy($this->primaryKey())
             ->limit(1)
             ->execute()
-            ->prepare_find_result();
+            ->prepareFindResult();
+    }
+
+    /**
+     * @return $this
+     * @deprecated Use prepareFindResult() instead
+     */
+    public function prepare_find_result(): self
+    {
+        $this->prepareFindResult();
+
+        return $this;
     }
 
     /**
      * @return $this
      */
-    public function prepare_find_result(): self
+    public function prepareFindResult(): self
     {
-        $find_result = $this->get_result();
+        $find_result = $this->getResult();
 
-        if (null !== $find_result && false !== $find_result)
+        if (false !== $find_result)
         {
             $this->result = $this->result[0];
-            $this->set_id($this->result[$this->primary_key()]);
+            $this->setId($this->result[$this->primaryKey()]);
         }
 
         return $this;
     }
 
     /**
-     * @return false|array|\stdClass|null
+     * @return array|false
+     * @deprecated Use getResult() instead
      */
-    public function get_result()
+    public function get_result(): array|false
     {
-        return $this->result;
+        return $this->getResult();
     }
 
     /**
-     * This function set the data id.
-     * @param mixed $id
+     * @return array|false
      */
-    private function set_id($id): void
+    public function getResult(): array|false
+    {
+        return $this->result;
+
+    }
+
+    /**
+     * @param int|string $id
+     * @return void
+     */
+    private function setId(int|string $id): void
     {
         $this->_id = $id;
     }
 
     /**
      * @return string
+     * @deprecated Use primaryKey() instead
      */
     public function primary_key(): string
     {
-        return $this->primary_key;
+        return $this->primaryKey();
+    }
+
+    /**
+     * @return string
+     */
+    public function primaryKey(): string
+    {
+        return $this->primaryKey;
     }
 
     /**
@@ -403,6 +413,7 @@ class Model
      * @return Model
      * @throws ModelException
      * @throws ModelInvalidArgumentException
+     * @throws ConfigLoadException
      * @deprecated Use findLast() instead
      */
     public function find_last(array $options = []): self
@@ -415,31 +426,45 @@ class Model
      * @return self
      * @throws ModelException
      * @throws ModelInvalidArgumentException
+     * @throws ConfigLoadException
      */
     public function findLast(array $options = []): self
     {
         return $this->select($options['columns'] ?? null)
             ->from()
-            ->apply_where_options($options)
+            ->applyWhereOptions($options)
             ->groupBy($options['group_by'] ?? [])
-            ->orderBy($this->primary_key(), 'DESC')
+            ->orderBy($this->primaryKey(), 'DESC')
             ->limit(1)
             ->execute()
-            ->prepare_find_result();
+            ->prepareFindResult();
     }
 
     /**
      * @param string|int $id
      * @return Model
      * @throws ModelException
+     * @throws ConfigLoadException
+     * @deprecated Use findByPrimaryKey() instead
      */
-    public function find_by_primary_key($id): self
+    public function find_by_primary_key(string|int $id): self
+    {
+        return $this->findByPrimaryKey($id);
+    }
+
+    /**
+     * @param string|int $id
+     * @return Model
+     * @throws ModelException
+     * @throws ConfigLoadException
+     */
+    public function findByPrimaryKey(string|int $id): self
     {
         return $this->select()
             ->from()
-            ->where($this->primary_key(), $id)
+            ->where($this->primaryKey(), $id)
             ->execute()
-            ->prepare_find_result();
+            ->prepareFindResult();
     }
 
     /**
@@ -470,6 +495,10 @@ class Model
         return $this;
     }
 
+    /**
+     * @param bool $value
+     * @return $this
+     */
     public function distinct(bool $value = true): self
     {
         $this->queryBuilder->distinct($value);
@@ -478,7 +507,6 @@ class Model
     }
 
     /**
-     * Query builder: This function appends the table to JOIN from.
      * @param string $table
      * @param string $direction
      * @param null|string $alias
@@ -492,7 +520,6 @@ class Model
     }
 
     /**
-     * Query builder: This function appends the table to JOIN ON.
      * @param string $column1
      * @param string $column2
      * @return Model
@@ -506,7 +533,6 @@ class Model
     }
 
     /**
-     * Query builder: This function appends the JOIN
      * @param string $column1
      * @param string $column2
      * @return Model
@@ -521,7 +547,6 @@ class Model
     }
 
     /**
-     * Query builder: This function appends the JOIN
      * @param string $column1
      * @param string $column2
      * @return Model
@@ -535,10 +560,6 @@ class Model
     }
 
     /**
-     * Query builder: This function set the OR condition.
-     * Hint: If you want only to set a simple = condition, you can use only 2 parameters:
-     * Example: ->or_where('column', 1)
-     * SQL statement: OR column = 1
      * @param string $column
      * @param string|null $operator
      * @param string|int|float|null $value
@@ -546,7 +567,7 @@ class Model
      * @return Model
      * @deprecated Use orWhere() instead
      */
-    public function or_where(string $column, ?string $operator = null, string|int|null $value = null, bool $backticks = true): self
+    public function or_where(string $column, ?string $operator = null, string|int|float|null $value = null, bool $backticks = true): self
     {
         $this->queryBuilder->orWhere($column, $operator, $value, $backticks);
 
@@ -701,9 +722,23 @@ class Model
         return $this;
     }
 
+    /**
+     * @return $this
+     * @deprecated Use andWhereClose() instead
+     */
     public function and_where_close(): self
     {
-        $this->where_close();
+        $this->whereClose();
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function andWhereClose(): self
+    {
+        $this->whereClose();
 
         return $this;
     }
@@ -720,9 +755,6 @@ class Model
     }
 
     /**
-     * Query builder: This function set the AND open condition.
-     * Example: ->where_open()
-     * SQL statement: AND (
      * @return Model
      * @deprecated Use whereOpen() instead
      */
@@ -734,9 +766,6 @@ class Model
     }
 
     /**
-     * Query builder: This function set the AND open condition.
-     * Example: ->whereOpen()
-     * SQL statement: AND (
      * @return Model
      */
     public function whereOpen(): self
@@ -746,6 +775,9 @@ class Model
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function and(): self
     {
         $this->queryBuilder->and();
@@ -753,6 +785,9 @@ class Model
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function or(): self
     {
         $this->queryBuilder->or();
@@ -760,6 +795,9 @@ class Model
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function open(): self
     {
         $this->queryBuilder->open();
@@ -767,6 +805,9 @@ class Model
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function close(): self
     {
         $this->queryBuilder->close();
@@ -774,7 +815,11 @@ class Model
         return $this;
     }
 
-    public function query($query = null): self
+    /**
+     * @param ?string $query
+     * @return $this
+     */
+    public function query(string $query = null): self
     {
         $this->queryBuilder->query($query);
 
@@ -782,10 +827,18 @@ class Model
     }
 
     /**
-     * Query builder: This function return the result as array.
-     * @return array|null|bool
+     * @return array|false
+     * @deprecated Use asArray() instead
      */
-    public function as_array()
+    public function as_array(): array|false
+    {
+        return $this->asArray();
+    }
+
+    /**
+     * @return array|false
+     */
+    public function asArray(): array|false
     {
         if (!$this->result)
         {
@@ -801,10 +854,18 @@ class Model
     }
 
     /**
-     * Query builder: This function return the result as object.
-     * @return null|object|bool
+     * @return false|object
+     * @deprecated Use asObject() instead
      */
-    public function as_object()
+    public function as_object(): object|false
+    {
+        return $this->asObject();
+    }
+
+    /**
+     * @return object|false
+     */
+    public function asObject(): object|false
     {
         if (!$this->result)
         {
@@ -822,13 +883,13 @@ class Model
     /**
      * Query builder: This function set property for INSERT or UPDATE data.
      * @param string|array $property
-     * @param mixed $value
+     * @param string|int|float|null $value
      * @return Model
      * @throws ModelException
      * @throws ModelPrimaryKeyException
      * @throws ModelPropertyException
      */
-    public function set($property, $value = null): self
+    public function set(string|array $property, string|int|float|null $value = null): self
     {
         if (is_array($property))
         {
@@ -839,7 +900,7 @@ class Model
         }
         else
         {
-            $this->set_data($property, $value);
+            $this->setData($property, $value);
         }
 
         return $this;
@@ -848,41 +909,49 @@ class Model
     /**
      * This function set the data for the model properties.
      * @param string $property
-     * @param mixed $value
+     * @param string|int|float|null $value
      * @throws ModelPrimaryKeyException
      * @throws ModelPropertyException
      */
-    private function set_data(string $property, $value): void
+    private function setData(string $property, string|int|float|null $value): void
     {
-        if ($property === $this->primary_key())
+        if ($property === $this->primaryKey())
         {
-            throw new ModelPrimaryKeyException('Primary key on model ' . $this->class . ' cannot be changed.');
+            throw new ModelPrimaryKeyException('Primary key on model ' . static::class . ' cannot be changed.');
         }
 
-        if (!$this->property_exists($property))
+        if (!$this->propertyExists($property))
         {
-            throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . $this->class . ' has no property "' . $property . '"!');
+            throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . static::class . ' has no property "' . $property . '"!');
         }
         $this->data[$property] = $value;
     }
 
     /**
-     * This function check if given property exist in model.
+     * @param string $property
+     * @return bool
+     * @deprecated Use propertyExists() instead
+     */
+    public function property_exists(string $property): bool
+    {
+        return $this->propertyExists($property);
+    }
+
+    /**
      * @param string $property
      * @return bool
      */
-    public function property_exists(string $property): bool
+    public function propertyExists(string $property): bool
     {
         return array_key_exists($property, $this->properties());
     }
 
+
     /**
-     * This method returns the properties for current model.
-     * Please note: you must set the properties in your model.
-     * @param bool $keys_only
+     * @param bool $keysOnly
      * @return array
      */
-    public function properties(bool $keys_only = false): array
+    public function properties(bool $keysOnly = false): array
     {
         foreach ($this->properties as $key => $p)
         {
@@ -893,7 +962,7 @@ class Model
             }
         }
 
-        if ($keys_only)
+        if ($keysOnly)
         {
             return array_keys($this->properties);
         }
@@ -902,47 +971,48 @@ class Model
     }
 
     /**
-     * Query builder: This function INSERT or UPDATE data into database.
-     * @return bool|int
+     * @return bool|int|string
      * @throws ModelException
      * @throws ModelPropertyException
+     * @throws ConfigLoadException
      */
-    public function save()
+    public function save(): bool|int|string
     {
-        if (!is_null($this->get_id()))
+        if (!is_null($this->getId()))
         {
-            return $this->update($this->get_id(), $this->get_data());
+            return $this->update($this->getId(), $this->get_data());
         }
 
         return $this->insert($this->get_data());
     }
 
     /**
-     * This function get the data id.
-     * @return null|mixed
+     * @return int|string
      */
-    private function get_id()
+    private function getId(): int|string
     {
         return $this->_id;
     }
 
     /**
-     * Query builder: This function UPDATE data in database.
-     * @param mixed $id
+     * @param int|string $id
      * @param array $data
      * @return bool
-     * @throws ModelException|ModelPropertyException|ConfigLoadException
+     * @throws ConfigLoadException
+     * @throws ModelException
+     * @throws ModelPropertyException
      */
-    public function update($id, array $data = []): bool
+    public function update(int|string $id, array $data = []): bool
     {
         if (empty($data))
         {
             return false;
         }
 
-        $this->has_properties($data);
+        $this->hasProperties($data);
 
-        $sql = 'UPDATE ' . $this->table() . ' SET ' . $this->prepare_update($data) . ' WHERE ' . $this->backticks($this->primary_key()) . ' = ' . $id;
+        $sql = 'UPDATE ' . $this->table() . ' SET ' . $this->prepareUpdate($data) . ' WHERE ' . $this->formatter->backticks($this->primaryKey()) . ' = ' .
+            $id;
 
         return Db::write($sql, $this->connection);
     }
@@ -951,23 +1021,34 @@ class Model
      * @param array $data
      * @throws ModelPropertyException
      */
-    private function has_properties(array $data): void
+    private function hasProperties(array $data): void
     {
         foreach ($data as $key => $value)
         {
-            if (!$this->property_exists($key))
+            if (!$this->propertyExists($key))
             {
-                throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . $this->class . ' has no property "' . $key . '"!');
+                throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . static::class . ' has no property "' . $key . '"!');
             }
         }
     }
 
     /**
-     * This function prepare data for UPDATE.
      * @param array $array
-     * @return bool|string
+     * @return string|false
+     * @throws ConfigLoadException
+     * @deprecated Use prepareUpdate() instead
      */
-    public function prepare_update(array $array)
+    public function prepare_update(array $array): string|false
+    {
+       return $this->prepareUpdate($array);
+    }
+
+    /**
+     * @param array $array
+     * @return string|false
+     * @throws ConfigLoadException
+     */
+    public function prepareUpdate(array $array): false|string
     {
         if (empty($array))
         {
@@ -980,23 +1061,23 @@ class Model
         {
             if ($value === null)
             {
-                $columns .= ' ' . $this->backticks(preg_replace('/[^a-z_A-Z0-9]/', '', $key)) . ' = NULL,';
+                $columns .= ' ' . $this->formatter->backticks(preg_replace('/[^a-z_A-Z0-9]/', '', $key)) . ' = NULL,';
 
                 continue;
             }
 
-            $columns .= ' ' . $this->backticks(preg_replace('/[^a-z_A-Z0-9]/', '', $key)) . ' = \'' . $this->escape($value) . '\',';
+            $columns .= ' ' . $this->formatter->backticks(preg_replace('/[^a-z_A-Z0-9]/', '', $key)) . ' = \'' . $this->escape($value) . '\',';
         }
 
         return rtrim($columns, ',');
     }
 
     /**
-     * @param string|int $value
+     * @param string|int|float|null $value
      * @return string
      * @throws ConfigLoadException
      */
-    public function escape($value): string
+    public function escape(string|int|float|null $value): string
     {
         return Db::escape((string)$value, $this->connection);
     }
@@ -1023,7 +1104,7 @@ class Model
             return false;
         }
 
-        $this->has_properties($data);
+        $this->hasProperties($data);
         $insert_data = $this->prepare_insert($data);
 
         $sql = 'INSERT INTO
@@ -1037,9 +1118,9 @@ class Model
     }
 
     /**
-     * This function prepare data for INSERT.
      * @param array $array
      * @return bool|array
+     * @throws ConfigLoadException
      */
     public function prepare_insert(array $array): bool|array
     {
@@ -1048,12 +1129,12 @@ class Model
             return false;
         }
 
-        $columns = $this->_open();
-        $columns_data = $this->_open();
+        $columns = $this->formatter->open();
+        $columns_data = $this->formatter->open();
 
         foreach ($array as $key => $value)
         {
-            $columns .= $this->backticks($key) . ',';
+            $columns .= $this->formatter->backticks($key) . ',';
 
             if ($value === null)
             {
@@ -1066,22 +1147,12 @@ class Model
         }
 
         $columns = rtrim($columns, ',');
-        $columns .= $this->_close();
+        $columns .= $this->formatter->close();
 
         $columns_data = rtrim($columns_data, ',');
-        $columns_data .= $this->_close();
+        $columns_data .= $this->formatter->close();
 
         return [$columns, $columns_data];
-    }
-
-    private function _open(): string
-    {
-        return '(';
-    }
-
-    private function _close(): string
-    {
-        return ')';
     }
 
     /**
@@ -1092,97 +1163,152 @@ class Model
      */
     public function delete(string|int $id): bool
     {
-        $sql = 'DELETE FROM ' . $this->table() . ' WHERE ' . $this->backticks($this->primary_key()) . ' = ' . $id . '
-        ';
+        $sql = 'DELETE FROM ' . $this->table() . ' WHERE ' . $this->formatter->backticks($this->primaryKey()) . ' = ' . $id;
 
         return Db::write($sql, $this->connection);
     }
 
     /**
      * @param string $property
-     * @return bool|mixed
+     * @return false|array
+     * @deprecated Use dataValue() instead
      */
-    public function data_value(string $property)
+    public function data_value(string $property): false|array
     {
-        $model_properties = $this->properties();
-        $data_type = $this->data_type($property);
-
-        if (!$data_type || (!isset($model_properties[$property]['length']) && !isset($model_properties[$property]['set'])))
-        {
-            return false;
-        }
-
-        $data_value = (isset($model_properties[$property]['length'])) ? 'length' : 'set';
-
-        return $model_properties[$property][$data_value];
+        return $this->dataValue($property);
     }
 
     /**
      * @param string $property
-     * @return bool|mixed
+     * @return false|array
      */
-    public function data_type(string $property)
+    public function dataValue(string $property): false|array
     {
-        $model_properties = $this->properties();
+        $modelProperties = $this->properties();
+        $dataType = $this->dataType($property);
 
-        if (!is_array($model_properties[$property]) || !isset($model_properties[$property]['data_type']))
+        if (!$dataType || (!isset($modelProperties[$property]['length']) && !isset($modelProperties[$property]['set'])))
         {
             return false;
         }
 
-        return $model_properties[$property]['data_type'];
+        $dataValue = (isset($modelProperties[$property]['length'])) ? 'length' : 'set';
+
+        return $modelProperties[$property][$dataValue];
+    }
+
+
+    /**
+     * @param string $property
+     * @return false|array
+     * @deprecated Use dataType() instead
+     */
+    public function data_type(string $property): false|array
+    {
+        return $this->DataType($property);
     }
 
     /**
-     * This function returns the field names from db.
+     * @param string $property
+     * @return false|array
+     */
+    public function DataType(string $property): false|array
+    {
+        $modelProperties = $this->properties();
+
+        if (!is_array($modelProperties[$property]) || !isset($modelProperties[$property]['data_type']))
+        {
+            return false;
+        }
+
+        return $modelProperties[$property]['data_type'];
+    }
+
+    /**
      * @return array
-     * @throws ModelException|ConfigLoadException
+     * @throws ConfigLoadException
+     * @throws ModelException
+     * @deprecated Use fieldNames() instead
      */
     public function field_names(): array
     {
-        $data_from_db = Db::field_names($this->compile(), $this->connection);
+        return $this->fieldNames();
+    }
 
-        if (!empty($data_from_db))
+    /**
+     * @return array
+     * @throws ConfigLoadException
+     * @throws ModelException
+     */
+    public function fieldNames(): array
+    {
+        $dataFromBb = Db::field_names($this->compile(), $this->connection);
+
+        if (!empty($dataFromBb))
         {
-            $this->set_db_schema($data_from_db);
+            $this->setDbSchema($dataFromBb);
         }
 
-        return $this->get_db_schema();
+        return $this->getDbSchema();
     }
 
     /**
      * @param array $schema
      * @return void
      */
-    private function set_db_schema(array $schema): void
+    private function setDbSchema(array $schema): void
     {
-        $this->db_schema = $schema;
+        $this->dbSchema = $schema;
     }
 
     /**
      * @return array
      */
-    private function get_db_schema(): array
+    private function getDbSchema(): array
     {
-        return $this->db_schema;
+        return $this->dbSchema;
     }
 
+    /**
+     * @return bool
+     * @deprecated Use hasResult() instead
+     */
     public function has_result(): bool
+    {
+        return $this->hasResult();
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasResult(): bool
     {
         return false !== $this->result;
     }
 
     /**
      * @return $this
-     * @throws ModelException|ConfigLoadException
+     * @throws ConfigLoadException
+     * @throws ModelException
+     * @deprecated Use getCount() instead
      */
-    public function get_count(): self
+    public function get_count() :self
     {
-        $data_from_db = Db::read($this->get_count_compile(), $this->connection);
+        return $this->getCount();
+    }
 
-        if ($data_from_db !== false)
+    /**
+     * @return $this
+     * @throws ConfigLoadException
+     * @throws ModelException
+     */
+    public function getCount(): self
+    {
+        $dataFromDb = Db::read($this->getCountCompile(), $this->connection);
+
+        if ($dataFromDb !== false)
         {
-            $this->result = $data_from_db;
+            $this->result = $dataFromDb;
         }
         else
         {
@@ -1195,15 +1321,50 @@ class Model
     /**
      * @return null|string
      * @throws ModelException
+     * @deprecated Use getCountCompile() instead
      */
     public function get_count_compile(): ?string
+    {
+        return $this->getCountCompile();
+    }
+
+    /**
+     * @return string|null
+     * @throws ModelException
+     */
+    public function getCountCompile(): ?string
     {
         return $this->queryBuilder->getCountCompile();
     }
 
+    /**
+     * @return string|null
+     * @deprecated Use getTableAlias() instead
+     */
     public function get_table_alias(): ?string
     {
-        return $this->table_alias;
+        return $this->tableAlias;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTableAlias(): ?string
+    {
+        return $this->tableAlias;
+    }
+
+    /**
+     * @param string $alias
+     * @return $this
+     * @throws ModelException
+     * @deprecated Use setTableAlias() instead
+     */
+    public function set_table_alias(string $alias): self
+    {
+        $this->setTableAlias($alias);
+
+        return $this;
     }
 
     /**
@@ -1211,9 +1372,9 @@ class Model
      * @return $this
      * @throws ModelException
      */
-    public function set_table_alias(string $alias): self
+    public function setTableAlias(string $alias): self
     {
-        $this->table_alias = $alias;
+        $this->tableAlias = $alias;
 
         $this->rebuildQueryBuilder();
 
@@ -1221,22 +1382,33 @@ class Model
     }
 
     /**
-     * @param string $column_name
-     * @return string|int|bool|null
+     * @param string $columnName
+     * @return array
+     * @throws ModelException
+     * @deprecated Use getDefault() instead
+     */
+    public function get_default(string $columnName): array
+    {
+        return $this->getDefault($columnName);
+    }
+
+    /**
+     * @param string $columnName
+     * @return array
      * @throws ModelException
      */
-    public function get_default(string $column_name)
+    public function getDefault(string $columnName): array
     {
-        if (!$this->property_exists($column_name))
+        if (!$this->propertyExists($columnName))
         {
-            throw new ModelException(sprintf('column name does not exist on Model: %s::%s', __CLASS__, $column_name));
+            throw new ModelException(sprintf('column name does not exist on Model: %s::%s', __CLASS__, $columnName));
         }
 
-        if (!isset($this->properties[$column_name]['default']))
+        if (!isset($this->properties[$columnName]['default']))
         {
-            throw new ModelException(sprintf('default definition on %s does not exist', $column_name));
+            throw new ModelException(sprintf('default definition on %s does not exist', $columnName));
         }
 
-        return $this->properties[$column_name]['default'];
+        return $this->properties[$columnName]['default'];
     }
 }
