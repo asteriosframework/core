@@ -4,6 +4,7 @@ namespace Asterios\Core\Orm;
 
 use Asterios\Core\Contracts\Orm\OrmQueryBuilderInterface;
 use Asterios\Core\Contracts\Orm\OrmSqlFormatterInterface;
+use Asterios\Core\Enum\Orm\OperatorEnum;
 use Asterios\Core\Exception\ModelInvalidArgumentException;
 
 class OrmQueryBuilder implements OrmQueryBuilderInterface
@@ -24,8 +25,7 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
     public function __construct(
         OrmMetadata $metadata,
         OrmSqlFormatterInterface $formatter
-    )
-    {
+    ) {
         $this->metadata = $metadata;
         $this->formatter = $formatter;
     }
@@ -163,9 +163,8 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
         string|int|float|null $value = null,
         bool $backticks = true,
         bool $formatValue = true
-    ): OrmQueryBuilderInterface
-    {
-        if (func_num_args() === 2)
+    ): OrmQueryBuilderInterface {
+        if (!OperatorEnum::isOperator($value))
         {
             $value = $operator;
             $operator = '=';
@@ -229,9 +228,8 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
         string|int|null $operator = null,
         string|int|float|null $value = null,
         bool $backticks = true
-    ): OrmQueryBuilderInterface
-    {
-        if (func_num_args() === 2)
+    ): OrmQueryBuilderInterface {
+        if (null === $value)
         {
             $value = $operator;
             $operator = '=';
@@ -297,11 +295,10 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
         string|int|null $operator,
         string|int|float|null $value = null,
         bool $backticks = true
-    ): OrmQueryBuilderInterface
-    {
-        if (func_num_args() === 2)
+    ): OrmQueryBuilderInterface {
+        if (!OperatorEnum::isOperator($value))
         {
-            return $this->whereOpenByCondition('AND', $column, null, $operator, $backticks);
+            return $this->whereOpenByCondition('AND', $column, '=', $operator, $backticks);
         }
 
         return $this->whereOpenByCondition('AND', $column, $operator, $value, $backticks);
@@ -316,10 +313,8 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
         string|int|null $operator,
         string|int|float|null $value = null,
         bool $backticks = true
-    ):
-    OrmQueryBuilderInterface
-    {
-        if ($operator === null)
+    ): OrmQueryBuilderInterface {
+        if (!OperatorEnum::isOperator($value))
         {
             $operator = '=';
         }
@@ -354,12 +349,11 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
     /**
      * @inheritDoc
      */
-    public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true):
-    OrmQueryBuilderInterface
+    public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): OrmQueryBuilderInterface
     {
-        if (func_num_args() === 2)
+        if (!OperatorEnum::isOperator($value))
         {
-            return $this->whereOpenByCondition('OR', $column, null, $operator, $backticks);
+            return $this->whereOpenByCondition('OR', $column, '=', $operator, $backticks);
         }
 
         return $this->whereOpenByCondition('OR', $column, $operator, $value, $backticks);
@@ -479,10 +473,13 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
 
         if ($booleanMode && $withWildcards)
         {
-            $search = implode(' ',
-                array_map(static fn($w) => '+' . $w . '*',
+            $search = implode(
+                ' ',
+                array_map(
+                    static fn ($w) => '+' . $w . '*',
                     preg_split('/\s+/', trim($search))
-                ));
+                )
+            );
         }
 
         $mode = $booleanMode ? ' IN BOOLEAN MODE' : '';
