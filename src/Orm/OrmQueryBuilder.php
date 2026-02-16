@@ -164,7 +164,7 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
         bool $backticks = true,
         bool $formatValue = true
     ): OrmQueryBuilderInterface {
-        if (!OperatorEnum::isOperator($value))
+        if (!OperatorEnum::isOperator($operator))
         {
             $value = $operator;
             $operator = '=';
