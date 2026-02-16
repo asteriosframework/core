@@ -229,7 +229,7 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
         string|int|float|null $value = null,
         bool $backticks = true
     ): OrmQueryBuilderInterface {
-        if (null === $value)
+        if (!OperatorEnum::isOperator($operator))
         {
             $value = $operator;
             $operator = '=';
@@ -296,7 +296,7 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
         string|int|float|null $value = null,
         bool $backticks = true
     ): OrmQueryBuilderInterface {
-        if (!OperatorEnum::isOperator($value))
+        if (!OperatorEnum::isOperator($operator))
         {
             return $this->whereOpenByCondition('AND', $column, '=', $operator, $backticks);
         }
@@ -314,7 +314,7 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
         string|int|float|null $value = null,
         bool $backticks = true
     ): OrmQueryBuilderInterface {
-        if (!OperatorEnum::isOperator($value))
+        if (!OperatorEnum::isOperator($operator))
         {
             $operator = '=';
         }
@@ -351,7 +351,7 @@ class OrmQueryBuilder implements OrmQueryBuilderInterface
      */
     public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): OrmQueryBuilderInterface
     {
-        if (!OperatorEnum::isOperator($value))
+        if (!OperatorEnum::isOperator($operator))
         {
             return $this->whereOpenByCondition('OR', $column, '=', $operator, $backticks);
         }
