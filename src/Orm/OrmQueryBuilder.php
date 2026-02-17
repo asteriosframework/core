@@ -348,9 +348,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
             $sql .= 'DISTINCT ';
         }
 
-        $sql .= empty($this->select)
-            ? '*'
-            : implode(', ', array_map([$this->formatter, 'backticks'], $this->select));
+        $sql .= $this->compileSelect();
 
         $sql .= $this->compileFrom();
         $sql .= $this->compileJoins();
@@ -360,6 +358,46 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         $sql .= $this->compileLimit();
 
         return trim($sql);
+    }
+
+    /**
+     * @return string
+     */
+    private function compileSelect(): string
+    {
+        if (empty($this->select))
+        {
+            return '*';
+        }
+
+        $columns = [];
+
+        foreach ($this->select as $column)
+        {
+
+            if ($column === '*')
+            {
+                $columns[] = '*';
+                continue;
+            }
+
+            if (str_ends_with($column, '.*'))
+            {
+                $columns[] = $column;
+                continue;
+            }
+
+            if (str_contains($column, '(') || str_contains($column, ')') || str_contains($column, ' ') || stripos($column, ' as ') !== false
+            )
+            {
+                $columns[] = $column;
+                continue;
+            }
+
+            $columns[] = $this->formatter->backticks($column);
+        }
+
+        return implode(', ', $columns);
     }
 
     private function compileFrom(): string
