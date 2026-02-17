@@ -1,127 +1,118 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection PhpUnused */
+
+declare(strict_types=1);
 
 namespace Asterios\Core;
 
+use Asterios\Core\Contracts\Orm\ModelInterface;
+use Asterios\Core\Contracts\Orm\OrmQueryBuilderInterface;
+use Asterios\Core\Contracts\Orm\OrmSqlFormatterInterface;
+use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\ModelException;
 use Asterios\Core\Exception\ModelInvalidArgumentException;
 use Asterios\Core\Exception\ModelPrimaryKeyException;
 use Asterios\Core\Exception\ModelPropertyException;
+use Asterios\Core\Orm\OrmMetadata;
+use Asterios\Core\Orm\OrmQueryBuilder;
+use Asterios\Core\Orm\OrmSqlFormatter;
 
-class Model
+class Model implements ModelInterface
 {
-    public const string SQL_COMMAND_SELECT = 'SELECT';
-    public const string SQL_COMMAND_FROM = 'FROM';
-    public const string SQL_COMMAND_UPDATE = 'UPDATE';
-    public const string SQL_COMMAND_DELETE = 'DELETE';
-    public const string SQL_COMMAND_INSERT = 'INSERT INTO';
-    public const string SQL_COMMAND_VALUES = 'VALUES';
-    public const string SQL_COMMAND_SET = 'SET';
-
-    public const string SQL_ORDER_BY_ASC = 'ASC';
-    public const string SQL_ORDER_BY_DESC = 'DESC';
-
-    public const string SQL_CLAUSE_JOIN = 'JOIN';
-    public const string SQL_CLAUSE_ON = 'ON';
-    public const string SQL_CLAUSE_INNER = 'INNER';
-    public const string SQL_CLAUSE_LIMIT = 'LIMIT';
-
-    public const string JOIN_LEFT = 'LEFT';
-    public const string JOIN_RIGHT = 'RIGHT';
-    public const string JOIN_INNER = 'INNER';
-
-    public const string SQL_STATEMENT_WHERE = 'WHERE';
-    public const string SQL_STATEMENT_AND = 'AND';
-    public const string SQL_STATEMENT_OR = 'OR';
-    public const string SQL_STATEMENT_EMPTY = '';
-    public const string SQL_STATEMENT_GROUP_BY = 'GROUP BY';
-    public const string SQL_STATEMENT_ORDER_BY = 'ORDER BY';
-
-    public const string OPERATOR_EQUAL = '=';
-    public const string OPERATOR_NOT_EQUAL = '!=';
-    public const string OPERATOR_GT = '>';
-    public const string OPERATOR_GT_OR_EQUAL = '>=';
-    public const string OPERATOR_LT = '<';
-    public const string OPERATOR_LT_OR_EQUAL = '<=';
-    public const string OPERATOR_BETWEEN = 'BETWEEN';
-    public const string OPERATOR_LIKE = 'LIKE';
-    public const string OPERATOR_IN = 'IN';
-    public const string OPERATOR_NOT_IN = 'NOT IN';
-    public const string OPERATOR_IS_NULL = 'IS NULL';
-    public const string OPERATOR_IS_NOT_NULL = 'IS NOT NULL';
-
     public const string EXECUTE_MODE_READ = 'read';
     public const string EXECUTE_MODE_WRITE = 'write';
-
-    public const int DEFAULT_CACHE_LIFETIME = 60;
-
     protected string $connection = 'default';
+    protected string $tableName = '';
+    protected ?string $tableAlias = null;
+    protected string $primaryKey = '';
 
-    protected $class;
-    protected $table_name = '';
-    /** @var null|string $table_alias */
-    protected $table_alias;
-    protected $primary_key = '';
-    /** @var array */
-    protected $properties = [];
-    /** @var array */
-    protected $update = [];
-    /** @var array */
-    protected $where_statement = [];
-    protected $group_by_statement;
-    protected $order_by_statement;
-    protected $limit_statement;
-    /** @var false | mixed */
-    protected $result = false;
-    protected bool $select_distinct = false;
-    protected $select_statement;
-    protected $from_statement;
-    protected $join_statement;
-    protected $query_statement;
-    protected $data = [];
-    protected $_id;
-    protected $db_schema = [];
-    /** @var null|int */
-    protected static $app_id = null;
+    /** @var array<string, string|array{dataType: string, length?: int, set?: list<string>, default?: string|int|float|null}> */
+    protected array $properties = [];
 
-    protected string $next_where_boolean = self::SQL_STATEMENT_AND;
+    protected array $update = [];
+
+    protected array|bool $result = false;
+    protected array $data = [];
+    protected int|string $_id;
+    protected array $dbSchema = [];
+
+    protected ?OrmQueryBuilderInterface $queryBuilder = null;
+    protected OrmSqlFormatterInterface $formatter;
 
     /**
-     * This method can be used in three ways: find a specific id (primary key), find first or all entries with conditions.
-     * @param mixed $id
-     * @param array $options
-     * @return Model
      * @throws ModelException
-     * @throws ModelInvalidArgumentException
-     * @deprecated use find_all | find_first | find_last | find_by_primary_key
      */
-    public static function find($id = 'all', array $options = []): self
+    public function __construct(?OrmSqlFormatterInterface $formatter = null)
+    {
+        $this->formatter = $formatter ?? new OrmSqlFormatter();
+
+        $this->rebuildQueryBuilder();
+
+        $this->reset();
+    }
+
+    /**
+     * @return void
+     * @throws ModelException
+     */
+    private function rebuildQueryBuilder(): void
+    {
+        $metadata = new OrmMetadata(
+            $this->table(),
+            $this->tableAlias,
+            $this->connection
+        );
+
+        $this->queryBuilder = new OrmQueryBuilder(
+            $metadata,
+            $this->formatter
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function table(): string
+    {
+        if ($this->tableName !== '')
+        {
+            return $this->tableName;
+        }
+
+        throw new ModelException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . static::class . ' has no Table property!');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function reset(): static
+    {
+        $this->rebuildQueryBuilder();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function find(int|string $id = 'all', array $options = []): static
     {
         $model = self::forge();
 
-        // Find all entries
-        if ('all' === $id)
+        match ($id)
         {
-            $model->find_all($options);
-        }
-        // find first/last entry
-        elseif ('first' === $id)
-        {
-            $model->find_first($options);
-        }
-        elseif ('last' === $id)
-        {
-            $model->find_last($options);
-        }
-        // find entry for given primary key
-        else
-        {
-            $model->find_by_primary_key($id);
-        }
+            'all' => $model->findAll($options),
+            'first' => $model->findFirst($options),
+            'last' => $model->findLast($options),
+            default => $model->findByPrimaryKey($id),
+        };
 
         return $model;
     }
 
-    public static function forge(): self
+    /**
+     * @inheritDoc
+     */
+    public static function forge(): static
     {
         $model = static::class;
 
@@ -129,439 +120,78 @@ class Model
     }
 
     /**
-     * @param array $options
-     * @return Model
-     * @throws ModelException
+     * @inheritDoc
      */
-    public function find_all(array $options = []): self
+    public function findAll(array $options = []): static
     {
         $this->select($options['columns'] ?? null)
             ->from()
-            ->apply_where_options($options)
-            ->group_by($options['group_by'] ?? []);
+            ->applyWhereOptions($options)
+            ->groupBy($options['group_by'] ?? []);
 
         if (isset($options['order_by']))
         {
-            $this->order_by($options['order_by'][0], $options['order_by'][1]);
+            $this->orderBy($options['order_by'][0], $options['order_by'][1]);
         }
 
         return $this->execute();
     }
 
     /**
-     * Query builder: This function set GROUP BY.
-     * @param array $group_by
-     * @return Model
+     * @inheritDoc
      */
-    public function group_by(array $group_by): self
+    public function groupBy(array $groupBy): static
     {
-        if (!empty($group_by))
-        {
-            if (null === $this->group_by_statement)
-            {
-                $this->group_by_statement = ' ' . self::SQL_STATEMENT_GROUP_BY . ' ';
-            }
-
-            $total_group_by = count($group_by);
-
-            $count = 1;
-
-            foreach ($group_by as $value)
-            {
-                if ($total_group_by === 1)
-                {
-                    $this->group_by_statement .= $this->backticks($value);
-                }
-                elseif ($count < $total_group_by)
-                {
-                    $this->group_by_statement .= $this->backticks($value) . ', ';
-                }
-                else
-                {
-                    $this->group_by_statement .= $this->backticks($value);
-                }
-                $count++;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * This function returns the backticks for given value.
-     * @param string $value
-     * @return string
-     */
-    private function backticks(string $value): string
-    {
-        if (stripos($value, ' AS ') !== false)
-        {
-            [$col, $alias] = preg_split('/\s+AS\s+/i', $value);
-            return $this->backticks(trim($col)) . ' AS ' . $alias;
-        }
-
-        if (preg_match('/^(.+)\s+([a-zA-Z0-9_]+)$/', $value, $m))
-        {
-            $col = trim($m[1]);
-            $alias = trim($m[2]);
-
-            return $this->backticks($col) . ' AS ' . $alias;
-        }
-
-        if (str_contains($value, 'MD5'))
-        {
-            preg_match('/MD5\((.*?)\)/i', $value, $m);
-
-            if (!empty($m[1]) && !str_contains($m[1], '`'))
-            {
-                return 'MD5(`' . $m[1] . '`)';
-            }
-
-            return $value;
-        }
-
-        if (str_contains($value, '.'))
-        {
-            preg_match('/([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/', $value, $m);
-            return '`' . $m[1] . '`.`' . $m[2] . '`';
-        }
-
-
-        return '`' . $value . '`';
-    }
-
-
-    /**
-     * @param array $options
-     * @return Model
-     */
-    private function apply_where_options(array $options): self
-    {
-        if (isset($options['where']))
-        {
-            foreach ($options['where'] as $column => $value)
-            {
-                if (is_array($value))
-                {
-                    if (count($value) === 2)
-                    {
-                        $this->where($value[0], $value[1]);
-                    }
-                    elseif (count($value) === 3)
-                    {
-                        $this->where($value[0], $value[1], $value[2]);
-                    }
-                }
-                else
-                {
-                    $this->where($column, $value);
-                }
-            }
-        }
+        $this->queryBuilder = $this->queryBuilder->groupBy($groupBy);
 
         return $this;
     }
 
     /**
-     * Query builder: This function set the WHERE / AND condition.
-     * Hint: If you want only to set a simple = condition, you can use only 2 parameters:
-     * Example: ->where('column', 1)
-     * SQL statement: WHERE column = 1 or AND column = 1
-     * @param string $column
-     * @param string|int|null $operator
-     * @param string|int|float $value
-     * @param bool $backticks
-     * @param bool $formatValue
-     * @return Model
+     * @param array $options
+     * @return static
      */
-    public function where(string $column, $operator = null, $value = null, bool $backticks = true, bool $formatValue = true): self
+    private function applyWhereOptions(array $options): static
     {
-        if (\func_num_args() === 2)
-        {
-            $value = $operator;
-            $operator = self::OPERATOR_EQUAL;
-        }
-
-        if ($operator === self::OPERATOR_IN)
-        {
-            $condition = $this->format_operator($value);
-        }
-        elseif ($formatValue)
-        {
-            $condition = $this->format_value($value);
-        }
-        else
-        {
-            $condition = $value;
-        }
-
-        $_column = $column;
-
-        if ($backticks)
-        {
-            $_column = $this->backticks($column);
-        }
-
-        $where = $_column . ' ' . $operator;
-
-        if (!$this->is_operator_null($operator))
-        {
-            $where .= ' ' . $condition;
-        }
-
-        $this->appendWhere($where);
-
+        $this->queryBuilder = $this->queryBuilder->applyWhereOptions($options);
 
         return $this;
     }
 
     /**
-     * @param string|array $columns
-     * @param string $search
-     * @param bool $booleanMode
-     * @param bool $withWildcards
-     * @return $this
+     * @inheritDoc
      */
-    public function fulltext(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
+    public function from(?string $tableName = null, ?string $alias = null): static
     {
-        $cols = is_array($columns)
-            ? implode(',', array_map([$this, 'backticks'], $columns))
-            : $this->backticks($columns);
-
-        if ($booleanMode && $withWildcards)
-        {
-            $search = implode(' ', array_map(static fn($w) => '+' . $w . '*',
-                preg_split('/\s+/', trim($search))
-            ));
-        }
-
-        $mode = $booleanMode ? ' IN BOOLEAN MODE' : '';
-        $expr = 'MATCH('.$cols.') AGAINST (' . $this->format_value($search) . $mode . ')';
-
-        $this->appendWhere($expr);
+        $this->queryBuilder = $this->queryBuilder->from($tableName, $alias);
 
         return $this;
     }
 
     /**
-     * @param string|array $columns
-     * @param string $search
-     * @param bool $booleanMode
-     * @param bool $withWildcards
-     * @return $this
+     * @inheritDoc
      */
-    public function fulltextWithScore(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
+    public function select(null|array|string $columns = null): static
     {
-        $cols = is_array($columns)
-            ? implode(',', array_map([$this, 'backticks'], $columns))
-            : $this->backticks($columns);
-
-        if ($booleanMode && $withWildcards)
-        {
-            $search = implode(' ', array_map(static fn($w) => '+' . $w . '*',
-                preg_split('/\s+/', trim($search))
-            ));
-        }
-
-        $mode = $booleanMode ? ' IN BOOLEAN MODE' : '';
-        $expr = 'MATCH('.$cols.') AGAINST (' . $this->format_value($search) . $mode . ')';
-
-
-        if (empty($this->select_statement))
-        {
-            $this->select_statement = '*';
-        }
-
-        $this->select_statement .= ', ' . $expr . ' AS relevance';
-
-        $this->appendWhere($expr);
-
-        return $this;
-    }
-
-
-    public function and(): self
-    {
-        $this->next_where_boolean = self::SQL_STATEMENT_AND;
-        return $this;
-    }
-
-    public function or(): self
-    {
-        $this->next_where_boolean = self::SQL_STATEMENT_OR;
-        return $this;
-    }
-
-
-    /**
-     * This function format value, if operator is IN operator
-     * @param string $value
-     * @return string
-     */
-    private function format_operator(string $value): string
-    {
-        return '(' . $value . ')';
-    }
-
-    /**
-     * This function format the given value to numeric or string.
-     * @param int|float|string $value
-     * @return string|int
-     */
-    private function format_value($value)
-    {
-        if (is_numeric($value))
-        {
-            return $value;
-        }
-
-        return '"' . $value . '"';
-    }
-
-    /**
-     * Query builder: This function appends the table to select FROM.
-     * @param null|string $table_name
-     * @param string|null $alias
-     * @return Model
-     * @throws ModelException
-     */
-    public function from(?string $table_name = null, ?string $alias = null): self
-    {
-        if (null === $table_name)
-        {
-            $this->from_statement = ' ' . self::SQL_COMMAND_FROM . ' ' . $this->backticks($this->table());
-        }
-        else
-        {
-            $this->from_statement = ' ' . self::SQL_COMMAND_FROM . ' ' . $this->backticks($table_name);
-
-            if (null !== $alias)
-            {
-                $this->from_statement .= ' ' . $alias;
-            }
-        }
+        $this->queryBuilder = $this->queryBuilder->select($columns);
 
         return $this;
     }
 
     /**
-     * This method returns the table name for current model.
-     * @return string
-     * @throws ModelException
+     * @inheritDoc
      */
-    public function table(): string
+    public function orderBy(string $column, string $direction = 'ASC', bool $backticks = true): static
     {
-        if (is_string($this->table_name) && $this->table_name !== '')
-        {
-            return $this->table_name;
-        }
-
-        throw new ModelException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . $this->class . ' has no Table property!');
-    }
-
-    public function set_table_alias(string $alias): self
-    {
-        $this->table_alias = $alias;
-
-        return $this;
-    }
-
-    protected function get_table_alias(): ?string
-    {
-        return $this->table_alias;
-    }
-
-    /**
-     * Query builder: This function set the SELECT statement.
-     * @param null|array|string $columns
-     * @return Model
-     */
-    public function select($columns = null): self
-    {
-        if (empty($columns))
-        {
-            $this->select_statement .= '*';
-        }
-        else
-        {
-            $count = 1;
-
-            if (is_array($columns))
-            {
-                $total_columns = count($columns);
-
-                foreach ($columns as $value)
-                {
-                    if ($total_columns === 1)
-                    {
-                        $this->select_statement .= $this->backticks($value);
-                    }
-                    elseif ($count < $total_columns)
-                    {
-                        $this->select_statement .= $this->backticks($value) . ', ';
-                    }
-                    else
-                    {
-                        $this->select_statement .= $this->backticks($value);
-                    }
-                    $count++;
-                }
-            }
-            else
-            {
-                $this->select_statement = $columns;
-            }
-        }
-
-        return $this;
-    }
-
-    public function distinct(bool $value = true): self
-    {
-        $this->select_distinct = $value;
-        return $this;
-    }
-
-    public function reset_select(): self
-    {
-        $this->select_statement = null;
-
-        return $this;
-    }
-
-    public function order_by(string $column, string $direction = self::SQL_ORDER_BY_ASC, bool $backticks = true): self
-    {
-
-        if (null === $this->order_by_statement)
-        {
-            $separator = '';
-            $order_by_sql = self::SQL_STATEMENT_ORDER_BY;
-        }
-        else
-        {
-            $separator = ',';
-            $order_by_sql = '';
-        }
-
-        $_column = $column;
-
-        if ($backticks)
-        {
-            $_column = $this->backticks($column);
-        }
-
-        $this->order_by_statement .= $separator . ' ' . $order_by_sql . ' ' . $_column . ' ' . $direction;
+        $this->queryBuilder = $this->queryBuilder->orderBy($column, $direction, $backticks);
 
         return $this;
     }
 
     /**
-     * Query builder: This function execute the compiled statement.
-     * @param string $option
-     * @return Model
-     * @throws ModelException
+     * @inheritDoc
      */
-    public function execute(string $option = self::EXECUTE_MODE_READ): self
+    public function execute(string $option = self::EXECUTE_MODE_READ): static
     {
         if ($option === self::EXECUTE_MODE_WRITE)
         {
@@ -576,440 +206,543 @@ class Model
     }
 
     /**
-     * Query builder: This method build the full select query.
-     * @return null|string
-     * @throws ModelException
+     * @inheritDoc
      */
     public function compile(): ?string
     {
-        if (null === $this->query_statement)
-        {
-            $this->query_statement = self::SQL_COMMAND_SELECT . ' ';
-
-            if ($this->select_distinct)
-            {
-                $this->query_statement .= 'DISTINCT ';
-            }
-
-            if (null === $this->from_statement)
-            {
-                $this->from();
-            }
-
-            if ($this->get_table_alias() !== null)
-            {
-                $this->from_statement .= ' ' . $this->get_table_alias();
-            }
-
-            $this->query_statement .= $this->select_statement . $this->from_statement . ' ';
-
-            if (null !== $this->join_statement)
-            {
-                $this->query_statement .= $this->join_statement . ' ';
-            }
-
-            if (!empty($this->where_statement))
-            {
-                foreach ($this->where_statement as $value)
-                {
-                    $this->query_statement .= $value;
-                }
-            }
-
-            if (null !== $this->group_by_statement)
-            {
-                $this->query_statement .= $this->group_by_statement;
-            }
-
-            if (null !== $this->order_by_statement)
-            {
-                $this->query_statement .= $this->order_by_statement;
-            }
-
-            if (null !== $this->limit_statement)
-            {
-                $this->query_statement .= $this->limit_statement;
-            }
-        }
-
-        return $this->query_statement;
+        return $this->queryBuilder->compile();
     }
 
     /**
-     * @param array $options
-     * @return Model
-     * @throws ModelException
-     * @throws ModelInvalidArgumentException
+     * @inheritDoc
      */
-    public function find_first(array $options = []): self
+    public function findFirst(array $options = []): static
     {
         return $this->select($options['columns'] ?? null)
             ->from()
-            ->apply_where_options($options)
-            ->group_by($options['group_by'] ?? [])
-            ->order_by($this->primary_key())
+            ->applyWhereOptions($options)
+            ->groupBy($options['group_by'] ?? [])
+            ->orderBy($this->primaryKey())
             ->limit(1)
             ->execute()
-            ->prepare_find_result();
+            ->prepareFindResult();
     }
 
     /**
-     * @return $this
+     * @inheritDoc
      */
-    public function prepare_find_result(): self
+    public function prepareFindResult(): static
     {
-        $find_result = $this->get_result();
+        $find_result = $this->getResult();
 
-        if (null !== $find_result && false !== $find_result)
+        if (false !== $find_result)
         {
             $this->result = $this->result[0];
-            $this->set_id($this->result[$this->primary_key()]);
+            $this->setId($this->result[$this->primaryKey()]);
         }
 
         return $this;
     }
 
     /**
-     * @return false|array|\stdClass|null
+     * @inheritDoc
      */
-    public function get_result()
+    public function getResult(): array|false
     {
         return $this->result;
+
     }
 
     /**
-     * This function set the data id.
-     * @param mixed $id
+     * @return array|false
+     * @deprecated Use getResult() instead
      */
-    private function set_id($id): void
+    public function get_result(): array|false
+    {
+        return $this->getResult();
+    }
+
+    /**
+     * @param int|string $id
+     * @return void
+     */
+    private function setId(int|string $id): void
     {
         $this->_id = $id;
     }
 
     /**
-     * Query builder: This function set the limit and offset.
-     * @param int $limit
-     * @param int $offset
-     * @return Model
-     * @throws ModelInvalidArgumentException
+     * @inheritDoc
      */
-    public function limit(int $limit, int $offset = 0): self
+    public function primaryKey(): string
     {
-        if ($limit === 0 && $offset === 0)
-        {
-            throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Required parameter not given!');
-        }
+        return $this->primaryKey;
+    }
 
-        $this->limit_statement = ' ' . self::SQL_CLAUSE_LIMIT . ' ' . $offset . ', ' . $limit;
+    /**
+     * @inheritDoc
+     */
+    public function limit(int $limit, int $offset = 0): static
+    {
+        $this->queryBuilder = $this->queryBuilder->limit($limit, $offset);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function findLast(array $options = []): static
+    {
+        return $this->select($options['columns'] ?? null)
+            ->from()
+            ->applyWhereOptions($options)
+            ->groupBy($options['group_by'] ?? [])
+            ->orderBy($this->primaryKey(), 'DESC')
+            ->limit(1)
+            ->execute()
+            ->prepareFindResult();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function findByPrimaryKey(string|int $id): static
+    {
+        return $this->select()
+            ->from()
+            ->where($this->primaryKey(), $id)
+            ->execute()
+            ->prepareFindResult();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function where(
+        string $column,
+        string|int|null $operator = null,
+        string|int|float|null $value = null,
+        bool $backticks = true,
+        bool $formatValue = true
+    ): static
+    {
+        $this->queryBuilder = $this->queryBuilder->where($column, $operator, $value, $backticks, $formatValue);
+
+        return $this;
+    }
+
+    /**
+     * @param array $options
+     * @return static
+     * @throws ModelException
+     * @throws ConfigLoadException
+     * @deprecated Use findAll() instead
+     */
+    public function find_all(array $options = []): static
+    {
+        return $this->findAll($options);
+    }
+
+    /**
+     * @param array $groupBy
+     * @return static
+     * @deprecated Use groupBy() instead
+     */
+    public function group_by(array $groupBy): static
+    {
+        $this->queryBuilder = $this->queryBuilder->groupBy($groupBy);
+
+        return $this;
+    }
+
+    /**
+     * @param string $column
+     * @param string $direction
+     * @param bool $backticks
+     * @return static
+     * @deprecated Use orderBy() instead
+     */
+    public function order_by(string $column, string $direction = 'ASC', bool $backticks = true): static
+    {
+        $this->queryBuilder = $this->queryBuilder->orderBy($column, $direction, $backticks);
+
+        return $this;
+    }
+
+    /**
+     * @param array $options
+     * @return static
+     * @throws ModelException
+     * @throws ModelInvalidArgumentException
+     * @throws ConfigLoadException
+     * @deprecated Use findFirst() instead
+     */
+    public function find_first(array $options = []): static
+    {
+        return $this->findFirst($options);
+    }
+
+    /**
+     * @return static
+     * @deprecated Use prepareFindResult() instead
+     */
+    public function prepare_find_result(): static
+    {
+        $this->prepareFindResult();
 
         return $this;
     }
 
     /**
      * @return string
+     * @deprecated Use primaryKey() instead
      */
     public function primary_key(): string
     {
-        return $this->primary_key;
+        return $this->primaryKey();
     }
 
     /**
      * @param array $options
-     * @return Model
+     * @return static
      * @throws ModelException
      * @throws ModelInvalidArgumentException
+     * @throws ConfigLoadException
+     * @deprecated Use findLast() instead
      */
-    public function find_last(array $options = []): self
+    public function find_last(array $options = []): static
     {
-        return $this->select($options['columns'] ?? null)
-            ->from()
-            ->apply_where_options($options)
-            ->group_by($options['group_by'] ?? [])
-            ->order_by($this->primary_key(), 'DESC')
-            ->limit(1)
-            ->execute()
-            ->prepare_find_result();
+        return $this->findLast($options);
     }
 
     /**
      * @param string|int $id
-     * @return Model
+     * @return static
      * @throws ModelException
+     * @throws ConfigLoadException
+     * @deprecated Use findByPrimaryKey() instead
      */
-    public function find_by_primary_key($id): self
+    public function find_by_primary_key(string|int $id): static
     {
-        return $this->select()
-            ->from()
-            ->where($this->primary_key(), $id)
-            ->execute()
-            ->prepare_find_result();
+        return $this->findByPrimaryKey($id);
     }
 
     /**
-     * Query builder: This function appends the table to JOIN from.
-     * @param string $table
-     * @param string $direction
-     * @param null|string $alias
-     * @return Model
+     * @inheritDoc
      */
-    public function join(string $table, string $direction = self::JOIN_LEFT, ?string $alias = null): self
+    public function fulltext(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): static
     {
-        if (!empty($table))
-        {
-
-            $this->join_statement .= $direction . ' ' . self::SQL_CLAUSE_JOIN . ' ' . $this->backticks($table);
-
-            if (null !== $alias)
-            {
-                $this->join_statement .= ' ' . $alias . ' ';
-            }
-        }
+        $this->queryBuilder = $this->queryBuilder->fulltext($columns, $search, $booleanMode, $withWildcards);
 
         return $this;
     }
 
     /**
-     * Query builder: This function appends the table to JOIN ON.
-     * @param string $column1
-     * @param string $column2
-     * @return Model
-     * @throws ModelInvalidArgumentException
+     * @inheritDoc
      */
-    public function on(string $column1, string $column2): self
+    public function fulltextWithScore(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): static
     {
-        if (!empty($column1) && !empty($column2))
-        {
-            if (strpos($column1, '.') === false)
-            {
-                throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column1 value "' . $column1 . '" must have table name and column name separated with a dot! Example: "table_name.row"');
-            }
+        $this->queryBuilder = $this->queryBuilder->fulltextWithScore($columns, $search, $booleanMode, $withWildcards);
 
-            if (strpos($column2, '.') === false)
-            {
-                throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column2 value "' . $column2 . '" must have table name and column name separated with a dot! Example: "table_name.row"');
-            }
-
-            $this->join_statement .= self::SQL_CLAUSE_ON . ' ' . $this->backticks($column1) . ' = ' . $this->backticks($column2) . ' ';
-
-            return $this;
-        }
-
-        throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column1 and Column2 must have table name and column name separated with a dot! Example: "table_name.row"');
+        return $this;
     }
 
     /**
-     * Query builder: This function appends the JOIN
-     * @param string $column1
-     * @param string $column2
-     * @return Model
-     * @throws ModelInvalidArgumentException
+     * @inheritDoc
      */
-    public function or_on(string $column1, string $column2): self
+    public function distinct(bool $value = true): static
     {
-        if (!empty($column1) && !empty($column2))
-        {
-            if (!str_contains($column1, '.'))
-            {
-                throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column1 value "' . $column1 . '" must have table name and column name separated with a dot! Example: "table_name.row"');
-            }
+        $this->queryBuilder = $this->queryBuilder->distinct($value);
 
-            if (!str_contains($column2, '.'))
-            {
-                throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column2 value "' . $column2 . '" must have table name and column name separated with a dot! Example: "table_name.row"');
-            }
-
-            $this->join_statement .= ' OR ' . $this->backticks($column1) . ' = ' . $this->backticks($column2) . ' ';
-
-            return $this;
-        }
-
-        throw new ModelInvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '(): Column1 and Column2 must have table name and column name separated with a dot! Example: "table_name.row"');
+        return $this;
     }
 
     /**
-     * Query builder: This function set the OR condition.
-     * Hint: If you want only to set a simple = condition, you can use only 2 parameters:
-     * Example: ->or_where('column', 1)
-     * SQL statement: OR column = 1
+     * @inheritDoc
+     */
+    public function join(string $table, string $direction = 'LEFT', ?string $alias = null): static
+    {
+        $this->queryBuilder = $this->queryBuilder->join($table, $direction, $alias);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function on(string $column1, string $column2): static
+    {
+        $this->queryBuilder = $this->queryBuilder->on($column1, $column2);
+
+        return $this;
+    }
+
+    /**
+     * @param string $column1
+     * @param string $column2
+     * @return static
+     * @throws ModelInvalidArgumentException
+     * @deprecated Use orOn() instead
+     */
+    public function or_on(string $column1, string $column2): static
+    {
+        $this->queryBuilder = $this->queryBuilder->orOn($column1, $column2);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function orOn(string $column1, string $column2): static
+    {
+        $this->queryBuilder = $this->queryBuilder->orOn($column1, $column2);
+
+        return $this;
+    }
+
+    /**
      * @param string $column
      * @param string|null $operator
-     * @param string|int|null $value
+     * @param string|int|float|null $value
      * @param bool $backticks
-     * @return Model
+     * @return static
+     * @deprecated Use orWhere() instead
      */
-    public function or_where(string $column, ?string $operator = null, $value = null, bool $backticks = true): self
+    public function or_where(string $column, ?string $operator = null, string|int|float|null $value = null, bool $backticks = true): static
     {
-        if (func_num_args() === 2)
-        {
-            $value = $operator;
-            $operator = self::OPERATOR_EQUAL;
-        }
-
-        if ($operator === self::OPERATOR_IN)
-        {
-            $condition = $this->format_operator($value);
-        }
-        else
-        {
-            $condition = $this->format_value($value);
-        }
-
-        $_column = $column;
-
-        if ($backticks)
-        {
-            $_column = $this->backticks($column);
-        }
-
-        $where = $_column . ' ' . $operator;
-
-        if (!$this->is_operator_null($operator))
-        {
-            $where .= ' ' . $condition;
-        }
-
-        $this->where_statement[] = ' ' . self::SQL_STATEMENT_OR . ' ' . $where;
+        $this->queryBuilder = $this->queryBuilder->orWhere($column, $operator, $value, $backticks);
 
         return $this;
     }
 
     /**
-     * Query builder: This function set the OR open condition.
+     * @inheritDoc
+     */
+    public function orWhere(string $column, ?string $operator = null, string|int|float|null $value = null, bool $backticks = true): static
+    {
+        $this->queryBuilder = $this->queryBuilder->orWhere($column, $operator, $value, $backticks);
+
+        return $this;
+    }
+
+    /**
      * @param string $column
      * @param string|int|null $operator
-     * @param mixed|null $value
+     * @param string|int|float|null $value
      * @param bool $backticks
-     * @return Model
+     * @return static
+     * @deprecated Use orWhereOpen() instead
      */
-    public function or_where_open(string $column, $operator = null, $value = null, bool $backticks = true): self
+    public function or_where_open(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): static
     {
-        if (func_num_args() === 2)
-        {
-            return $this->where_open_by_condition(self::SQL_STATEMENT_OR, $column, null, $operator, $backticks);
-        }
+        $this->queryBuilder = $this->queryBuilder->orWhereOpen($column, $operator, $value, $backticks);
 
-        return $this->where_open_by_condition(self::SQL_STATEMENT_OR, $column, $operator, $value, $backticks);
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): static
+    {
+        $this->queryBuilder = $this->queryBuilder->orWhereOpen($column, $operator, $value, $backticks);
+
+        return $this;
     }
 
     /**
      * @param string $where_condition
      * @param string $column
      * @param string|int|null $operator
-     * @param mixed|null $value
+     * @param string|int|float|null $value
      * @param bool $backticks
-     * @return Model
+     * @return static
+     * @deprecated Use whereOpenByCondition() instead
      */
-    public function where_open_by_condition(string $where_condition, string $column, $operator, $value = null, bool $backticks = true): self
+    public function where_open_by_condition(
+        string $where_condition,
+        string $column,
+        string|int|null $operator,
+        string|int|float|null $value = null,
+        bool $backticks = true
+    ): static
     {
-        if ($operator === null)
-        {
-            $operator = self::OPERATOR_EQUAL;
-        }
-
-        if ($operator === self::OPERATOR_IN)
-        {
-            $condition = $this->format_operator($value);
-        }
-        else
-        {
-            $condition = $this->format_value($value);
-        }
-
-        $_column = $column;
-        if ($backticks)
-        {
-            $_column = $this->backticks($column);
-        }
-
-        $where = $_column . ' ' . $operator;
-
-        if (!$this->is_operator_null($operator))
-        {
-            $where .= ' ' . $condition;
-        }
-
-        $this->where_statement[] = ' ' . $where_condition . ' ' . $this->_open() . $where;
+        $this->queryBuilder = $this->queryBuilder->whereOpenByCondition($where_condition, $column, $operator, $value, $backticks);
 
         return $this;
-    }
-
-    private function _open(): string
-    {
-        return '(';
-    }
-
-    public function or_where_close(): self
-    {
-        $this->where_close();
-
-        return $this;
-    }
-
-    public function where_close(): self
-    {
-        $this->where_statement[] = $this->_close();
-
-        return $this;
-    }
-
-    private function _close(): string
-    {
-        return ')';
     }
 
     /**
-     * Query builder: This function set the AND open condition.
-     * @param string $column
-     * @param mixed|null $operator
-     * @param mixed|null $value
-     * @param bool $backticks
-     * @return Model
+     * @inheritDoc
      */
-    public function and_where_open(string $column, $operator, $value = null, bool $backticks = true): self
+    public function whereOpenByCondition(
+        string $where_condition,
+        string $column,
+        string|int|null $operator,
+        string|int|float|null $value = null,
+        bool $backticks = true
+    ): static
     {
-        if (func_num_args() === 2)
-        {
-            return $this->where_open_by_condition(self::SQL_STATEMENT_AND, $column, null, $operator, $backticks);
-        }
+        $this->queryBuilder = $this->queryBuilder->whereOpenByCondition($where_condition, $column, $operator, $value, $backticks);
 
-        return $this->where_open_by_condition(self::SQL_STATEMENT_AND, $column, $operator, $value, $backticks);
+        return $this;
     }
 
-    public function and_where_close(): self
+    /**
+     * @return static
+     * @deprecated Use orWhereClose() instead
+     */
+    public function or_where_close(): static
     {
-        $this->where_close();
+        $this->queryBuilder = $this->queryBuilder->orWhereClose();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function orWhereClose(): static
+    {
+        $this->queryBuilder = $this->queryBuilder->whereClose();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function whereClose(): static
+    {
+        $this->queryBuilder = $this->queryBuilder->whereClose();
 
         return $this;
     }
 
     /**
      * Query builder: This function set the AND open condition.
-     * Example: ->where_open()
-     * SQL statement: AND (
-     * @return Model
+     * @param string $column
+     * @param string|int|null $operator
+     * @param string|int|float|null $value
+     * @param bool $backticks
+     * @return static
+     * @deprecated Use andWhereOpen() instead
      */
-    public function where_open(): self
+    public function and_where_open(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): static
     {
-        $this->where_statement[] = ' ' . self::SQL_STATEMENT_AND . ' ' . $this->_open();
-
-        return $this;
-    }
-
-    public function query($query = null): self
-    {
-        if (null !== $query)
-        {
-            $this->query_statement = $query;
-        }
+        $this->queryBuilder = $this->queryBuilder->andWhereOpen($column, $operator, $value, $backticks);
 
         return $this;
     }
 
     /**
-     * Query builder: This function return the result as array.
-     * @return array|null|bool
+     * @inheritDoc
      */
-    public function as_array()
+    public function andWhereOpen(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): static
+    {
+        $this->queryBuilder = $this->queryBuilder->andWhereOpen($column, $operator, $value, $backticks);
+
+        return $this;
+    }
+
+    /**
+     * @return static
+     * @deprecated Use andWhereClose() instead
+     */
+    public function and_where_close(): static
+    {
+        $this->whereClose();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function andWhereClose(): static
+    {
+        $this->whereClose();
+
+        return $this;
+    }
+
+    /**
+     * @return static
+     * @deprecated Use whereClose() instead
+     */
+    public function where_close(): static
+    {
+        $this->queryBuilder = $this->queryBuilder->whereClose();
+
+        return $this;
+    }
+
+    /**
+     * @return static
+     * @deprecated Use whereOpen() instead
+     */
+    public function where_open(): static
+    {
+        $this->queryBuilder = $this->queryBuilder->whereOpen();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function whereOpen(): static
+    {
+        $this->queryBuilder = $this->queryBuilder->whereOpen();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function and(): static
+    {
+        $this->queryBuilder = $this->queryBuilder->and();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function or(): static
+    {
+        $this->queryBuilder = $this->queryBuilder->or();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function query(string $query = null): static
+    {
+        $this->queryBuilder = $this->queryBuilder->query($query);
+
+        return $this;
+    }
+
+    /**
+     * @return array|false
+     * @deprecated Use asArray() instead
+     */
+    public function as_array(): array|false
+    {
+        return $this->asArray();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function asArray(): array|false
     {
         if (!$this->result)
         {
@@ -1025,10 +758,18 @@ class Model
     }
 
     /**
-     * Query builder: This function return the result as object.
-     * @return null|object|bool
+     * @return false|object
+     * @deprecated Use asObject() instead
      */
-    public function as_object()
+    public function as_object(): object|false
+    {
+        return $this->asObject();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function asObject(): object|false
     {
         if (!$this->result)
         {
@@ -1044,15 +785,9 @@ class Model
     }
 
     /**
-     * Query builder: This function set property for INSERT or UPDATE data.
-     * @param string|array $property
-     * @param mixed $value
-     * @return Model
-     * @throws ModelException
-     * @throws ModelPrimaryKeyException
-     * @throws ModelPropertyException
+     * @inheritDoc
      */
-    public function set($property, $value = null): self
+    public function set(string|array $property, string|int|float|null $value = null): static
     {
         if (is_array($property))
         {
@@ -1063,50 +798,44 @@ class Model
         }
         else
         {
-            $this->set_data($property, $value);
+            $this->setData($property, $value);
         }
 
         return $this;
     }
 
     /**
-     * This function set the data for the model properties.
      * @param string $property
-     * @param mixed $value
+     * @param string|int|float|null $value
      * @throws ModelPrimaryKeyException
      * @throws ModelPropertyException
      */
-    private function set_data(string $property, $value): void
+    private function setData(string $property, string|int|float|null $value): void
     {
-        if ($property === $this->primary_key())
+        if ($property === $this->primaryKey())
         {
-            throw new ModelPrimaryKeyException('Primary key on model ' . $this->class . ' cannot be changed.');
+            throw new ModelPrimaryKeyException('Primary key on model ' . static::class . ' cannot be changed.');
         }
 
-        if (!$this->property_exists($property))
+        if (!$this->propertyExists($property))
         {
-            throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . $this->class . ' has no property "' . $property . '"!');
+            throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . static::class . ' has no property "' . $property . '"!');
         }
         $this->data[$property] = $value;
     }
 
     /**
-     * This function check if given property exist in model.
-     * @param string $property
-     * @return bool
+     * @inheritDoc
      */
-    public function property_exists(string $property): bool
+    public function propertyExists(string $property): bool
     {
         return array_key_exists($property, $this->properties());
     }
 
     /**
-     * This method returns the properties for current model.
-     * Please note: you must set the properties in your model.
-     * @param bool $keys_only
-     * @return array
+     * @inheritDoc
      */
-    public function properties(bool $keys_only = false): array
+    public function properties(bool $keysOnly = false): array
     {
         foreach ($this->properties as $key => $p)
         {
@@ -1117,7 +846,7 @@ class Model
             }
         }
 
-        if ($keys_only)
+        if ($keysOnly)
         {
             return array_keys($this->properties);
         }
@@ -1126,49 +855,50 @@ class Model
     }
 
     /**
-     * Query builder: This function INSERT or UPDATE data into database.
-     * @return bool|int
-     * @throws ModelException
-     * @throws ModelPropertyException
+     * @param string $property
+     * @return bool
+     * @deprecated Use propertyExists() instead
      */
-    public function save()
+    public function property_exists(string $property): bool
     {
-        if (!is_null($this->get_id()))
-        {
-            return $this->update($this->get_id(), $this->get_data());
-        }
-
-        return $this->insert($this->get_data());
+        return $this->propertyExists($property);
     }
 
     /**
-     * This function get the data id.
-     * @return null|mixed
+     * @inheritDoc
      */
-    private function get_id()
+    public function save(): bool|int|string
+    {
+        if (!empty($this->getId()))
+        {
+            return $this->update($this->getId(), $this->getData());
+        }
+
+        return $this->insert($this->getData());
+    }
+
+    /**
+     * @return int|string
+     */
+    private function getId(): int|string
     {
         return $this->_id;
     }
 
     /**
-     * Query builder: This function UPDATE data in database.
-     * @param mixed $id
-     * @param array $data
-     * @return bool
-     * @throws ModelException
-     * @throws ModelPropertyException
+     * @inheritDoc
      */
-    public function update($id, array $data = []): bool
+    public function update(int|string $id, array $data = []): bool
     {
         if (empty($data))
         {
             return false;
         }
 
-        $this->has_properties($data);
+        $this->hasProperties($data);
 
-        $sql = self::SQL_COMMAND_UPDATE . '
-            ' . $this->table() . ' ' . self::SQL_COMMAND_SET . ' ' . $this->prepare_update($data) . ' ' . self::SQL_STATEMENT_WHERE . ' ' . $this->backticks($this->primary_key()) . ' = ' . $id;
+        $sql = 'UPDATE ' . $this->table() . ' SET ' . $this->prepareUpdate($data) . ' WHERE ' . $this->formatter->backticks($this->primaryKey()) . ' = ' .
+            $id;
 
         return Db::write($sql, $this->connection);
     }
@@ -1177,23 +907,21 @@ class Model
      * @param array $data
      * @throws ModelPropertyException
      */
-    private function has_properties(array $data): void
+    private function hasProperties(array $data): void
     {
         foreach ($data as $key => $value)
         {
-            if (!$this->property_exists($key))
+            if (!$this->propertyExists($key))
             {
-                throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . $this->class . ' has no property "' . $key . '"!');
+                throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . static::class . ' has no property "' . $key . '"!');
             }
         }
     }
 
     /**
-     * This function prepare data for UPDATE.
-     * @param array $array
-     * @return bool|string
+     * @inheritDoc
      */
-    public function prepare_update(array $array)
+    public function prepareUpdate(array $array): false|string
     {
         if (empty($array))
         {
@@ -1206,56 +934,50 @@ class Model
         {
             if ($value === null)
             {
-                $columns .= ' ' . $this->backticks(preg_replace('/[^a-z_A-Z0-9]/', '', $key)) . ' = NULL,';
+                $columns .= ' ' . $this->formatter->backticks(preg_replace('/[^a-z_A-Z0-9]/', '', $key)) . ' = NULL,';
 
                 continue;
             }
 
-            $columns .= ' ' . $this->backticks(preg_replace('/[^a-z_A-Z0-9]/', '', $key)) . ' = \'' . $this->escape($value) . '\',';
+            $columns .= ' ' . $this->formatter->backticks(preg_replace('/[^a-z_A-Z0-9]/', '', $key)) . ' = \'' . $this->escape($value) . '\',';
         }
 
         return rtrim($columns, ',');
     }
 
     /**
-     * @param string|int $value
-     * @return string
+     * @inheritDoc
      */
-    public function escape($value): string
+    public function escape(string|int|float|null|bool $value): string
     {
         return Db::escape((string)$value, $this->connection);
     }
 
     /**
-     * This function get the data for the model properties.
      * @return array
      */
-    private function get_data(): array
+    private function getData(): array
     {
         return $this->data;
     }
 
     /**
-     * Query builder: This function INSERT data into database.
-     * @param array $data
-     * @return bool|int
-     * @throws ModelException
-     * @throws ModelPropertyException
+     * @inheritDoc
      */
-    public function insert(array $data = [])
+    public function insert(array $data = []): false|int|string
     {
         if (empty($data))
         {
             return false;
         }
 
-        $this->has_properties($data);
-        $insert_data = $this->prepare_insert($data);
+        $this->hasProperties($data);
+        $insert_data = $this->prepareInsert($data);
 
-        $sql = self::SQL_COMMAND_INSERT . '
+        $sql = 'INSERT INTO
                     ' . $this->table() . '
                     ' . $insert_data[0] . '
-                ' . self::SQL_COMMAND_VALUES . '
+                         VALUES
                     ' . $insert_data[1] . '
                 ';
 
@@ -1263,23 +985,21 @@ class Model
     }
 
     /**
-     * This function prepare data for INSERT.
-     * @param array $array
-     * @return bool|array
+     * @inheritDoc
      */
-    public function prepare_insert(array $array)
+    public function prepareInsert(array $array): bool|array
     {
         if (empty($array))
         {
             return false;
         }
 
-        $columns = $this->_open();
-        $columns_data = $this->_open();
+        $columns = $this->formatter->open();
+        $columns_data = $this->formatter->open();
 
         foreach ($array as $key => $value)
         {
-            $columns .= $this->backticks($key) . ',';
+            $columns .= $this->formatter->backticks($key) . ',';
 
             if ($value === null)
             {
@@ -1292,171 +1012,200 @@ class Model
         }
 
         $columns = rtrim($columns, ',');
-        $columns .= $this->_close();
+        $columns .= $this->formatter->close();
 
         $columns_data = rtrim($columns_data, ',');
-        $columns_data .= $this->_close();
+        $columns_data .= $this->formatter->close();
 
         return [$columns, $columns_data];
     }
 
     /**
-     * Query builder: This function DELETE data from database.
-     * @param mixed $id
-     * @return bool
-     * @throws ModelException
+     * @inheritDoc
      */
-    public function delete($id): bool
+    public function open(): static
     {
-        $sql = self::SQL_COMMAND_DELETE . ' ' . self::SQL_COMMAND_FROM . '
-                ' . $this->table() . '
-            ' . self::SQL_STATEMENT_WHERE . '
-                ' . $this->backticks($this->primary_key()) . ' = ' . $id . '
-        ';
+        $this->queryBuilder = $this->queryBuilder->open();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function close(): static
+    {
+        $this->queryBuilder = $this->queryBuilder->close();
+
+        return $this;
+    }
+
+    /**
+     * @param array $array
+     * @return string|false
+     * @throws ConfigLoadException
+     * @deprecated Use prepareUpdate() instead
+     */
+    public function prepare_update(array $array): string|false
+    {
+        return $this->prepareUpdate($array);
+    }
+
+    /**
+     * @param array $array
+     * @return bool|array
+     * @throws ConfigLoadException
+     * @deprecated Use prepareInsert() instead
+     */
+    public function prepare_insert(array $array): bool|array
+    {
+        return $this->prepareInsert($array);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function delete(string|int $id): bool
+    {
+        $sql = 'DELETE FROM ' . $this->table() . ' WHERE ' . $this->formatter->backticks($this->primaryKey()) . ' = ' . $id;
 
         return Db::write($sql, $this->connection);
     }
 
-    public function open(): self
+    /**
+     * @param string $property
+     * @return false|array
+     * @deprecated Use dataValue() instead
+     */
+    public function data_value(string $property): false|array
     {
-        $this->where_statement[] = '(';
-
-        return $this;
-    }
-
-    public function close(): self
-    {
-        $this->where_statement[] = ')';
-
-        return $this;
+        return $this->dataValue($property);
     }
 
     /**
-     * This function returns the data value for current model.
-     * @param string $property
-     * @return bool|mixed
+     * @inheritDoc
      */
-    public function data_value(string $property)
+    public function dataValue(string $property): false|array
     {
-        $model_properties = $this->properties();
-        $data_type = $this->data_type($property);
+        $modelProperties = $this->properties();
+        $dataType = $this->dataType($property);
 
-        if (!$data_type || (!isset($model_properties[$property]['length']) && !isset($model_properties[$property]['set'])))
+        if (!$dataType || (!isset($modelProperties[$property]['length']) && !isset($modelProperties[$property]['set'])))
         {
             return false;
         }
 
-        $data_value = (isset($model_properties[$property]['length'])) ? 'length' : 'set';
+        $dataValue = (isset($modelProperties[$property]['length'])) ? 'length' : 'set';
 
-        return $model_properties[$property][$data_value];
+        return $modelProperties[$property][$dataValue];
     }
 
     /**
-     * This function returns the data type for current model.
-     * @param string $property
-     * @return bool|mixed
+     * @inheritDoc
      */
-    public function data_type(string $property)
+    public function DataType(string $property): false|array
     {
-        $model_properties = $this->properties();
+        $modelProperties = $this->properties();
 
-        if (!is_array($model_properties[$property]) || !isset($model_properties[$property]['data_type']))
+        if (!is_array($modelProperties[$property]) || !isset($modelProperties[$property]['data_type']))
         {
             return false;
         }
 
-        return $model_properties[$property]['data_type'];
+        return $modelProperties[$property]['data_type'];
     }
 
     /**
-     * This function returns the field names from db.
+     * @param string $property
+     * @return false|array
+     * @deprecated Use dataType() instead
+     */
+    public function data_type(string $property): false|array
+    {
+        return $this->DataType($property);
+    }
+
+    /**
      * @return array
+     * @throws ConfigLoadException
      * @throws ModelException
+     * @deprecated Use fieldNames() instead
      */
     public function field_names(): array
     {
-        $data_from_db = Db::field_names($this->compile(), $this->connection);
+        return $this->fieldNames();
+    }
 
-        if (!empty($data_from_db))
+    /**
+     * @inheritDoc
+     */
+    public function fieldNames(): array
+    {
+        $dataFromBb = Db::field_names($this->compile(), $this->connection);
+
+        if (!empty($dataFromBb))
         {
-            $this->set_db_schema($data_from_db);
+            $this->setDbSchema($dataFromBb);
         }
 
-        return $this->get_db_schema();
+        return $this->getDbSchema();
     }
 
     /**
      * @param array $schema
      * @return void
      */
-    private function set_db_schema(array $schema): void
+    private function setDbSchema(array $schema): void
     {
-        $this->db_schema = $schema;
+        $this->dbSchema = $schema;
     }
 
     /**
      * @return array
      */
-    private function get_db_schema(): array
+    private function getDbSchema(): array
     {
-        return $this->db_schema;
+        return $this->dbSchema;
     }
 
+    /**
+     * @return bool
+     * @deprecated Use hasResult() instead
+     */
     public function has_result(): bool
+    {
+        return $this->hasResult();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasResult(): bool
     {
         return false !== $this->result;
     }
 
     /**
-     * Query builder: This method build the full select query.
-     * @return null|string
+     * @return static
+     * @throws ConfigLoadException
      * @throws ModelException
+     * @deprecated Use getCount() instead
      */
-    public function get_count_compile(): ?string
+    public function get_count(): static
     {
-        $count_query_statement = self::SQL_COMMAND_SELECT . ' ';
-
-        $this->from();
-
-        if ($this->get_table_alias() !== null)
-        {
-            $this->from_statement .= ' ' . $this->get_table_alias();
-        }
-
-        $count_query_statement .= 'COUNT(*) AS count' . $this->from_statement . ' ';
-
-        if (null !== $this->join_statement)
-        {
-            $count_query_statement .= $this->join_statement . ' ';
-        }
-
-        if (!empty($this->where_statement))
-        {
-            foreach ($this->where_statement as $value)
-            {
-                $count_query_statement .= $value;
-            }
-        }
-
-        if (null !== $this->group_by_statement)
-        {
-            $count_query_statement .= $this->group_by_statement;
-        }
-
-        return $count_query_statement;
+        return $this->getCount();
     }
 
     /**
-     * @return $this
-     * @throws ModelException
+     * @inheritDoc
      */
-    public function get_count(): self
+    public function getCount(): static
     {
-        $data_from_db = Db::read($this->get_count_compile(), $this->connection);
+        $dataFromDb = Db::read($this->getCountCompile(), $this->connection);
 
-        if ($data_from_db !== false)
+        if ($dataFromDb !== false)
         {
-            $this->result = $data_from_db;
+            $this->result = $dataFromDb;
         }
         else
         {
@@ -1467,44 +1216,91 @@ class Model
     }
 
     /**
-     * @param string $column_name
-     * @return string|int|bool|null
-     * @throws ModelException
+     * @inheritDoc
      */
-    public function get_default(string $column_name)
+    public function getCountCompile(): ?string
     {
-        if (!$this->property_exists($column_name))
-        {
-            throw new ModelException(sprintf('column name does not exist on Model: %s::%s', __CLASS__, $column_name));
-        }
-
-        if (!isset($this->properties[$column_name]['default']))
-        {
-            throw new ModelException(sprintf('default definition on %s does not exist', $column_name));
-        }
-
-        return $this->properties[$column_name]['default'];
+        return $this->queryBuilder->getCountCompile();
     }
 
     /**
-     * @param int|string $operator
+     * @return null|string
+     * @throws ModelException
+     * @deprecated Use getCountCompile() instead
      */
-    private function is_operator_null($operator): bool
+    public function get_count_compile(): ?string
     {
-        return \in_array($operator, [self::OPERATOR_IS_NULL, self::OPERATOR_IS_NOT_NULL], true);
+        return $this->getCountCompile();
     }
 
-    protected function appendWhere(string $condition): void
+    /**
+     * @return string|null
+     * @deprecated Use getTableAlias() instead
+     */
+    public function get_table_alias(): ?string
     {
-        if (empty($this->where_statement))
+        return $this->tableAlias;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTableAlias(): ?string
+    {
+        return $this->tableAlias;
+    }
+
+    /**
+     * @param string $alias
+     * @return static
+     * @throws ModelException
+     * @deprecated Use setTableAlias() instead
+     */
+    public function set_table_alias(string $alias): static
+    {
+        $this->setTableAlias($alias);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setTableAlias(string $alias): static
+    {
+        $this->tableAlias = $alias;
+
+        $this->rebuildQueryBuilder();
+
+        return $this;
+    }
+
+    /**
+     * @param string $columnName
+     * @return string|int|float|null
+     * @throws ModelException
+     * @deprecated Use getDefault() instead
+     */
+    public function get_default(string $columnName): string|int|float|null
+    {
+        return $this->getDefault($columnName);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getDefault(string $columnName): string|int|float|null
+    {
+        if (!$this->propertyExists($columnName))
         {
-            $this->where_statement[] = self::SQL_STATEMENT_WHERE . ' ' . $condition;
-        }
-        else
-        {
-            $this->where_statement[] = ' ' . $this->next_where_boolean . ' ' . $condition;
+            throw new ModelException(sprintf('column name does not exist on Model: %s::%s', __CLASS__, $columnName));
         }
 
-        $this->next_where_boolean = self::SQL_STATEMENT_AND;
+        if (!isset($this->properties[$columnName]['default']))
+        {
+            throw new ModelException(sprintf('default definition on %s does not exist', $columnName));
+        }
+
+        return $this->properties[$columnName]['default'];
     }
 }
