@@ -205,7 +205,7 @@ interface ModelInterface
     public function join(string $table, string $direction = 'LEFT', ?string $alias = null): static;
 
     /**
-     * @param string $column1^
+     * @param string $column1 ^
      * @param string $column2
      * @return static
      * @throws ModelInvalidArgumentException
@@ -382,11 +382,11 @@ interface ModelInterface
     public function prepareUpdate(array $array): false|string;
 
     /**
-     * @param string|int|float|null $value
+     * @param string|int|float|null|bool $value
      * @return string
      * @throws ConfigLoadException
      */
-    public function escape(string|int|float|null $value): string;
+    public function escape(string|int|float|null|bool $value): string;
 
     /**
      * @param array $data

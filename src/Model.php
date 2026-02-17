@@ -948,7 +948,7 @@ class Model implements ModelInterface
     /**
      * @inheritDoc
      */
-    public function escape(string|int|float|null $value): string
+    public function escape(string|int|float|null|bool $value): string
     {
         return Db::escape((string)$value, $this->connection);
     }
