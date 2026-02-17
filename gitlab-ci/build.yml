@@ -1,0 +1,13 @@
+# Select what we should cache between builds
+cache:
+  key: build_cache
+  paths:
+    - vendor/
+    - node_modules
+
+build:
+  stage: build
+  image: ${DOCKER_IMAGE}
+  script:
+    - npm ci > /dev/null
+    - composer install

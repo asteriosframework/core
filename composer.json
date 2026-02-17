@@ -1,0 +1,89 @@
+{
+  "name": "asterios/core",
+  "bin": [
+    "bin/asterios"
+  ],
+  "description": "Asterios PHP Core",
+  "type": "asterios-package",
+  "homepage": "https://www.asteriosphp.de",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Benjamin Butschko"
+    },
+    {
+      "name": "Jörg Heinrich"
+    }
+  ],
+  "minimum-stability": "stable",
+  "config": {
+    "preferred-install": {
+      "*": "dist"
+    },
+    "platform": {
+      "php": "8.3"
+    },
+    "optimize-autoloader": true
+  },
+  "autoload": {
+    "psr-4": {
+      "Asterios\\Core\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Asterios\\Test\\": "tests/"
+    }
+  },
+  "require": {
+    "vanilla/htmlawed": "2.2.15",
+    "mobiledetect/mobiledetectlib": "4.8.09",
+    "ext-mysqli": "*",
+    "ext-curl": "*",
+    "firebase/php-jwt": "^6.10",
+    "symfony/mailer": "^7.3",
+    "symfony/mime": "^7.3",
+    "twig/twig": "^3.21",
+    "symfony/twig-bridge": "^7.3",
+    "spomky-labs/otphp": "^11.3",
+    "endroid/qr-code": "^6.0"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest",
+    "phpunit/phpunit": "11.4.2",
+    "mockery/mockery": "1.6.12",
+    "phpstan/phpstan": "2.1.17",
+    "friendsofphp/php-cs-fixer": "^3.40",
+    "phan/phan": "^5.4"
+  },
+  "scripts": {
+    "tests": [
+      "Composer\\Config::disableProcessTimeout",
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit  --colors=never -c ./phpunit.xml"
+    ],
+    "tests:coverage": [
+      "Composer\\Config::disableProcessTimeout",
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit --colors=never -c ./phpunit.xml --coverage-text ./tests"
+    ],
+    "tests:coverage-pretty": [
+      "Composer\\Config::disableProcessTimeout",
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml --coverage-text --coverage-html coverage-report/ --testdox ./tests"
+    ],
+    "tests:ci": [
+      "Composer\\Config::disableProcessTimeout",
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml --do-not-cache-result --log-junit phpunit-report.xml --coverage-cobertura phpunit-coverage.xml --coverage-html coverage-report/ --coverage-clover coverage.clover.xml --coverage-text --colors=never ./tests"
+    ],
+    "phpstan": [
+      "Composer\\Config::disableProcessTimeout",
+      "./vendor/bin/phpstan analyse -c phpstan.neon --no-progress --memory-limit 1G"
+    ],
+    "ddev:phpstan": "composer phpstan",
+    "cs-fixer:check": "./php-cs-fixer -t",
+    "cs-fixer:fix": "./php-cs-fixer -f",
+    "all": [
+      "@cs-fixer:check",
+      "@phpstan",
+      "@tests"
+    ]
+  }
+}

@@ -1,0 +1,73 @@
+cache:
+  key: build_cache
+  paths:
+    - vendor/
+    - node_modules
+
+before_script:
+  - touch CHANGELOG.md
+  - touch VERSION
+  - touch LICENSE
+
+fetch-semantic-version:
+  image: ${DOCKER_IMAGE}
+  stage: release-fetch-version
+  needs: ['build']
+  only:
+    refs:
+      - main
+      - develop
+      - /^(([0-9]+)\.)?([0-9]+)\.x/                                                                   # This matches maintenance branches
+      - /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/ # This matches pre-releases
+  script:
+    - npx semantic-release --generate-notes false --dry-run
+  artifacts:
+    paths:
+      - VERSION
+  cache:
+    key: build_cache
+    paths:
+      - vendor/
+      - node_modules
+
+generate-non-semantic-version:
+  stage: release-fetch-version
+  except:
+    refs:
+      - main
+      - develop
+      - /^(([0-9]+)\.)?([0-9]+)\.x/                                                                   # This matches maintenance branches
+      - /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/ # This matches pre-releases
+  script:
+    - echo build-$CI_PIPELINE_ID > VERSION
+  artifacts:
+    paths:
+      - VERSION
+
+release-build:
+  stage: release-build
+  script:
+    - echo "Version is $(cat VERSION)"
+
+release:
+  image: ${DOCKER_IMAGE}
+  needs: ['build']
+  stage: release
+  only:
+    refs:
+      - main
+      - develop
+      - /^(([0-9]+)\.)?([0-9]+)\.x/                                                                   # This matches maintenance branches
+      - /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/ # This matches pre-releases
+  script:
+    - npx semantic-release
+  artifacts:
+    paths:
+    - CHANGELOG.md
+    - VERSION
+    - LICENSE
+  cache:
+    key: build_cache
+    paths:
+      - vendor/
+      - node_modules

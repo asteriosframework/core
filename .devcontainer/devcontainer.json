@@ -1,0 +1,31 @@
+{
+    "name": "Asterios PHP Nginx Devcontainer",
+    "dockerComposeFile": [
+        "docker-compose.yml"
+    ],
+    "service": "php",
+    "workspaceFolder": "/var/www",
+    "remoteUser": "vscode",
+    "containerUser": "vscode",
+    "updateRemoteUserUID": true,
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bmewburn.vscode-intelephense-client",
+                "esbenp.prettier-vscode",
+                "redjue.git-commit-plugin",
+                "xdebug.php-debug",
+                "github.vscode-github-actions"
+            ],
+            "settings": {
+                "php.validate.executablePath": "/usr/bin/php"
+            }
+        }
+    },
+    "forwardPorts": [
+        8080,
+        3306
+    ],
+    "postCreateCommand": "composer install && npm install",
+    "postStartCommand": ".devcontainer/scripts/post-start"
+}

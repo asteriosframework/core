@@ -1,0 +1,47 @@
+# Select what we should cache between builds
+cache:
+  key: build_cache
+  paths:
+    - vendor/
+    - node_modules
+
+# Run our tests
+# If Xdebug was installed you can generate a coverage report and see code coverage metrics.
+test:
+  stage: test
+  image: ${DOCKER_IMAGE}
+  needs: [ 'build' ]
+  services:
+    - name: mariadb:11.5@sha256:4b812bbd9a025569fbe5a7a70e4a3cd3af53aa36621fecb1c2e108af2113450a
+      alias: db
+      variables:
+        MARIADB_USER: db
+        MARIADB_PASSWORD: db
+        MARIADB_ROOT_PASSWORD: db
+        MARIADB_DATABASE: db
+  variables:
+    XDEBUG_MODE: coverage
+  script:
+    - composer tests:ci
+  artifacts:
+    when: always
+    reports:
+      junit: phpunit-report.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: phpunit-coverage.xml
+    paths:
+      - coverage-report/
+  coverage: '/^\s+Lines:\s+[0-9]+[.][0-9]+\%/'
+
+code-quality:
+  image: ${DOCKER_IMAGE}
+  needs: [ 'build' ]
+  stage: test
+  script:
+    - composer phpstan
+  cache:
+    key: build_cache
+    paths:
+      - vendor/
+      - node_modules/

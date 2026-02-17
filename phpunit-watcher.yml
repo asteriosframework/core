@@ -1,0 +1,9 @@
+watch:
+  directories:
+    - src
+    - tests
+  fileMask: '*.php'
+hideManual: true
+notifications:
+  passingTests: false
+  failingTests: true
