@@ -34,12 +34,8 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     public function __construct(
         private readonly OrmMetadata $metadata,
         private readonly OrmSqlFormatterInterface $formatter
-    ) {
-    }
-
-    private function cloneInstance(): self
+    )
     {
-        return clone $this;
     }
 
     /** @inheritDoc */
@@ -59,11 +55,17 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         return $new;
     }
 
+    private function cloneInstance(): self
+    {
+        return clone $this;
+    }
+
     /** @inheritDoc */
     public function distinct(bool $value = true): self
     {
         $new = $this->cloneInstance();
         $new->distinct = $value;
+
         return $new;
     }
 
@@ -77,7 +79,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
 
         $new->from = [
             'table' => $tableName,
-            'alias' => $alias
+            'alias' => $alias,
         ];
 
         return $new;
@@ -92,7 +94,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
             'type' => strtoupper($direction),
             'table' => $table,
             'alias' => $alias,
-            'conditions' => []
+            'conditions' => [],
         ];
 
         return $new;
@@ -102,12 +104,6 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     public function on(string $column1, string $column2): self
     {
         return $this->addJoinCondition($column1, $column2, 'AND');
-    }
-
-    /** @inheritDoc */
-    public function orOn(string $column1, string $column2): self
-    {
-        return $this->addJoinCondition($column1, $column2, 'OR');
     }
 
     /**
@@ -137,10 +133,23 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         $new->joins[$lastJoinIndex]['conditions'][] = [
             'boolean' => $boolean,
             'left' => $col1,
-            'right' => $col2
+            'right' => $col2,
         ];
 
         return $new;
+    }
+
+    /** @inheritDoc */
+    public function orOn(string $column1, string $column2): self
+    {
+        return $this->addJoinCondition($column1, $column2, 'OR');
+    }
+
+    /** @inheritDoc */
+    public function orWhere(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): self
+    {
+        return $this->or()
+            ->where($column, $operator, $value, $backticks);
     }
 
     /** @inheritDoc */
@@ -150,7 +159,8 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         string|int|float|null $value = null,
         bool $backticks = true,
         bool $formatValue = true
-    ): self {
+    ): self
+    {
         $new = $this->cloneInstance();
 
         if (!OperatorEnum::isOperator($operator))
@@ -166,7 +176,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
             'operator' => $operator,
             'value' => $value,
             'backticks' => $backticks,
-            'formatValue' => $formatValue
+            'formatValue' => $formatValue,
         ];
 
         $new->nextBoolean = 'AND';
@@ -175,45 +185,18 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     }
 
     /** @inheritDoc */
-    public function orWhere(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): self
+    public function or(): self
     {
-        return $this->or()->where($column, $operator, $value, $backticks);
-    }
+        $new = $this->cloneInstance();
+        $new->nextBoolean = 'OR';
 
-    /** @inheritDoc */
-    public function whereOpen(): self
-    {
-        return $this->addBracket('(');
-    }
-
-    /** @inheritDoc */
-    public function whereClose(): self
-    {
-        return $this->addBracket(')');
+        return $new;
     }
 
     /** @inheritDoc */
     public function andWhereOpen(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): self
     {
-        return $this->and()->whereOpenByCondition('AND', $column, $operator, $value, $backticks);
-    }
-
-    /** @inheritDoc */
-    public function andWhereClose(): self
-    {
-        return $this->whereClose();
-    }
-
-    /** @inheritDoc */
-    public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): self
-    {
-        return $this->or()->whereOpenByCondition('OR', $column, $operator, $value, $backticks);
-    }
-
-    /** @inheritDoc */
-    public function orWhereClose(): self
-    {
-        return $this->whereClose();
+        return $this->whereOpenByCondition('AND', $column, $operator, $value, $backticks);
     }
 
     /** @inheritDoc */
@@ -223,7 +206,8 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         string|int|null $operator,
         string|int|float|null $value = null,
         bool $backticks = true
-    ): self {
+    ): self
+    {
         return $this->addBracket('(')
             ->where($column, $operator, $value, $backticks);
     }
@@ -235,7 +219,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         $new->whereParts[] = [
             'type' => 'bracket',
             'value' => $bracket,
-            'boolean' => $new->nextBoolean
+            'boolean' => $new->nextBoolean,
         ];
 
         $new->nextBoolean = 'AND';
@@ -244,10 +228,36 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     }
 
     /** @inheritDoc */
+    public function andWhereClose(): self
+    {
+        return $this->whereClose();
+    }
+
+    /** @inheritDoc */
+    public function whereClose(): self
+    {
+        return $this->addBracket(')');
+    }
+
+    /** @inheritDoc */
+    public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): self
+    {
+        return $this->or()
+            ->whereOpenByCondition('OR', $column, $operator, $value, $backticks);
+    }
+
+    /** @inheritDoc */
+    public function orWhereClose(): self
+    {
+        return $this->whereClose();
+    }
+
+    /** @inheritDoc */
     public function groupBy(array $groupBy): self
     {
         $new = $this->cloneInstance();
         $new->groupBy = $groupBy;
+
         return $new;
     }
 
@@ -259,7 +269,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         $new->orderBy[] = [
             'column' => $column,
             'direction' => strtoupper($direction),
-            'backticks' => $backticks
+            'backticks' => $backticks,
         ];
 
         return $new;
@@ -275,6 +285,25 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
 
         $new = $this->cloneInstance();
         $new->limit = ['limit' => $limit, 'offset' => $offset];
+
+        return $new;
+    }
+
+    /** @inheritDoc */
+    public function fulltextWithScore(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
+    {
+        $new = $this->fulltext($columns, $search, $booleanMode, $withWildcards);
+
+        $cols = is_array($columns)
+            ? implode(',', array_map([$this->formatter, 'backticks'], $columns))
+            : $this->formatter->backticks($columns);
+
+        $mode = $booleanMode ? ' IN BOOLEAN MODE' : '';
+
+        $expr = "MATCH($cols) AGAINST (" .
+            $this->formatter->formatValue($search) . $mode . ") AS relevance";
+
+        $new->select[] = $expr;
 
         return $new;
     }
@@ -296,29 +325,10 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         $new->whereParts[] = [
             'type' => 'raw',
             'boolean' => $new->nextBoolean,
-            'expression' => $expr
+            'expression' => $expr,
         ];
 
         $new->nextBoolean = 'AND';
-
-        return $new;
-    }
-
-    /** @inheritDoc */
-    public function fulltextWithScore(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): self
-    {
-        $new = $this->fulltext($columns, $search, $booleanMode, $withWildcards);
-
-        $cols = is_array($columns)
-            ? implode(',', array_map([$this->formatter, 'backticks'], $columns))
-            : $this->formatter->backticks($columns);
-
-        $mode = $booleanMode ? ' IN BOOLEAN MODE' : '';
-
-        $expr = "MATCH($cols) AGAINST (" .
-            $this->formatter->formatValue($search) . $mode . ") AS relevance";
-
-        $new->select[] = $expr;
 
         return $new;
     }
@@ -352,88 +362,11 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         return trim($sql);
     }
 
-    /** @inheritDoc */
-    public function getCountCompile(): ?string
-    {
-        $sql = 'SELECT COUNT(*) AS count';
-        $sql .= $this->compileFrom();
-        $sql .= $this->compileJoins();
-        $sql .= $this->compileWhere();
-        $sql .= $this->compileGroupBy();
-
-        return trim($sql);
-    }
-
-    /** @inheritDoc */
-    public function query(string $query = null): self
-    {
-        $new = $this->cloneInstance();
-        $new->rawQuery = $query;
-        return $new;
-    }
-
-    /** @inheritDoc */
-    public function reset(): self
-    {
-        return new self($this->metadata, $this->formatter);
-    }
-
-    /** @inheritDoc */
-    public function open(): self
-    {
-        return $this->whereOpen();
-    }
-
-    /** @inheritDoc */
-    public function close(): self
-    {
-        return $this->whereClose();
-    }
-
-    /** @inheritDoc */
-    public function and(): self
-    {
-        $new = $this->cloneInstance();
-        $new->nextBoolean = 'AND';
-        return $new;
-    }
-
-    /** @inheritDoc */
-    public function or(): self
-    {
-        $new = $this->cloneInstance();
-        $new->nextBoolean = 'OR';
-        return $new;
-    }
-
-    /** @inheritDoc */
-    public function applyWhereOptions(array $options): self
-    {
-        $builder = $this;
-
-        if (isset($options['where']))
-        {
-            foreach ($options['where'] as $column => $value)
-            {
-                if (is_array($value))
-                {
-                    $builder = $builder->where($value[0], $value[1] ?? '=', $value[2] ?? null);
-                }
-                else
-                {
-                    $builder = $builder->where($column, '=', $value);
-                }
-            }
-        }
-
-        return $builder;
-    }
-
     private function compileFrom(): string
     {
         $from = $this->from ?? [
             'table' => $this->metadata->table,
-            'alias' => $this->metadata->alias
+            'alias' => $this->metadata->alias,
         ];
 
         $sql = ' FROM ' . $this->formatter->backticks($from['table']);
@@ -483,6 +416,9 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         return $sql;
     }
 
+    /**
+     * @return string
+     */
     private function compileWhere(): string
     {
         if (empty($this->whereParts))
@@ -492,16 +428,44 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
 
         $sql = ' WHERE ';
         $first = true;
+        $previousWasOpenBracket = false;
 
         foreach ($this->whereParts as $part)
         {
-            if (!$first)
+
+            if ($part['type'] === 'bracket')
+            {
+
+                if ($part['value'] === '(')
+                {
+
+                    if (!$first)
+                    {
+                        $sql .= ' ' . $part['boolean'] . ' ';
+                    }
+
+                    $sql .= '(';
+                    $previousWasOpenBracket = true;
+                    $first = false;
+                    continue;
+                }
+
+                if ($part['value'] === ')')
+                {
+                    $sql .= ')';
+                    $previousWasOpenBracket = false;
+                    continue;
+                }
+            }
+
+            if (!$first && !$previousWasOpenBracket)
             {
                 $sql .= ' ' . ($part['boolean'] ?? 'AND') . ' ';
             }
 
             if ($part['type'] === 'condition')
             {
+
                 $column = $part['backticks']
                     ? $this->formatter->backticks($part['column'])
                     : $part['column'];
@@ -510,22 +474,22 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
 
                 if (!$this->formatter->isOperatorNull($part['operator']))
                 {
+
                     $value = $part['formatValue']
                         ? $this->formatter->formatValue($part['value'])
                         : $part['value'];
 
                     $sql .= ' ' . $value;
                 }
+
             }
             elseif ($part['type'] === 'raw')
             {
+
                 $sql .= $part['expression'];
             }
-            elseif ($part['type'] === 'bracket')
-            {
-                $sql .= $part['value'];
-            }
 
+            $previousWasOpenBracket = false;
             $first = false;
         }
 
@@ -539,10 +503,11 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
             return '';
         }
 
-        return ' GROUP BY ' . implode(', ', array_map(
-            [$this->formatter, 'backticks'],
-            $this->groupBy
-        ));
+        return ' GROUP BY ' . implode(', ',
+                array_map(
+                    [$this->formatter, 'backticks'],
+                    $this->groupBy
+                ));
     }
 
     private function compileOrderBy(): string
@@ -574,5 +539,82 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         }
 
         return ' LIMIT ' . $this->limit['offset'] . ', ' . $this->limit['limit'];
+    }
+
+    /** @inheritDoc */
+    public function getCountCompile(): ?string
+    {
+        $sql = 'SELECT COUNT(*) AS count';
+        $sql .= $this->compileFrom();
+        $sql .= $this->compileJoins();
+        $sql .= $this->compileWhere();
+        $sql .= $this->compileGroupBy();
+
+        return trim($sql);
+    }
+
+    /** @inheritDoc */
+    public function query(string $query = null): self
+    {
+        $new = $this->cloneInstance();
+        $new->rawQuery = $query;
+
+        return $new;
+    }
+
+    /** @inheritDoc */
+    public function reset(): self
+    {
+        return new self($this->metadata, $this->formatter);
+    }
+
+    /** @inheritDoc */
+    public function open(): self
+    {
+        return $this->whereOpen();
+    }
+
+    /** @inheritDoc */
+    public function whereOpen(): self
+    {
+        return $this->addBracket('(');
+    }
+
+    /** @inheritDoc */
+    public function close(): self
+    {
+        return $this->whereClose();
+    }
+
+    /** @inheritDoc */
+    public function and(): self
+    {
+        $new = $this->cloneInstance();
+        $new->nextBoolean = 'AND';
+
+        return $new;
+    }
+
+    /** @inheritDoc */
+    public function applyWhereOptions(array $options): self
+    {
+        $builder = $this;
+
+        if (isset($options['where']))
+        {
+            foreach ($options['where'] as $column => $value)
+            {
+                if (is_array($value))
+                {
+                    $builder = $builder->where($value[0], $value[1] ?? '=', $value[2] ?? null);
+                }
+                else
+                {
+                    $builder = $builder->where($column, '=', $value);
+                }
+            }
+        }
+
+        return $builder;
     }
 }
