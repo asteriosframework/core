@@ -48,6 +48,16 @@ enum OperatorEnum: string
         };
     }
 
+    public static function isOperator(string|int|float|null $input): bool
+    {
+        return match ($input)
+        {
+            '=', '!=', '<>', '>', '>=', '<', '<=', 'BETWEEN', 'LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL' => true,
+
+            default => false,
+        };
+    }
+
     /**
      * @param string $input
      * @return self|null
