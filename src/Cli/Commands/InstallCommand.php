@@ -64,6 +64,10 @@ MEDIA_GALLERY_PATH="/assets/media/gallery/"
 DATABASE_MIGRATION_PATH="/database/migrations/"
 DATABASE_SEEDER_PATH="/database/seeder/"
 JWT_SECRET=""
+MAILER_DSN=""
+MAIL_FROM_ADDRESS=""
+MAIL_FROM_NAME=""
+MAIL_TEMPLATES_PATH="/templates/emails"
 
 ENV;
     }
