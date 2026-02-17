@@ -51,19 +51,6 @@ class Model implements ModelInterface
     }
 
     /**
-     * @inheritDoc
-     */
-    public function reset(): static
-    {
-        if (isset($this->queryBuilder))
-        {
-            $this->queryBuilder->reset();
-        }
-
-        return $this;
-    }
-
-    /**
      * @return void
      * @throws ModelException
      */
@@ -97,6 +84,16 @@ class Model implements ModelInterface
     /**
      * @inheritDoc
      */
+    public function reset(): static
+    {
+        $this->rebuildQueryBuilder();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public static function find(int|string $id = 'all', array $options = []): static
     {
         $model = self::forge();
@@ -123,18 +120,6 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param array $options
-     * @return static
-     * @throws ModelException
-     * @throws ConfigLoadException
-     * @deprecated Use findAll() instead
-     */
-    public function find_all(array $options = []): static
-    {
-        return $this->findAll($options);
-    }
-
-    /**
      * @inheritDoc
      */
     public function findAll(array $options = []): static
@@ -153,23 +138,11 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param array $groupBy
-     * @return static
-     * @deprecated Use groupBy() instead
-     */
-    public function group_by(array $groupBy): static
-    {
-        $this->queryBuilder->groupBy($groupBy);
-
-        return $this;
-    }
-
-    /**
      * @inheritDoc
      */
     public function groupBy(array $groupBy): static
     {
-        $this->queryBuilder->groupBy($groupBy);
+        $this->queryBuilder = $this->queryBuilder->groupBy($groupBy);
 
         return $this;
     }
@@ -180,22 +153,7 @@ class Model implements ModelInterface
      */
     private function applyWhereOptions(array $options): static
     {
-        $this->queryBuilder->applyWhereOptions($options);
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function where(
-        string $column,
-        string|int|null $operator = null,
-        string|int|float|null $value = null,
-        bool $backticks = true,
-        bool $formatValue = true
-    ): static {
-        $this->queryBuilder->where($column, $operator, $value, $backticks, $formatValue);
+        $this->queryBuilder = $this->queryBuilder->applyWhereOptions($options);
 
         return $this;
     }
@@ -205,7 +163,7 @@ class Model implements ModelInterface
      */
     public function from(?string $tableName = null, ?string $alias = null): static
     {
-        $this->queryBuilder->from($tableName, $alias);
+        $this->queryBuilder = $this->queryBuilder->from($tableName, $alias);
 
         return $this;
     }
@@ -215,21 +173,7 @@ class Model implements ModelInterface
      */
     public function select(null|array|string $columns = null): static
     {
-        $this->queryBuilder->select($columns);
-
-        return $this;
-    }
-
-    /**
-     * @param string $column
-     * @param string $direction
-     * @param bool $backticks
-     * @return static
-     * @deprecated Use orderBy() instead
-     */
-    public function order_by(string $column, string $direction = 'ASC', bool $backticks = true): static
-    {
-        $this->queryBuilder->orderBy($column, $direction, $backticks);
+        $this->queryBuilder = $this->queryBuilder->select($columns);
 
         return $this;
     }
@@ -239,7 +183,7 @@ class Model implements ModelInterface
      */
     public function orderBy(string $column, string $direction = 'ASC', bool $backticks = true): static
     {
-        $this->queryBuilder->orderBy($column, $direction, $backticks);
+        $this->queryBuilder = $this->queryBuilder->orderBy($column, $direction, $backticks);
 
         return $this;
     }
@@ -270,19 +214,6 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param array $options
-     * @return static
-     * @throws ModelException
-     * @throws ModelInvalidArgumentException
-     * @throws ConfigLoadException
-     * @deprecated Use findFirst() instead
-     */
-    public function find_first(array $options = []): static
-    {
-        return $this->findFirst($options);
-    }
-
-    /**
      * @inheritDoc
      */
     public function findFirst(array $options = []): static
@@ -295,17 +226,6 @@ class Model implements ModelInterface
             ->limit(1)
             ->execute()
             ->prepareFindResult();
-    }
-
-    /**
-     * @return static
-     * @deprecated Use prepareFindResult() instead
-     */
-    public function prepare_find_result(): static
-    {
-        $this->prepareFindResult();
-
-        return $this;
     }
 
     /**
@@ -325,15 +245,6 @@ class Model implements ModelInterface
     }
 
     /**
-     * @return array|false
-     * @deprecated Use getResult() instead
-     */
-    public function get_result(): array|false
-    {
-        return $this->getResult();
-    }
-
-    /**
      * @inheritDoc
      */
     public function getResult(): array|false
@@ -343,21 +254,21 @@ class Model implements ModelInterface
     }
 
     /**
+     * @return array|false
+     * @deprecated Use getResult() instead
+     */
+    public function get_result(): array|false
+    {
+        return $this->getResult();
+    }
+
+    /**
      * @param int|string $id
      * @return void
      */
     private function setId(int|string $id): void
     {
         $this->_id = $id;
-    }
-
-    /**
-     * @return string
-     * @deprecated Use primaryKey() instead
-     */
-    public function primary_key(): string
-    {
-        return $this->primaryKey();
     }
 
     /**
@@ -373,22 +284,9 @@ class Model implements ModelInterface
      */
     public function limit(int $limit, int $offset = 0): static
     {
-        $this->queryBuilder->limit($limit, $offset);
+        $this->queryBuilder = $this->queryBuilder->limit($limit, $offset);
 
         return $this;
-    }
-
-    /**
-     * @param array $options
-     * @return static
-     * @throws ModelException
-     * @throws ModelInvalidArgumentException
-     * @throws ConfigLoadException
-     * @deprecated Use findLast() instead
-     */
-    public function find_last(array $options = []): static
-    {
-        return $this->findLast($options);
     }
 
     /**
@@ -407,18 +305,6 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string|int $id
-     * @return static
-     * @throws ModelException
-     * @throws ConfigLoadException
-     * @deprecated Use findByPrimaryKey() instead
-     */
-    public function find_by_primary_key(string|int $id): static
-    {
-        return $this->findByPrimaryKey($id);
-    }
-
-    /**
      * @inheritDoc
      */
     public function findByPrimaryKey(string|int $id): static
@@ -433,9 +319,121 @@ class Model implements ModelInterface
     /**
      * @inheritDoc
      */
+    public function where(
+        string $column,
+        string|int|null $operator = null,
+        string|int|float|null $value = null,
+        bool $backticks = true,
+        bool $formatValue = true
+    ): static
+    {
+        $this->queryBuilder = $this->queryBuilder->where($column, $operator, $value, $backticks, $formatValue);
+
+        return $this;
+    }
+
+    /**
+     * @param array $options
+     * @return static
+     * @throws ModelException
+     * @throws ConfigLoadException
+     * @deprecated Use findAll() instead
+     */
+    public function find_all(array $options = []): static
+    {
+        return $this->findAll($options);
+    }
+
+    /**
+     * @param array $groupBy
+     * @return static
+     * @deprecated Use groupBy() instead
+     */
+    public function group_by(array $groupBy): static
+    {
+        $this->queryBuilder = $this->queryBuilder->groupBy($groupBy);
+
+        return $this;
+    }
+
+    /**
+     * @param string $column
+     * @param string $direction
+     * @param bool $backticks
+     * @return static
+     * @deprecated Use orderBy() instead
+     */
+    public function order_by(string $column, string $direction = 'ASC', bool $backticks = true): static
+    {
+        $this->queryBuilder = $this->queryBuilder->orderBy($column, $direction, $backticks);
+
+        return $this;
+    }
+
+    /**
+     * @param array $options
+     * @return static
+     * @throws ModelException
+     * @throws ModelInvalidArgumentException
+     * @throws ConfigLoadException
+     * @deprecated Use findFirst() instead
+     */
+    public function find_first(array $options = []): static
+    {
+        return $this->findFirst($options);
+    }
+
+    /**
+     * @return static
+     * @deprecated Use prepareFindResult() instead
+     */
+    public function prepare_find_result(): static
+    {
+        $this->prepareFindResult();
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     * @deprecated Use primaryKey() instead
+     */
+    public function primary_key(): string
+    {
+        return $this->primaryKey();
+    }
+
+    /**
+     * @param array $options
+     * @return static
+     * @throws ModelException
+     * @throws ModelInvalidArgumentException
+     * @throws ConfigLoadException
+     * @deprecated Use findLast() instead
+     */
+    public function find_last(array $options = []): static
+    {
+        return $this->findLast($options);
+    }
+
+    /**
+     * @param string|int $id
+     * @return static
+     * @throws ModelException
+     * @throws ConfigLoadException
+     * @deprecated Use findByPrimaryKey() instead
+     */
+    public function find_by_primary_key(string|int $id): static
+    {
+        return $this->findByPrimaryKey($id);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function fulltext(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): static
     {
-        $this->queryBuilder->fulltext($columns, $search, $booleanMode, $withWildcards);
+        $this->queryBuilder = $this->queryBuilder->fulltext($columns, $search, $booleanMode, $withWildcards);
 
         return $this;
     }
@@ -445,7 +443,7 @@ class Model implements ModelInterface
      */
     public function fulltextWithScore(string|array $columns, string $search, bool $booleanMode = true, bool $withWildcards = false): static
     {
-        $this->queryBuilder->fulltextWithScore($columns, $search, $booleanMode, $withWildcards);
+        $this->queryBuilder = $this->queryBuilder->fulltextWithScore($columns, $search, $booleanMode, $withWildcards);
 
         return $this;
     }
@@ -455,7 +453,7 @@ class Model implements ModelInterface
      */
     public function distinct(bool $value = true): static
     {
-        $this->queryBuilder->distinct($value);
+        $this->queryBuilder = $this->queryBuilder->distinct($value);
 
         return $this;
     }
@@ -465,7 +463,7 @@ class Model implements ModelInterface
      */
     public function join(string $table, string $direction = 'LEFT', ?string $alias = null): static
     {
-        $this->queryBuilder->join($table, $direction, $alias);
+        $this->queryBuilder = $this->queryBuilder->join($table, $direction, $alias);
 
         return $this;
     }
@@ -475,7 +473,7 @@ class Model implements ModelInterface
      */
     public function on(string $column1, string $column2): static
     {
-        $this->queryBuilder->on($column1, $column2);
+        $this->queryBuilder = $this->queryBuilder->on($column1, $column2);
 
         return $this;
     }
@@ -489,7 +487,7 @@ class Model implements ModelInterface
      */
     public function or_on(string $column1, string $column2): static
     {
-        $this->queryBuilder->orOn($column1, $column2);
+        $this->queryBuilder = $this->queryBuilder->orOn($column1, $column2);
 
         return $this;
     }
@@ -499,7 +497,7 @@ class Model implements ModelInterface
      */
     public function orOn(string $column1, string $column2): static
     {
-        $this->queryBuilder->orOn($column1, $column2);
+        $this->queryBuilder = $this->queryBuilder->orOn($column1, $column2);
 
         return $this;
     }
@@ -514,7 +512,7 @@ class Model implements ModelInterface
      */
     public function or_where(string $column, ?string $operator = null, string|int|float|null $value = null, bool $backticks = true): static
     {
-        $this->queryBuilder->orWhere($column, $operator, $value, $backticks);
+        $this->queryBuilder = $this->queryBuilder->orWhere($column, $operator, $value, $backticks);
 
         return $this;
     }
@@ -524,7 +522,7 @@ class Model implements ModelInterface
      */
     public function orWhere(string $column, ?string $operator = null, string|int|float|null $value = null, bool $backticks = true): static
     {
-        $this->queryBuilder->orWhere($column, $operator, $value, $backticks);
+        $this->queryBuilder = $this->queryBuilder->orWhere($column, $operator, $value, $backticks);
 
         return $this;
     }
@@ -539,7 +537,7 @@ class Model implements ModelInterface
      */
     public function or_where_open(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): static
     {
-        $this->queryBuilder->orWhereOpen($column, $operator, $value, $backticks);
+        $this->queryBuilder = $this->queryBuilder->orWhereOpen($column, $operator, $value, $backticks);
 
         return $this;
     }
@@ -549,7 +547,7 @@ class Model implements ModelInterface
      */
     public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): static
     {
-        $this->queryBuilder->orWhereOpen($column, $operator, $value, $backticks);
+        $this->queryBuilder = $this->queryBuilder->orWhereOpen($column, $operator, $value, $backticks);
 
         return $this;
     }
@@ -569,8 +567,9 @@ class Model implements ModelInterface
         string|int|null $operator,
         string|int|float|null $value = null,
         bool $backticks = true
-    ): static {
-        $this->queryBuilder->whereOpenByCondition($where_condition, $column, $operator, $value, $backticks);
+    ): static
+    {
+        $this->queryBuilder = $this->queryBuilder->whereOpenByCondition($where_condition, $column, $operator, $value, $backticks);
 
         return $this;
     }
@@ -584,8 +583,9 @@ class Model implements ModelInterface
         string|int|null $operator,
         string|int|float|null $value = null,
         bool $backticks = true
-    ): static {
-        $this->queryBuilder->whereOpenByCondition($where_condition, $column, $operator, $value, $backticks);
+    ): static
+    {
+        $this->queryBuilder = $this->queryBuilder->whereOpenByCondition($where_condition, $column, $operator, $value, $backticks);
 
         return $this;
     }
@@ -596,7 +596,7 @@ class Model implements ModelInterface
      */
     public function or_where_close(): static
     {
-        $this->queryBuilder->orWhereClose();
+        $this->queryBuilder = $this->queryBuilder->orWhereClose();
 
         return $this;
     }
@@ -606,7 +606,7 @@ class Model implements ModelInterface
      */
     public function orWhereClose(): static
     {
-        $this->queryBuilder->whereClose();
+        $this->queryBuilder = $this->queryBuilder->whereClose();
 
         return $this;
     }
@@ -616,7 +616,7 @@ class Model implements ModelInterface
      */
     public function whereClose(): static
     {
-        $this->queryBuilder->whereClose();
+        $this->queryBuilder = $this->queryBuilder->whereClose();
 
         return $this;
     }
@@ -632,7 +632,7 @@ class Model implements ModelInterface
      */
     public function and_where_open(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): static
     {
-        $this->queryBuilder->andWhereOpen($column, $operator, $value, $backticks);
+        $this->queryBuilder = $this->queryBuilder->andWhereOpen($column, $operator, $value, $backticks);
 
         return $this;
     }
@@ -642,7 +642,7 @@ class Model implements ModelInterface
      */
     public function andWhereOpen(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): static
     {
-        $this->queryBuilder->andWhereOpen($column, $operator, $value, $backticks);
+        $this->queryBuilder = $this->queryBuilder->andWhereOpen($column, $operator, $value, $backticks);
 
         return $this;
     }
@@ -674,7 +674,7 @@ class Model implements ModelInterface
      */
     public function where_close(): static
     {
-        $this->queryBuilder->whereClose();
+        $this->queryBuilder = $this->queryBuilder->whereClose();
 
         return $this;
     }
@@ -685,7 +685,7 @@ class Model implements ModelInterface
      */
     public function where_open(): static
     {
-        $this->queryBuilder->whereOpen();
+        $this->queryBuilder = $this->queryBuilder->whereOpen();
 
         return $this;
     }
@@ -695,7 +695,7 @@ class Model implements ModelInterface
      */
     public function whereOpen(): static
     {
-        $this->queryBuilder->whereOpen();
+        $this->queryBuilder = $this->queryBuilder->whereOpen();
 
         return $this;
     }
@@ -705,7 +705,7 @@ class Model implements ModelInterface
      */
     public function and(): static
     {
-        $this->queryBuilder->and();
+        $this->queryBuilder = $this->queryBuilder->and();
 
         return $this;
     }
@@ -715,27 +715,7 @@ class Model implements ModelInterface
      */
     public function or(): static
     {
-        $this->queryBuilder->or();
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function open(): static
-    {
-        $this->queryBuilder->open();
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function close(): static
-    {
-        $this->queryBuilder->close();
+        $this->queryBuilder = $this->queryBuilder->or();
 
         return $this;
     }
@@ -745,7 +725,7 @@ class Model implements ModelInterface
      */
     public function query(string $query = null): static
     {
-        $this->queryBuilder->query($query);
+        $this->queryBuilder = $this->queryBuilder->query($query);
 
         return $this;
     }
@@ -845,16 +825,6 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param string $property
-     * @return bool
-     * @deprecated Use propertyExists() instead
-     */
-    public function property_exists(string $property): bool
-    {
-        return $this->propertyExists($property);
-    }
-
-    /**
      * @inheritDoc
      */
     public function propertyExists(string $property): bool
@@ -882,6 +852,16 @@ class Model implements ModelInterface
         }
 
         return $this->properties;
+    }
+
+    /**
+     * @param string $property
+     * @return bool
+     * @deprecated Use propertyExists() instead
+     */
+    public function property_exists(string $property): bool
+    {
+        return $this->propertyExists($property);
     }
 
     /**
@@ -936,17 +916,6 @@ class Model implements ModelInterface
                 throw new ModelPropertyException(__CLASS__ . '::' . __FUNCTION__ . '(): self ' . static::class . ' has no property "' . $key . '"!');
             }
         }
-    }
-
-    /**
-     * @param array $array
-     * @return string|false
-     * @throws ConfigLoadException
-     * @deprecated Use prepareUpdate() instead
-     */
-    public function prepare_update(array $array): string|false
-    {
-        return $this->prepareUpdate($array);
     }
 
     /**
@@ -1016,17 +985,6 @@ class Model implements ModelInterface
     }
 
     /**
-     * @param array $array
-     * @return bool|array
-     * @throws ConfigLoadException
-     * @deprecated Use prepareInsert() instead
-     */
-    public function prepare_insert(array $array): bool|array
-    {
-        return $this->prepareInsert($array);
-    }
-
-    /**
      * @inheritDoc
      */
     public function prepareInsert(array $array): bool|array
@@ -1060,6 +1018,48 @@ class Model implements ModelInterface
         $columns_data .= $this->formatter->close();
 
         return [$columns, $columns_data];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function open(): static
+    {
+        $this->queryBuilder = $this->queryBuilder->open();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function close(): static
+    {
+        $this->queryBuilder = $this->queryBuilder->close();
+
+        return $this;
+    }
+
+    /**
+     * @param array $array
+     * @return string|false
+     * @throws ConfigLoadException
+     * @deprecated Use prepareUpdate() instead
+     */
+    public function prepare_update(array $array): string|false
+    {
+        return $this->prepareUpdate($array);
+    }
+
+    /**
+     * @param array $array
+     * @return bool|array
+     * @throws ConfigLoadException
+     * @deprecated Use prepareInsert() instead
+     */
+    public function prepare_insert(array $array): bool|array
+    {
+        return $this->prepareInsert($array);
     }
 
     /**
@@ -1100,17 +1100,6 @@ class Model implements ModelInterface
         return $modelProperties[$property][$dataValue];
     }
 
-
-    /**
-     * @param string $property
-     * @return false|array
-     * @deprecated Use dataType() instead
-     */
-    public function data_type(string $property): false|array
-    {
-        return $this->DataType($property);
-    }
-
     /**
      * @inheritDoc
      */
@@ -1124,6 +1113,16 @@ class Model implements ModelInterface
         }
 
         return $modelProperties[$property]['data_type'];
+    }
+
+    /**
+     * @param string $property
+     * @return false|array
+     * @deprecated Use dataType() instead
+     */
+    public function data_type(string $property): false|array
+    {
+        return $this->DataType($property);
     }
 
     /**
@@ -1217,6 +1216,14 @@ class Model implements ModelInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getCountCompile(): ?string
+    {
+        return $this->queryBuilder->getCountCompile();
+    }
+
+    /**
      * @return null|string
      * @throws ModelException
      * @deprecated Use getCountCompile() instead
@@ -1224,14 +1231,6 @@ class Model implements ModelInterface
     public function get_count_compile(): ?string
     {
         return $this->getCountCompile();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getCountCompile(): ?string
-    {
-        return $this->queryBuilder->getCountCompile();
     }
 
     /**
