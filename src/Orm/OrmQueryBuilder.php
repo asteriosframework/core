@@ -7,14 +7,6 @@ use Asterios\Core\Contracts\Orm\OrmSqlFormatterInterface;
 use Asterios\Core\Enum\Orm\OperatorEnum;
 use Asterios\Core\Exception\ModelInvalidArgumentException;
 
-/**
- * Immutable ORM Query Builder
- *
- * - Keine internen SQL-Caches
- * - Jede mutierende Methode erzeugt neue Instanz
- * - Vollständig Interface-konform
- * - Pagination- und Clone-safe
- */
 final class OrmQueryBuilder implements OrmQueryBuilderInterface
 {
     private array $select = [];
