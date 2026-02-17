@@ -6,7 +6,7 @@ trait ArgumentParserTrait
 {
     protected array $args = [];
 
-    protected function parseArguments(array $argv = null): void
+    protected function parseArguments(?array $argv = null): void
     {
         $argv ??= $_SERVER['argv'] ?? [];
         array_shift($argv);
