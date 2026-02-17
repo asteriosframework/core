@@ -146,7 +146,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     }
 
     /** @inheritDoc */
-    public function orWhere(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): self
+    public function orWhere(string $column, string|int|float|null|bool $operator = null, string|int|float|null|bool $value = null, bool $backticks = true): self
     {
         return $this->or()
             ->where($column, $operator, $value, $backticks);
@@ -155,8 +155,8 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     /** @inheritDoc */
     public function where(
         string $column,
-        string|int|null $operator = null,
-        string|int|float|null $value = null,
+        string|int|float|null|bool $operator = null,
+        string|int|float|null|bool $value = null,
         bool $backticks = true,
         bool $formatValue = true
     ): self
@@ -194,7 +194,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     }
 
     /** @inheritDoc */
-    public function andWhereOpen(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): self
+    public function andWhereOpen(string $column, string|int|float|null|bool $operator, string|int|float|null|bool $value = null, bool $backticks = true): self
     {
         return $this->whereOpenByCondition('AND', $column, $operator, $value, $backticks);
     }
@@ -203,8 +203,8 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     public function whereOpenByCondition(
         string $whereCondition,
         string $column,
-        string|int|null $operator,
-        string|int|float|null $value = null,
+        string|int|float|null|bool $operator,
+        string|int|float|null|bool $value = null,
         bool $backticks = true
     ): self
     {
@@ -240,7 +240,12 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     }
 
     /** @inheritDoc */
-    public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): self
+    public function orWhereOpen(
+        string $column,
+        string|int|float|null|bool $operator = null,
+        string|int|float|null|bool $value = null,
+        bool $backticks = true
+    ): self
     {
         return $this->or()
             ->whereOpenByCondition('OR', $column, $operator, $value, $backticks);
@@ -334,7 +339,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     }
 
     /** @inheritDoc */
-    public function compile(): ?string
+    public function compile(): string
     {
         if ($this->rawQuery !== null)
         {
@@ -580,7 +585,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     }
 
     /** @inheritDoc */
-    public function getCountCompile(): ?string
+    public function getCountCompile(): string
     {
         $sql = 'SELECT COUNT(*) AS count';
         $sql .= $this->compileFrom();

@@ -35,6 +35,12 @@ class OrmSqlFormatterTest extends TestCase
         $this->assertSame('"test"', $this->formatter->formatValue('test'));
     }
 
+    public function testFormatValueBoolean(): void
+    {
+        $this->assertSame('"true"', $this->formatter->formatValue(true));
+        $this->assertSame('"false"', $this->formatter->formatValue(false));
+    }
+
     public function testFormatInOperator(): void
     {
         $this->assertSame('(1,2,3)', $this->formatter->formatInOperator('1,2,3'));
@@ -88,7 +94,7 @@ class OrmSqlFormatterTest extends TestCase
         $formatter = new OrmSqlFormatter();
         $this->assertSame(')', $formatter->close());
     }
-    
+
     protected function setUp(): void
     {
         $this->formatter = new OrmSqlFormatter();

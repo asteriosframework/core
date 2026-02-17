@@ -13,10 +13,10 @@ interface OrmSqlFormatterInterface
     public function backticks(string $value): string;
 
     /**
-     * @param int|float|string|null $value
+     * @param string|int|float|null|bool $value
      * @return string
      */
-    public function formatValue(int|float|string|null $value): string;
+    public function formatValue(string|int|float|null|bool $value): string;
 
     /**
      * @param string $value

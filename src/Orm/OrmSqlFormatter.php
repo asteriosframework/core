@@ -51,11 +51,16 @@ class OrmSqlFormatter implements OrmSqlFormatterInterface
     /**
      * @inheritDoc
      */
-    public function formatValue(float|int|string|null $value): string
+    public function formatValue(string|int|float|null|bool $value): string
     {
         if (is_numeric($value))
         {
             return (string)$value;
+        }
+
+        if (is_bool($value))
+        {
+            return $value ? '"true"' : '"false"';
         }
 
         return '"' . $value . '"';

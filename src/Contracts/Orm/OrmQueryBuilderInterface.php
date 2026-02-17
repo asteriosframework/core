@@ -53,16 +53,16 @@ interface OrmQueryBuilderInterface
 
     /**
      * @param string $column
-     * @param string|int|null $operator
-     * @param string|int|float|null $value
+     * @param string|int|float|null|bool $operator
+     * @param string|int|float|null|bool $value
      * @param bool $backticks
      * @param bool $formatValue
      * @return self
      */
     public function where(
         string $column,
-        string|int|null $operator = null,
-        string|int|float|null $value = null,
+        string|int|float|null|bool $operator = null,
+        string|int|float|null|bool $value = null,
         bool $backticks = true,
         bool $formatValue = true
     ): self;
@@ -70,27 +70,32 @@ interface OrmQueryBuilderInterface
     /**
      * @param string $whereCondition
      * @param string $column
-     * @param string|int|null $operator
-     * @param string|int|float|null $value
+     * @param string|int|float|null|bool $operator
+     * @param string|int|float|null|bool $value
      * @param bool $backticks
      * @return self
      */
     public function whereOpenByCondition(
         string $whereCondition,
         string $column,
-        string|int|null $operator,
-        string|int|float|null $value = null,
+        string|int|float|null|bool $operator,
+        string|int|float|null|bool $value = null,
         bool $backticks = true
     ): self;
 
     /**
      * @param string $column
-     * @param string|int|null $operator
-     * @param string|int|float|null $value
+     * @param string|int|float|null|bool $operator
+     * @param string|int|float|null|bool $value
      * @param bool $backticks
      * @return self
      */
-    public function orWhere(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): self;
+    public function orWhere(
+        string $column,
+        string|int|float|null|bool $operator = null,
+        string|int|float|null|bool $value = null,
+        bool $backticks = true
+    ): self;
 
     /**
      * @return self
@@ -104,12 +109,12 @@ interface OrmQueryBuilderInterface
 
     /**
      * @param string $column
-     * @param string|int|null $operator
-     * @param string|int|float|null $value
+     * @param string|int|float|null|bool $operator
+     * @param string|int|float|null|bool $value
      * @param bool $backticks
      * @return self
      */
-    public function andWhereOpen(string $column, string|int|null $operator, string|int|float|null $value = null, bool $backticks = true): self;
+    public function andWhereOpen(string $column, string|int|float|null|bool $operator, string|int|float|null|bool $value = null, bool $backticks = true): self;
 
     /**
      * @return self
@@ -118,12 +123,17 @@ interface OrmQueryBuilderInterface
 
     /**
      * @param string $column
-     * @param string|int|null $operator
-     * @param string|int|float|null $value
+     * @param string|int|float|null|bool $operator
+     * @param string|int|float|null|bool $value
      * @param bool $backticks
      * @return self
      */
-    public function orWhereOpen(string $column, string|int|null $operator = null, string|int|float|null $value = null, bool $backticks = true): self;
+    public function orWhereOpen(
+        string $column,
+        string|int|float|null|bool $operator = null,
+        string|int|float|null|bool $value = null,
+        bool $backticks = true
+    ): self;
 
     /**
      * @return self
@@ -202,6 +212,7 @@ interface OrmQueryBuilderInterface
      * @return self
      */
     public function close(): self;
+
     /**
      * @return self
      */
