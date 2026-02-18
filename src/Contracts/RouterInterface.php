@@ -36,11 +36,11 @@ interface RouterInterface
     public function setRoutes(array $routes): Router;
 
     /**
-     * @param callable|null $callback
+     * @param ?callable $callback
      * @return bool
      * @throws RouterException
      */
-    public function run(callable $callback = null): bool;
+    public function run(?callable $callback = null): bool;
 
     /**
      * @return string

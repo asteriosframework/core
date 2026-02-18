@@ -27,10 +27,41 @@ class Router implements RouterInterface
     /**
      * @inheritDoc
      */
-    public function setNamespace(string $namespace): Router
+    public function setRoutes(array $routes): Router
     {
-        $this->namespace = rtrim($namespace, '\\');
+        $this->routes = $routes;
+
         return $this;
+    }
+
+    /**
+     * @return void
+     */
+    protected function prepareRoutes(): void
+    {
+        usort($this->routes, static function ($a, $b) {
+            $aDynamicCount = substr_count($a['route'], '{');
+            $bDynamicCount = substr_count($b['route'], '{');
+
+            if ($aDynamicCount === $bDynamicCount)
+            {
+                return strlen($b['route']) <=> strlen($a['route']);
+            }
+
+            return $aDynamicCount <=> $bDynamicCount;
+        });
+
+        foreach ($this->routes as $route)
+        {
+            $method = strtoupper($route['method']);
+            $pattern = '/' . trim($this->baseRoute . '/' . ltrim($route['route'], '/'), '/');
+
+            $this->afterRoutes[$method][] = [
+                'pattern' => $pattern,
+                'fn' => $route['action'],
+                'middlewares' => $route['middlewares'] ?? [],
+            ];
+        }
     }
 
     /**
@@ -41,9 +72,13 @@ class Router implements RouterInterface
         return $this->namespace;
     }
 
-    public function setMiddlewareNamespace(string $namespace): Router
+    /**
+     * @inheritDoc
+     */
+    public function setNamespace(string $namespace): Router
     {
-        $this->middlewareNamespace = rtrim($namespace, '\\');
+        $this->namespace = rtrim($namespace, '\\');
+
         return $this;
     }
 
@@ -55,19 +90,17 @@ class Router implements RouterInterface
         return $this->middlewareNamespace;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function setRoutes(array $routes): Router
+    public function setMiddlewareNamespace(string $namespace): Router
     {
-        $this->routes = $routes;
+        $this->middlewareNamespace = rtrim($namespace, '\\');
+
         return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function run(callable $callback = null): bool
+    public function run(?callable $callback = null): bool
     {
         $this->requestedMethod = $this->getRequestMethod();
 
@@ -150,108 +183,31 @@ class Router implements RouterInterface
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getCurrentUri(): string
-    {
-        $uri = $_SERVER['REQUEST_URI'] ?? '/';
-        $uri = substr($uri, strlen($this->getBasePath()));
-
-        if (str_contains($uri, '?'))
-        {
-            $uri = strstr($uri, '?', true);
-        }
-
-        return '/' . trim($uri, '/');
-    }
-
-    /**
-     * @return void
-     */
-    protected function prepareRoutes(): void
-    {
-        usort($this->routes, static function ($a, $b) {
-            $aDynamicCount = substr_count($a['route'], '{');
-            $bDynamicCount = substr_count($b['route'], '{');
-
-            if ($aDynamicCount === $bDynamicCount)
-            {
-                return strlen($b['route']) <=> strlen($a['route']);
-            }
-
-            return $aDynamicCount <=> $bDynamicCount;
-        });
-
-        foreach ($this->routes as $route)
-        {
-            $method = strtoupper($route['method']);
-            $pattern = '/' . trim($this->baseRoute . '/' . ltrim($route['route'], '/'), '/');
-
-            $this->afterRoutes[$method][] = [
-                'pattern' => $pattern,
-                'fn' => $route['action'],
-                'middlewares' => $route['middlewares'] ?? [],
-            ];
-        }
-    }
-
-
-    /**
-     * @return string
-     */
-    protected function getBasePath(): string
-    {
-        return implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME'] ?? ''), 0, -1)) . '/';
-    }
-
-    /**
-     * @param string|array $fn
-     * @param array $params
-     * @return void
+     * @param array $middlewareNames
+     * @return bool
      * @throws RouterException
      * @codeCoverageIgnore
      */
-    private function invoke(string|array $fn, array $params = []): void
+    private function executeMiddlewares(array $middlewareNames): bool
     {
-        if (is_callable($fn))
+        foreach ($middlewareNames as $name)
         {
-            call_user_func_array($fn, $params);
-            return;
+            $class = $this->middlewareNamespace . '\\' . ucfirst($name) . 'Middleware';
+
+            if (!class_exists($class))
+            {
+                throw new RouterException('Middleware ' . $class . ' not found.');
+            }
+
+            $middleware = new $class();
+
+            if (method_exists($middleware, 'handle') && !$middleware->handle())
+            {
+                return false;
+            }
         }
 
-        if (is_array($fn) && count($fn) === 2)
-        {
-            [$controller, $method] = $fn;
-            if (!class_exists($controller))
-            {
-                throw new RouterException('Controller class '.$controller.' not found.');
-            }
-
-            $instance = new $controller();
-
-            if (method_exists($instance, 'before') && !$instance->before())
-            {
-                return;
-            }
-
-            if (!method_exists($instance, $method))
-            {
-                $altMethod = strtolower($this->requestedMethod) . '_' . $method;
-                if (method_exists($instance, $altMethod))
-                {
-                    $method = $altMethod;
-                }
-                else
-                {
-                    throw new RouterException('Method '.$method.' not found in '.$controller.'.');
-                }
-            }
-
-            $instance->$method(...$params);
-            return;
-        }
-
-        throw new RouterException('Invalid route action.');
+        return true;
     }
 
     /**
@@ -297,30 +253,78 @@ class Router implements RouterInterface
     }
 
     /**
-     * @param array $middlewareNames
-     * @return bool
+     * @inheritDoc
+     */
+    public function getCurrentUri(): string
+    {
+        $uri = $_SERVER['REQUEST_URI'] ?? '/';
+        $uri = substr($uri, strlen($this->getBasePath()));
+
+        if (str_contains($uri, '?'))
+        {
+            $uri = strstr($uri, '?', true);
+        }
+
+        return '/' . trim($uri, '/');
+    }
+
+    /**
+     * @return string
+     */
+    protected function getBasePath(): string
+    {
+        return implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME'] ?? ''), 0, -1)) . '/';
+    }
+
+    /**
+     * @param string|array $fn
+     * @param array $params
+     * @return void
      * @throws RouterException
      * @codeCoverageIgnore
      */
-    private function executeMiddlewares(array $middlewareNames): bool
+    private function invoke(string|array $fn, array $params = []): void
     {
-        foreach ($middlewareNames as $name)
+        if (is_callable($fn))
         {
-            $class = $this->middlewareNamespace . '\\' . ucfirst($name) . 'Middleware';
+            call_user_func_array($fn, $params);
 
-            if (!class_exists($class))
-            {
-                throw new RouterException('Middleware ' . $class . ' not found.');
-            }
-
-            $middleware = new $class();
-
-            if (method_exists($middleware, 'handle') && !$middleware->handle())
-            {
-                return false;
-            }
+            return;
         }
 
-        return true;
+        if (is_array($fn) && count($fn) === 2)
+        {
+            [$controller, $method] = $fn;
+            if (!class_exists($controller))
+            {
+                throw new RouterException('Controller class ' . $controller . ' not found.');
+            }
+
+            $instance = new $controller();
+
+            if (method_exists($instance, 'before') && !$instance->before())
+            {
+                return;
+            }
+
+            if (!method_exists($instance, $method))
+            {
+                $altMethod = strtolower($this->requestedMethod) . '_' . $method;
+                if (method_exists($instance, $altMethod))
+                {
+                    $method = $altMethod;
+                }
+                else
+                {
+                    throw new RouterException('Method ' . $method . ' not found in ' . $controller . '.');
+                }
+            }
+
+            $instance->$method(...$params);
+
+            return;
+        }
+
+        throw new RouterException('Invalid route action.');
     }
 }

@@ -4,223 +4,211 @@ declare(strict_types=1);
 
 namespace Asterios\Core;
 
-class Logger
+use JsonException;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
+use RuntimeException;
+
+final class Logger implements LoggerInterface
 {
-    protected $file;
+    private string $logDirectory;
+    private string $logFilename;
+    private string $dateFormat;
+    private string $logFormat;
 
-    protected array $options = [
-        'dateFormat' => 'Ymd',
-        'logFormat' => 'Y-m-d H:i:s',
-        'logDirectory' => null,
-        'logFilename' => null,
-    ];
-
-    public function __construct(string $logFileName = null, string $logDirectory = null)
+    public function __construct(
+        string $logDirectory,
+        string $logFilename = 'app',
+        string $dateFormat = 'Ymd',
+        string $logFormat = 'Y-m-d H:i:s'
+    )
     {
-        if (null !== $logFileName)
+        $this->logDirectory = rtrim($logDirectory, DIRECTORY_SEPARATOR);
+        $this->logFilename = $logFilename;
+        $this->dateFormat = $dateFormat;
+        $this->logFormat = $logFormat;
+    }
+
+    /**
+     * @param string|\Stringable $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     */
+    public function emergency(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::EMERGENCY, $message, $context);
+    }
+
+    /**
+     * @param $level
+     * @param string|\Stringable $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     */
+    public function log($level, string|\Stringable $message, array $context = []): void
+    {
+        $this->ensureLogDirectoryExists();
+
+        $timestamp = date($this->logFormat);
+        $level = strtoupper((string)$level);
+        $env = strtolower(Asterios::getEnvironment());
+
+        $interpolatedMessage = $this->interpolate((string)$message, $context);
+        $contextJson = $this->normalizeContext($context);
+
+        $line = sprintf(
+            '[%s] %s.%s: %s%s%s',
+            $timestamp,
+            $env,
+            $level,
+            $interpolatedMessage,
+            $contextJson !== '' ? ' ' : '',
+            $contextJson
+        );
+
+        $this->writeToFile($line);
+    }
+
+    private function ensureLogDirectoryExists(): void
+    {
+        if (!is_dir($this->logDirectory))
         {
-            $this->setOptions(['logFilename' => $logFileName]);
-        }
-
-        if (null !== $logDirectory)
-        {
-            $this->setOptions(['logDirectory' => $logDirectory]);
-        }
-    }
-
-    public static function forge(string $logfileName = null, string $logDirectory = null): self
-    {
-        return new self($logfileName, $logDirectory);
-    }
-
-    public function createLogDirectory(string $directory = null): self
-    {
-        $logDirectory = $this->options['logDirectory'];
-
-        if (null === $logDirectory)
-        {
-            $logDirectory = Config::get('default', 'logger.log_dir');
-        }
-
-        if (!File::forge()
-            ->directory_exists($logDirectory))
-        {
-            File::forge()
-                ->create_directory($logDirectory);
-        }
-
-        return $this;
-    }
-
-    public function setOptions(array $options): self
-    {
-        $this->options = array_merge($this->options, $options);
-
-        return $this;
-    }
-
-    public function info(string $message, array $context = []): void
-    {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-
-        $this->writeLog([
-            'message' => $message,
-            'bt' => $bt,
-            'severity' => 'INFO',
-            'context' => $context,
-        ]);
-    }
-
-    public function notice(string $message, array $context = []): void
-    {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-
-        $this->writeLog([
-            'message' => $message,
-            'bt' => $bt,
-            'severity' => 'NOTICE',
-            'context' => $context,
-        ]);
-    }
-
-    public function debug(string $message, array $context = []): void
-    {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-
-        $this->writeLog([
-            'message' => $message,
-            'bt' => $bt,
-            'severity' => 'DEBUG',
-            'context' => $context,
-        ]);
-    }
-
-    public function warning(string $message, array $context = []): void
-    {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-
-        $this->writeLog([
-            'message' => $message,
-            'bt' => $bt,
-            'severity' => 'WARNING',
-            'context' => $context,
-        ]);
-    }
-
-    public function error(string $message, array $context = []): void
-    {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-
-        $this->writeLog([
-            'message' => $message,
-            'bt' => $bt,
-            'severity' => 'ERROR',
-            'context' => $context,
-        ]);
-    }
-
-    public function fatal(string $message, array $context = []): void
-    {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-
-        $this->writeLog([
-            'message' => $message,
-            'bt' => $bt,
-            'severity' => 'FATAL',
-            'context' => $context,
-        ]);
-    }
-
-    public function critical(string $message, array $context = []): void
-    {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-
-        $this->writeLog([
-            'message' => $message,
-            'bt' => $bt,
-            'severity' => 'CRITICAL',
-            'context' => $context,
-        ]);
-    }
-
-    public function writeLog(array $args = []): void
-    {
-        $this->createLogDirectory();
-
-        $this->file = $this->openLog();
-
-        if (!$this->file)
-        {
-            return;
-        }
-
-        $time = date($this->options['logFormat']);
-
-        $context = json_encode($args['context'], JSON_THROW_ON_ERROR);
-
-        $currentEnv = strtolower(Asterios::getEnvironment());
-
-        $timeLog = "[{$time}] ";
-        $severityLog = $currentEnv . '.';
-        $severityLog .= is_null($args['severity']) ? 'N/A' : $args['severity'];
-        $messageLog = is_null($args['message']) ? "N/A" : (string)($args['message']);
-        $contextLog = empty($args['context']) ? "" : (string)($context);
-
-        fwrite($this->file, "{$timeLog}{$severityLog}: {$messageLog} {$contextLog}" . PHP_EOL);
-
-        $this->closeFile();
-    }
-
-    private function openLog()
-    {
-        $openFile = $this->getLogfileName();
-
-        $handle = fopen($openFile, 'ab');
-
-        if (!$handle)
-        {
-            /** @noinspection ForgottenDebugOutputInspection */
-            error_log('Could not create/open log file ' . $openFile);
-        }
-
-        return $handle;
-    }
-
-    public function closeFile(): void
-    {
-        if ($this->file)
-        {
-            fclose($this->file);
+            if (!mkdir($concurrentDirectory = $this->logDirectory, 0775, true)
+                && !is_dir($concurrentDirectory))
+            {
+                throw new RuntimeException(
+                    sprintf('Unable to create log directory: %s', $this->logDirectory)
+                );
+            }
         }
     }
 
-    public function absToRealPath(string $pathToConvert): string
+    private function interpolate(string $message, array $context): string
     {
-        $pathAbs = str_replace(['/', '\\'], '/', $pathToConvert);
-        $documentRoot = str_replace(['/', '\\'], '/', $_SERVER['DOCUMENT_ROOT']);
+        $replace = [];
 
-        return $_SERVER['SERVER_NAME'] . str_replace($documentRoot, '', $pathAbs);
+        foreach ($context as $key => $value)
+        {
+            if (is_scalar($value) || $value instanceof \Stringable)
+            {
+                $replace['{' . $key . '}'] = (string)$value;
+            }
+        }
+
+        return strtr($message, $replace);
     }
 
-    protected function getLogfileName(): string
+    /**
+     * @throws JsonException
+     */
+    private function normalizeContext(array $context): string
     {
-        $config = Config::get('default', 'logger');
-
-        $logDirectory = $this->options['logDirectory'];
-        $logFile = $this->options['logFilename'];
-
-        if (null === $logDirectory)
+        if ($context === [])
         {
-            $logDirectory = $config->log_dir;
+            return '';
         }
 
-        if (null === $logFile)
+        return json_encode(
+            $context,
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+        );
+    }
+
+    private function writeToFile(string $line): void
+    {
+        $filePath = $this->buildLogFilePath();
+
+        $result = @file_put_contents(
+            $filePath,
+            $line . PHP_EOL,
+            FILE_APPEND | LOCK_EX
+        );
+
+        if ($result === false)
         {
-            $logFile = $config->log_file;
+            throw new RuntimeException(
+                sprintf('Unable to write to log file: %s', $filePath)
+            );
         }
+    }
 
-        $time = date($this->options['dateFormat']);
+    private function buildLogFilePath(): string
+    {
+        $date = date($this->dateFormat);
 
-        return $logDirectory . DIRECTORY_SEPARATOR . $logFile . '-' . $time . '.log';
+        return sprintf(
+            '%s%s%s-%s.log',
+            $this->logDirectory,
+            DIRECTORY_SEPARATOR,
+            $this->logFilename,
+            $date
+        );
+    }
+
+    /**
+     * @param string|\Stringable $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     */
+    public function alert(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::ALERT, $message, $context);
+    }
+
+    public function critical(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::CRITICAL, $message, $context);
+    }
+
+    /**
+     * @param string|\Stringable $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     */
+    public function error(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::ERROR, $message, $context);
+    }
+
+    /**
+     * @param string|\Stringable $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     */
+    public function warning(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::WARNING, $message, $context);
+    }
+
+    public function notice(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::NOTICE, $message, $context);
+    }
+
+    /**
+     * @param string|\Stringable $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     */
+    public function info(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::INFO, $message, $context);
+    }
+
+    /**
+     * @param string|\Stringable $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     */
+    public function debug(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::DEBUG, $message, $context);
     }
 }
