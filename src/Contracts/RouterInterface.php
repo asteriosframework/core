@@ -40,7 +40,7 @@ interface RouterInterface
      * @return bool
      * @throws RouterException
      */
-    public function run(callable $callback = null): bool;
+    public function run(?callable $callback = null): bool;
 
     /**
      * @return string

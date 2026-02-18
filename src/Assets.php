@@ -52,22 +52,13 @@ class Assets
         $file = $dto->get_path() . $dto->get_file();
         $extension = self::get_file_extension($file);
 
-        switch ($extension)
+        return match ($extension)
         {
-            case self::EXTENSION_CSS:
-                $return = self::css($dto);
-                break;
-            case self::EXTENSION_JS:
-                $return = self::js($dto);
-                break;
-            case self::EXTENSION_ICO:
-                $return = self::favicon($dto);
-                break;
-            default:
-                $return = self::img($dto);
-        }
-
-        return $return;
+            self::EXTENSION_CSS => self::css($dto),
+            self::EXTENSION_JS => self::js($dto),
+            self::EXTENSION_ICO => self::favicon($dto),
+            default => self::img($dto),
+        };
     }
 
     /**

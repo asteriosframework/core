@@ -13,7 +13,7 @@ class Session
      *
      * @return  Session The new session object
      */
-    public static function forge(): Session
+    public static function forge(): self
     {
         return new self();
     }

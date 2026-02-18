@@ -10,6 +10,7 @@ use Asterios\Core\Exception\ModelInvalidArgumentException;
 use Asterios\Core\Logger;
 use Asterios\Core\Model;
 use Asterios\Core\Support\PaginateResult;
+use JsonException;
 
 /**
  * @mixin Model
@@ -23,6 +24,7 @@ trait HasPaginationTrait
      * @throws ConfigLoadException
      * @throws ModelException
      * @throws ModelInvalidArgumentException
+     * @throws JsonException
      */
     public function paginate(int $page = 1, int $perPage = 15): PaginateResult
     {
@@ -49,6 +51,8 @@ trait HasPaginationTrait
 
     /**
      * @return int
+     * @throws ConfigLoadException
+     * @throws JsonException
      */
     protected function getTotalCount(): int
     {
@@ -66,7 +70,8 @@ trait HasPaginationTrait
                     ? (int)$result[0]['count']
                     : 0;
             }
-        } catch (ModelException|ConfigLoadException $e)
+        }
+        catch (ModelException|ConfigLoadException $e)
         {
             Logger::forge()
                 ->fatal(

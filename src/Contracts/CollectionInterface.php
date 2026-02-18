@@ -42,7 +42,7 @@ interface CollectionInterface
      * @param $default
      * @return mixed
      */
-    public function first(Closure $callback = null, $default = null): mixed;
+    public function first(?Closure $callback = null, $default = null): mixed;
 
     /**
      * @return string

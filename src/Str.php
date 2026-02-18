@@ -12,9 +12,9 @@ use Random\RandomException;
 class Str implements StrInterface, SingletonInterface
 {
     /** @var Str */
-    private static $str;
+    private static Str $str;
 
-    public static function getInstance(): Str
+    public static function getInstance(): self
     {
         if (self::$str === null)
         {
@@ -37,7 +37,7 @@ class Str implements StrInterface, SingletonInterface
      * @param string $characters
      * @return int|float|string|bool|null
      */
-    public function trim($value, string $characters = " \n\r\t\v\x00")
+    public function trim($value, string $characters = " \n\r\t\v\x00"): int|float|string|bool|null
     {
         return is_string($value) ? trim($value, $characters) : $value;
     }
@@ -54,7 +54,6 @@ class Str implements StrInterface, SingletonInterface
 
     public function sub(string $string, int $start, ?int $length = null, ?string $encoding = 'UTF-8'): string
     {
-        // substr functions don't parse null correctly
         $length = is_null($length) ? (function_exists('mb_substr') ? mb_strlen($string, $encoding) : strlen($string)) - $start : $length;
 
         return function_exists('mb_substr') ? mb_substr($string, $start, $length, $encoding) : substr($string, $start, $length);

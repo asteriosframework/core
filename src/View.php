@@ -2,7 +2,6 @@
 
 namespace Asterios\Core;
 
-use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Exception\ViewTemplateAccessException;
@@ -23,10 +22,9 @@ class View
      * @param array $data
      * @param string $envFile
      * @return View
-     * @throws ConfigLoadException
      * @throws ViewTemplateAccessException
      */
-    public static function forge(string $template, bool $autoRender = true, array $data = [], string $envFile = '.env'): View
+    public static function forge(string $template, bool $autoRender = true, array $data = [], string $envFile = '.env'): self
     {
         return new self($template, $autoRender, $data, $envFile);
     }
@@ -36,7 +34,6 @@ class View
      * @param bool $autoRender
      * @param array $data
      * @param string $envFile
-     * @throws ConfigLoadException
      * @throws ViewTemplateAccessException
      */
     protected function __construct(string $template, bool $autoRender = true, array $data = [], string $envFile = '.env')

@@ -26,12 +26,11 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     public function __construct(
         private readonly OrmMetadata $metadata,
         private readonly OrmSqlFormatterInterface $formatter
-    )
-    {
+    ) {
     }
 
     /** @inheritDoc */
-    public function select(array|string $columns = null): self
+    public function select(null|array|string $columns = null): self
     {
         $new = $this->cloneInstance();
 
@@ -151,8 +150,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         string|int|float|null|bool $value = null,
         bool $backticks = true,
         bool $formatValue = true
-    ): self
-    {
+    ): self {
         $new = $this->cloneInstance();
 
         if (!OperatorEnum::isOperator($operator))
@@ -198,8 +196,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         string|int|float|null|bool $operator,
         string|int|float|null|bool $value = null,
         bool $backticks = true
-    ): self
-    {
+    ): self {
         return $this->addBracket('(')
             ->where($column, $operator, $value, $backticks);
     }
@@ -237,8 +234,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         string|int|float|null|bool $operator = null,
         string|int|float|null|bool $value = null,
         bool $backticks = true
-    ): self
-    {
+    ): self {
         return $this->or()
             ->whereOpenByCondition('OR', $column, $operator, $value, $backticks);
     }
@@ -385,8 +381,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
             }
 
             if (str_contains($column, '(') || str_contains($column, ')') || str_contains($column, ' ') || stripos($column, ' as ') !== false
-            )
-            {
+            ) {
                 $columns[] = $column;
                 continue;
             }
@@ -538,11 +533,13 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
             return '';
         }
 
-        return ' GROUP BY ' . implode(', ',
-                array_map(
-                    [$this->formatter, 'backticks'],
-                    $this->groupBy
-                ));
+        return ' GROUP BY ' . implode(
+            ', ',
+            array_map(
+                [$this->formatter, 'backticks'],
+                $this->groupBy
+            )
+        );
     }
 
     private function compileOrderBy(): string
@@ -589,7 +586,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
     }
 
     /** @inheritDoc */
-    public function query(string $query = null): self
+    public function query(?string $query = null): self
     {
         $new = $this->cloneInstance();
         $new->rawQuery = $query;

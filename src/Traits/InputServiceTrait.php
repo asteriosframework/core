@@ -7,7 +7,7 @@ use Asterios\Core\InputService;
 trait InputServiceTrait
 {
     /** @var InputService|null */
-    protected $inputService;
+    protected InputService|null $inputService;
 
     public function setInputService(InputService $inputService): self
     {

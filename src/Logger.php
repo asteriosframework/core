@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Asterios\Core;
 
+use Asterios\Core\Exception\ConfigLoadException;
+use JsonException;
+
 class Logger
 {
-    protected $file;
-
     protected array $options = [
         'dateFormat' => 'Ymd',
         'logFormat' => 'Y-m-d H:i:s',
@@ -15,7 +16,11 @@ class Logger
         'logFilename' => null,
     ];
 
-    public function __construct(string $logFileName = null, string $logDirectory = null)
+    /**
+     * @param string|null $logFileName
+     * @param string|null $logDirectory
+     */
+    public function __construct(?string $logFileName = null, string $logDirectory = null)
     {
         if (null !== $logFileName)
         {
@@ -28,12 +33,21 @@ class Logger
         }
     }
 
-    public static function forge(string $logfileName = null, string $logDirectory = null): self
+    /**
+     * @param string|null $logfileName
+     * @param string|null $logDirectory
+     * @return self
+     */
+    public static function forge(?string $logfileName = null, string $logDirectory = null): self
     {
         return new self($logfileName, $logDirectory);
     }
 
-    public function createLogDirectory(string $directory = null): self
+    /**
+     * @return $this
+     * @throws Exception\ConfigLoadException
+     */
+    public function createLogDirectory(): self
     {
         $logDirectory = $this->options['logDirectory'];
 
@@ -52,6 +66,10 @@ class Logger
         return $this;
     }
 
+    /**
+     * @param array $options
+     * @return $this
+     */
     public function setOptions(array $options): self
     {
         $this->options = array_merge($this->options, $options);
@@ -59,6 +77,13 @@ class Logger
         return $this;
     }
 
+    /**
+     * @param string $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     * @throws ConfigLoadException
+     */
     public function info(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -71,6 +96,13 @@ class Logger
         ]);
     }
 
+    /**
+     * @param string $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     * @throws ConfigLoadException
+     */
     public function notice(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -83,6 +115,13 @@ class Logger
         ]);
     }
 
+    /**
+     * @param string $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     * @throws ConfigLoadException
+     */
     public function debug(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -95,6 +134,13 @@ class Logger
         ]);
     }
 
+    /**
+     * @param string $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     * @throws ConfigLoadException
+     */
     public function warning(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -107,6 +153,13 @@ class Logger
         ]);
     }
 
+    /**
+     * @param string $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     * @throws ConfigLoadException
+     */
     public function error(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -119,6 +172,13 @@ class Logger
         ]);
     }
 
+    /**
+     * @param string $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     * @throws ConfigLoadException
+     */
     public function fatal(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -131,6 +191,13 @@ class Logger
         ]);
     }
 
+    /**
+     * @param string $message
+     * @param array $context
+     * @return void
+     * @throws JsonException
+     * @throws ConfigLoadException
+     */
     public function critical(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -143,13 +210,19 @@ class Logger
         ]);
     }
 
+    /**
+     * @param array $args
+     * @return void
+     * @throws Exception\ConfigLoadException
+     * @throws JsonException
+     */
     public function writeLog(array $args = []): void
     {
         $this->createLogDirectory();
 
-        $this->file = $this->openLog();
+        $fileHandle = $this->openLog();
 
-        if (!$this->file)
+        if (false === $fileHandle)
         {
             return;
         }
@@ -160,18 +233,23 @@ class Logger
 
         $currentEnv = strtolower(Asterios::getEnvironment());
 
-        $timeLog = "[{$time}] ";
+        $timeLog = '['.$time.'] ';
         $severityLog = $currentEnv . '.';
         $severityLog .= is_null($args['severity']) ? 'N/A' : $args['severity'];
-        $messageLog = is_null($args['message']) ? "N/A" : (string)($args['message']);
-        $contextLog = empty($args['context']) ? "" : (string)($context);
+        $messageLog = is_null($args['message']) ? 'N/A' : (string)($args['message']);
+        $contextLog = empty($args['context']) ? '' : (string)($context);
 
-        fwrite($this->file, "{$timeLog}{$severityLog}: {$messageLog} {$contextLog}" . PHP_EOL);
+        $fileContent = $timeLog.$severityLog.': '.$messageLog.' '.$contextLog. PHP_EOL;
 
-        $this->closeFile();
+        fwrite($fileHandle, $fileContent);
+        fclose($fileHandle);
     }
 
-    private function openLog()
+    /**
+     * @return false|resource
+     * @throws ConfigLoadException
+     */
+    private function openLog(): false
     {
         $openFile = $this->getLogfileName();
 
@@ -186,14 +264,11 @@ class Logger
         return $handle;
     }
 
-    public function closeFile(): void
-    {
-        if ($this->file)
-        {
-            fclose($this->file);
-        }
-    }
-
+    /**
+     * @param string $pathToConvert
+     * @return string
+     * @noinspection PhpUnused
+     */
     public function absToRealPath(string $pathToConvert): string
     {
         $pathAbs = str_replace(['/', '\\'], '/', $pathToConvert);
@@ -202,6 +277,10 @@ class Logger
         return $_SERVER['SERVER_NAME'] . str_replace($documentRoot, '', $pathAbs);
     }
 
+    /**
+     * @return string
+     * @throws ConfigLoadException
+     */
     protected function getLogfileName(): string
     {
         $config = Config::get('default', 'logger');

@@ -105,8 +105,6 @@ class Config
     }
 
     /**
-     * Determine whether the given value is array accessible.
-     *
      * @param mixed $value
      * @return bool
      */

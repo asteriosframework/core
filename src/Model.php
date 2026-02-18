@@ -325,8 +325,7 @@ class Model implements ModelInterface
         string|int|float|null $value = null,
         bool $backticks = true,
         bool $formatValue = true
-    ): static
-    {
+    ): static {
         $this->queryBuilder = $this->queryBuilder->where($column, $operator, $value, $backticks, $formatValue);
 
         return $this;
@@ -567,8 +566,7 @@ class Model implements ModelInterface
         string|int|null $operator,
         string|int|float|null $value = null,
         bool $backticks = true
-    ): static
-    {
+    ): static {
         $this->queryBuilder = $this->queryBuilder->whereOpenByCondition($where_condition, $column, $operator, $value, $backticks);
 
         return $this;
@@ -583,8 +581,7 @@ class Model implements ModelInterface
         string|int|null $operator,
         string|int|float|null $value = null,
         bool $backticks = true
-    ): static
-    {
+    ): static {
         $this->queryBuilder = $this->queryBuilder->whereOpenByCondition($where_condition, $column, $operator, $value, $backticks);
 
         return $this;
@@ -723,7 +720,7 @@ class Model implements ModelInterface
     /**
      * @inheritDoc
      */
-    public function query(string $query = null): static
+    public function query(?string $query = null): static
     {
         $this->queryBuilder = $this->queryBuilder->query($query);
 

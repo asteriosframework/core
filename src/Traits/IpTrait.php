@@ -7,9 +7,9 @@ use Asterios\Core\Ip;
 trait IpTrait
 {
     /** @var Ip|null */
-    protected $ip;
+    protected Ip|null $ip;
 
-    public function setIp(Ip $ip): IpTrait
+    public function setIp(Ip $ip): self
     {
         $this->ip = $ip;
 

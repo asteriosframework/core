@@ -90,7 +90,7 @@ class Validation
      * @param mixed $error_message Custom error message. Messages are separated with a pipe symbol (|), or as a array of Messages. If not set, default message will be used.
      * @return boolean
      */
-    public function run(string $input, string $field, $rules, ?string $regex = null, $optional_value = null, $error_message = null): bool
+    public function run(string $input, string $field, string|array $rules, ?string $regex = null, $optional_value = null, $error_message = null): bool
     {
         if (!is_array($rules))
         {

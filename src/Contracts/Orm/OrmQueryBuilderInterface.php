@@ -11,7 +11,7 @@ interface OrmQueryBuilderInterface
      * @param array|string|null $columns
      * @return self
      */
-    public function select(array|string $columns = null): self;
+    public function select(null|array|string $columns = null): self;
 
     /**
      * @param bool $value
@@ -196,7 +196,7 @@ interface OrmQueryBuilderInterface
      * @param ?string $query
      * @return self
      */
-    public function query(string $query = null): self;
+    public function query(?string $query = null): self;
 
     /**
      * @return self

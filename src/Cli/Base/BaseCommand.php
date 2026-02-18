@@ -4,9 +4,10 @@ namespace Asterios\Core\Cli\Base;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Builder\ColorBuilder;
-use Asterios\Core\Traits\Cli\Commands\CommandsBuilderTrait;
 use Asterios\Core\Cli\Support\ArgumentParserTrait;
 use Asterios\Core\Contracts\CommandInterface;
+use Asterios\Core\Traits\Cli\Commands\CommandsBuilderTrait;
+use ReflectionException;
 
 abstract class BaseCommand implements CommandInterface
 {
@@ -21,6 +22,11 @@ abstract class BaseCommand implements CommandInterface
 
     // @codeCoverageIgnoreEnd
 
+    /**
+     * @param string|null $argument
+     * @return void
+     * @throws ReflectionException
+     */
     abstract public function handle(?string $argument): void;
 
     /**

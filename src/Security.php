@@ -12,7 +12,7 @@ class Security
     /**
      * Cleans the global $_GET, $_POST and $_COOKIE arrays
      */
-    public static function clean_input()
+    public static function clean_input(): void
     {
         $_GET = static::clean($_GET);
         $_POST = static::clean($_POST);
@@ -35,7 +35,7 @@ class Security
         foreach ($filter_data as $filter)
         {
             // is this filter a callable local function?
-            if (is_string($filter) && is_callable('static::' . $filter))
+            if (is_string($filter) && is_callable((static::class . '::' . $filter)(...)))
             {
                 $value = static::$filter($value);
             }

@@ -38,6 +38,7 @@ interface ModelInterface
 
     /**
      * @return static
+     * @throws ModelException
      */
     public function reset(): static;
 
