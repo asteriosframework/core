@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Asterios\Core;
 
+use Asterios\Core\Contracts\LoggerInterface;
 use Asterios\Core\Exception\ConfigLoadException;
+use Asterios\Core\Exception\LoggerException;
 use JsonException;
 
-class Logger
+class Logger implements LoggerInterface
 {
     protected array $options = [
         'dateFormat' => 'Ymd',
@@ -34,9 +36,7 @@ class Logger
     }
 
     /**
-     * @param string|null $logfileName
-     * @param string|null $logDirectory
-     * @return self
+     * @inheritDoc
      */
     public static function forge(?string $logfileName = null, string $logDirectory = null): self
     {
@@ -44,8 +44,7 @@ class Logger
     }
 
     /**
-     * @return $this
-     * @throws Exception\ConfigLoadException
+     * @inheritDoc
      */
     public function createLogDirectory(): self
     {
@@ -53,22 +52,28 @@ class Logger
 
         if (null === $logDirectory)
         {
-            $logDirectory = Config::get('default', 'logger.log_dir');
-        }
+            try
+            {
+                $logDirectory = Config::get('default', 'logger.log_dir');
+                if (!File::forge()
+                    ->directory_exists($logDirectory))
+                {
+                    File::forge()
+                        ->create_directory($logDirectory);
+                }
 
-        if (!File::forge()
-            ->directory_exists($logDirectory))
-        {
-            File::forge()
-                ->create_directory($logDirectory);
+            }
+            catch (ConfigLoadException $e)
+            {
+                throw new LoggerException($e->getMessage());
+            }
         }
 
         return $this;
     }
 
     /**
-     * @param array $options
-     * @return $this
+     * @inheritDoc
      */
     public function setOptions(array $options): self
     {
@@ -78,11 +83,7 @@ class Logger
     }
 
     /**
-     * @param string $message
-     * @param array $context
-     * @return void
-     * @throws JsonException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function info(string $message, array $context = []): void
     {
@@ -97,11 +98,7 @@ class Logger
     }
 
     /**
-     * @param string $message
-     * @param array $context
-     * @return void
-     * @throws JsonException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function notice(string $message, array $context = []): void
     {
@@ -116,11 +113,7 @@ class Logger
     }
 
     /**
-     * @param string $message
-     * @param array $context
-     * @return void
-     * @throws JsonException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function debug(string $message, array $context = []): void
     {
@@ -135,11 +128,7 @@ class Logger
     }
 
     /**
-     * @param string $message
-     * @param array $context
-     * @return void
-     * @throws JsonException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function warning(string $message, array $context = []): void
     {
@@ -154,11 +143,7 @@ class Logger
     }
 
     /**
-     * @param string $message
-     * @param array $context
-     * @return void
-     * @throws JsonException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function error(string $message, array $context = []): void
     {
@@ -173,11 +158,7 @@ class Logger
     }
 
     /**
-     * @param string $message
-     * @param array $context
-     * @return void
-     * @throws JsonException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function fatal(string $message, array $context = []): void
     {
@@ -192,11 +173,7 @@ class Logger
     }
 
     /**
-     * @param string $message
-     * @param array $context
-     * @return void
-     * @throws JsonException
-     * @throws ConfigLoadException
+     * @inheritDoc
      */
     public function critical(string $message, array $context = []): void
     {
@@ -211,38 +188,48 @@ class Logger
     }
 
     /**
-     * @param array $args
-     * @return void
-     * @throws Exception\ConfigLoadException
-     * @throws JsonException
+     * @inheritDoc
      */
     public function writeLog(array $args = []): void
     {
-        $this->createLogDirectory();
-
-        $fileHandle = $this->openLog();
-
-        if (false === $fileHandle)
+        try
         {
-            return;
+            $this->createLogDirectory();
+            $fileHandle = $this->openLog();
+
+            if (false === $fileHandle)
+            {
+                return;
+            }
+
+            $time = date($this->options['logFormat']);
+
+            try
+            {
+                $context = json_encode($args['context'], JSON_THROW_ON_ERROR);
+            }
+            catch (JsonException $e)
+            {
+                throw new LoggerException($e->getMessage());
+            }
+
+            $currentEnv = strtolower(Asterios::getEnvironment());
+
+            $timeLog = '['.$time.'] ';
+            $severityLog = $currentEnv . '.';
+            $severityLog .= is_null($args['severity']) ? 'N/A' : $args['severity'];
+            $messageLog = is_null($args['message']) ? 'N/A' : (string)($args['message']);
+            $contextLog = empty($args['context']) ? '' : (string)($context);
+
+            $fileContent = $timeLog.$severityLog.': '.$messageLog.' '.$contextLog. PHP_EOL;
+
+            fwrite($fileHandle, $fileContent);
+            fclose($fileHandle);
         }
-
-        $time = date($this->options['logFormat']);
-
-        $context = json_encode($args['context'], JSON_THROW_ON_ERROR);
-
-        $currentEnv = strtolower(Asterios::getEnvironment());
-
-        $timeLog = '['.$time.'] ';
-        $severityLog = $currentEnv . '.';
-        $severityLog .= is_null($args['severity']) ? 'N/A' : $args['severity'];
-        $messageLog = is_null($args['message']) ? 'N/A' : (string)($args['message']);
-        $contextLog = empty($args['context']) ? '' : (string)($context);
-
-        $fileContent = $timeLog.$severityLog.': '.$messageLog.' '.$contextLog. PHP_EOL;
-
-        fwrite($fileHandle, $fileContent);
-        fclose($fileHandle);
+        catch (ConfigLoadException $e)
+        {
+            throw new LoggerException($e->getMessage());
+        }
     }
 
     /**
@@ -265,9 +252,7 @@ class Logger
     }
 
     /**
-     * @param string $pathToConvert
-     * @return string
-     * @noinspection PhpUnused
+     * @inheritDoc
      */
     public function absToRealPath(string $pathToConvert): string
     {
