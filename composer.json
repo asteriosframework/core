@@ -20,9 +20,6 @@
     "preferred-install": {
       "*": "dist"
     },
-    "platform": {
-      "php": "^8.3"
-    },
     "optimize-autoloader": true
   },
   "autoload": {
@@ -36,6 +33,7 @@
     }
   },
   "require": {
+    "php": "^8.3",
     "vanilla/htmlawed": "2.2.15",
     "mobiledetect/mobiledetectlib": "4.8.09",
     "ext-mysqli": "*",
