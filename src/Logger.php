@@ -249,7 +249,7 @@ class Logger
      * @return false|resource
      * @throws ConfigLoadException
      */
-    private function openLog(): false
+    private function openLog()
     {
         $openFile = $this->getLogfileName();
 
