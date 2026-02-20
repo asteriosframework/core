@@ -36,7 +36,7 @@ class Date
     {
         $date = sprintf('%d-%d-01', $year, $month);
 
-        return new DateTime($date)->format('t');
+        return (new DateTime($date))->format('t');
     }
 
     public function setTimezone(string $timezone): void
@@ -58,7 +58,7 @@ class Date
         {
             $date = sprintf('%d-%d-01', $year, $month);
 
-            return new DateTime($date, new DateTimeZone(self::DEFAULT_TIMEZONE))->format('t');
+            return (new DateTime($date, (new DateTimeZone(self::DEFAULT_TIMEZONE))))->format('t');
 
         }
         catch (Exception $e)
@@ -75,7 +75,7 @@ class Date
     {
         try
         {
-            return new DateTime($date, new DateTimeZone(self::DEFAULT_TIMEZONE))->getTimestamp();
+            return (new DateTime($date, new DateTimeZone(self::DEFAULT_TIMEZONE)))->getTimestamp();
         }
         catch (Exception $e)
         {
@@ -90,7 +90,7 @@ class Date
     {
         try
         {
-            return new DateTime($date, new DateTimeZone(self::DEFAULT_TIMEZONE))->format($format);
+            return (new DateTime($date, new DateTimeZone(self::DEFAULT_TIMEZONE)))->format($format);
         }
         catch (Exception $e)
         {
