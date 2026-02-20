@@ -11,7 +11,7 @@ interface LoggerInterface
      * @param string|null $logDirectory
      * @return self
      */
-    public static function forge(?string $logfileName = null, string $logDirectory = null): self;
+    public static function forge(?string $logfileName = null, ?string $logDirectory = null): self;
 
     /**
      * @return self
