@@ -22,7 +22,7 @@ class Logger implements LoggerInterface
      * @param string|null $logFileName
      * @param string|null $logDirectory
      */
-    public function __construct(?string $logFileName = null, string $logDirectory = null)
+    public function __construct(?string $logFileName = null, ?string $logDirectory = null)
     {
         if (null !== $logFileName)
         {
@@ -38,7 +38,7 @@ class Logger implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public static function forge(?string $logfileName = null, string $logDirectory = null): self
+    public static function forge(?string $logfileName = null, ?string $logDirectory = null): self
     {
         return new self($logfileName, $logDirectory);
     }
