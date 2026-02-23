@@ -4,7 +4,6 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
-use Asterios\Core\Db\Migration;
 use Asterios\Core\Db\Seeder;
 use Asterios\Core\Enum\CliStatusIcon;
 

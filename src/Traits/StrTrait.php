@@ -7,7 +7,7 @@ use Asterios\Core\Str;
 trait StrTrait
 {
     /** @var Str|null */
-    protected $str;
+    protected Str|null $str;
 
     public function setStr(Str $str): self
     {

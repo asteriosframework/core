@@ -50,7 +50,7 @@ class FakeBankCommand extends BaseCommand
         {
 
         }
-        return "{$countryCode}{$checkDigits}{$bankCode}{$accountNumber}";
+        return $countryCode.$checkDigits.$bankCode.$accountNumber;
     }
 
     private function generateBic(string $countryCode): string

@@ -7,7 +7,7 @@ use Asterios\Core\Date;
 trait DateTrait
 {
     /** @var Date|null */
-    protected $date;
+    protected Date|null $date;
 
     public function setDate(Date $date): self
     {

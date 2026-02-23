@@ -7,7 +7,7 @@ use Asterios\Core\Logger;
 trait LoggerTrait
 {
     /** @var Logger|null */
-    protected $logger;
+    protected Logger|null $logger;
 
     public function setLogger(Logger $logger): self
     {

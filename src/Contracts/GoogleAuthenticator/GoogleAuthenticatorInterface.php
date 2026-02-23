@@ -20,5 +20,5 @@ interface GoogleAuthenticatorInterface
      * @param int|null $timestamp
      * @return bool
      */
-    public function verify(string $code, int $leeway = 1, int $timestamp = null): bool;
+    public function verify(string $code, int $leeway = 1, ?int $timestamp = null): bool;
 }

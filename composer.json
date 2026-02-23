@@ -20,9 +20,6 @@
     "preferred-install": {
       "*": "dist"
     },
-    "platform": {
-      "php": "8.3"
-    },
     "optimize-autoloader": true
   },
   "autoload": {
@@ -36,11 +33,12 @@
     }
   },
   "require": {
+    "php": "^8.3",
     "vanilla/htmlawed": "2.2.15",
     "mobiledetect/mobiledetectlib": "4.8.09",
     "ext-mysqli": "*",
     "ext-curl": "*",
-    "firebase/php-jwt": "^6.10",
+    "firebase/php-jwt": "^7",
     "symfony/mailer": "^7.3",
     "symfony/mime": "^7.3",
     "twig/twig": "^3.21",
@@ -50,7 +48,7 @@
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
-    "phpunit/phpunit": "11.4.2",
+    "phpunit/phpunit": "^12.5",
     "mockery/mockery": "1.6.12",
     "phpstan/phpstan": "2.1.17",
     "friendsofphp/php-cs-fixer": "^3.40",

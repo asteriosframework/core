@@ -9,7 +9,7 @@ use Exception;
 
 class Date
 {
-    public const DEFAULT_TIMEZONE = 'Europe/Berlin';
+    public const string DEFAULT_TIMEZONE = 'Europe/Berlin';
 
     /**
      * @deprecated Use non-static method instead
@@ -58,7 +58,7 @@ class Date
         {
             $date = sprintf('%d-%d-01', $year, $month);
 
-            return (new DateTime($date, new DateTimeZone(self::DEFAULT_TIMEZONE)))->format('t');
+            return (new DateTime($date, (new DateTimeZone(self::DEFAULT_TIMEZONE))))->format('t');
 
         }
         catch (Exception $e)

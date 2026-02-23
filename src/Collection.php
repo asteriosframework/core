@@ -73,7 +73,7 @@ class Collection implements CollectionInterface, ArrayAccess, Countable, Iterato
     /**
      * @inheritDoc
      */
-    public function first(Closure $callback = null, $default = null): mixed
+    public function first(?Closure $callback = null, $default = null): mixed
     {
         foreach ($this->items as $item)
         {

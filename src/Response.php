@@ -9,14 +9,14 @@ class Response
      *
      * @var string
      **/
-    public $body = '';
+    public string $body = '';
 
     /**
      * An associative array containing the response's headers
      *
      * @var array
      **/
-    public $headers = [];
+    public array $headers = [];
 
     /**
      * Accepts the result of a curl request as a string
@@ -50,27 +50,23 @@ class Response
         $this->headers['Status'] = $matches[2] . ' ' . $matches[3];
 
         # Convert headers into an associative array
+        $headerPattern = '~^(?<key>.*?)\s*:\s*(?<value>.*)$~';
         foreach ($headers as $header)
         {
-            preg_match('#(.*?)\:\s(.*)#', $header, $matches);
-            $this->headers[$matches[1]] = $matches[2];
+            if (!preg_match($headerPattern, $header, $matches))
+            {
+                continue;
+            }
+
+            $this->headers[$matches['key']] = $matches['value'];
         }
     }
 
     /**
-     * Returns the response body
-     *
-     * <code>
-     * $curl = new Curl;
-     * $response = $curl->get('google.com');
-     * echo $response;  # => echo $response->body;
-     * </code>
-     *
      * @return string
-     **/
+     */
     public function __toString()
     {
         return (string)$this->body;
     }
-
 }
