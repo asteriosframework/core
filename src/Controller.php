@@ -2,13 +2,15 @@
 
 namespace Asterios\Core;
 
+use JsonException;
+
 class Controller
 {
-    protected const CONTENT_TYPE_JSON = 'application/json';
+    protected const string CONTENT_TYPE_JSON = 'application/json';
 
-    private $content_type = self::CONTENT_TYPE_JSON;
+    private string $content_type = self::CONTENT_TYPE_JSON;
 
-    private $content_types = [
+    private array $content_types = [
         'application/xml',
         'application/xml',
         'application/json',
@@ -27,7 +29,7 @@ class Controller
         }
     }
 
-    public static $statuses = [
+    public static array $statuses = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',
@@ -92,6 +94,7 @@ class Controller
     /**
      * @param mixed $data
      * @param int $status_code
+     * @throws JsonException
      */
     public function response($data, int $status_code = 200): void
     {
@@ -122,14 +125,15 @@ class Controller
 
     /**
      * @param string|array|\stdClass $data
+     * @throws JsonException
      */
     private function return_response($data): void
     {
-        if (is_array($data) || ($data instanceof \stdClass) || !empty($data))
+        if (is_array($data) || !empty($data))
         {
             if ($this->content_type === self::CONTENT_TYPE_JSON)
             {
-                echo json_encode($data);
+                echo json_encode($data, JSON_THROW_ON_ERROR);
             }
             elseif (is_string($data))
             {
@@ -143,7 +147,7 @@ class Controller
         return in_array($content_type, $this->content_types, true);
     }
 
-    public function set_content_type(string $content_type): Controller
+    public function set_content_type(string $content_type): self
     {
         if ($this->is_supported_content_type($this->content_type))
         {

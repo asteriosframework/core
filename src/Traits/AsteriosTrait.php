@@ -7,7 +7,7 @@ use Asterios\Core\Asterios;
 trait AsteriosTrait
 {
     /** @var Asterios|null */
-    protected $asterios;
+    protected Asterios|null $asterios;
 
     public function setAsterios(Asterios $asterios): self
     {

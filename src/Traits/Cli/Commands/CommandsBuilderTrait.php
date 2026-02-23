@@ -7,6 +7,7 @@ use Asterios\Core\Asterios;
 use Asterios\Core\Cli\Builder\ColorBuilder;
 use Asterios\Core\Cli\CommandRegistry;
 use Asterios\Core\Contracts\Cli\CommandRegistryInterface;
+use ReflectionException;
 
 /** @codeCoverageIgnore */
 trait CommandsBuilderTrait
@@ -25,7 +26,9 @@ trait CommandsBuilderTrait
     }
 
     /**
-     * @inheritDoc
+     * @param string $prefix
+     * @return void
+     * @throws ReflectionException
      */
     protected function printTable(string $prefix = 'asterios'): void
     {
@@ -63,7 +66,9 @@ trait CommandsBuilderTrait
     }
 
     /**
-     * @inheritDoc
+     * @param string $message
+     * @param string $context
+     * @return void
      */
     protected function printError(string $message, string $context = ''): void
     {
@@ -95,7 +100,8 @@ trait CommandsBuilderTrait
     }
 
     /**
-     * @inheritDoc
+     * @param array $groups
+     * @return void
      */
     protected function printDataTable(array $groups): void
     {
@@ -138,7 +144,11 @@ trait CommandsBuilderTrait
     }
 
     /**
-     * @inheritDoc
+     * @param string $title
+     * @param array $items
+     * @param string $keyField
+     * @param string $valueField
+     * @return void
      */
     protected function printListTable(string $title, array $items, string $keyField, string $valueField): void
     {
@@ -202,6 +212,7 @@ trait CommandsBuilderTrait
      * @param string $value
      * @return void
      * @codeCoverageIgnore
+     * @noinspection PhpUnusedPrivateMethodInspection
      */
     private function printPrettyRow(string $label, string $value): void
     {
@@ -277,12 +288,14 @@ trait CommandsBuilderTrait
 
     /**
      * @return ColorBuilder
+     * @noinspection PhpUnusedPrivateMethodInspection
      */
     private function color(): ColorBuilder
     {
         return $this->colorBuilder ??= new ColorBuilder();
     }
 
+    /** @noinspection PhpUnusedParameterInspection */
     private function printPrettyRowAligned(string $label, string $value, int $maxLabelWidth): void
     {
         $label = trim(strip_tags($label));
@@ -307,6 +320,10 @@ trait CommandsBuilderTrait
         $this->commandRegistry = $registry;
     }
 
+    /**
+     * @return array
+     * @throws ReflectionException
+     */
     protected function getRegisteredCommands(): array
     {
         return ($this->commandRegistry ?? new CommandRegistry())->all();
@@ -344,6 +361,10 @@ trait CommandsBuilderTrait
         return file_put_contents($path, $content) !== false;
     }
 
+    /**
+     * @param string $dir
+     * @return void
+     */
     protected function ensureDirectoryExists(string $dir): void
     {
         if (!is_dir($dir) && !mkdir($dir, 0777, true) && !is_dir($dir))

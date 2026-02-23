@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Asterios\Core;
 
-class Logger
-{
-    protected $file;
+use Asterios\Core\Contracts\LoggerInterface;
+use Asterios\Core\Exception\ConfigLoadException;
+use Asterios\Core\Exception\LoggerException;
+use JsonException;
 
+class Logger implements LoggerInterface
+{
     protected array $options = [
         'dateFormat' => 'Ymd',
         'logFormat' => 'Y-m-d H:i:s',
@@ -15,7 +18,11 @@ class Logger
         'logFilename' => null,
     ];
 
-    public function __construct(string $logFileName = null, string $logDirectory = null)
+    /**
+     * @param string|null $logFileName
+     * @param string|null $logDirectory
+     */
+    public function __construct(?string $logFileName = null, ?string $logDirectory = null)
     {
         if (null !== $logFileName)
         {
@@ -28,30 +35,46 @@ class Logger
         }
     }
 
-    public static function forge(string $logfileName = null, string $logDirectory = null): self
+    /**
+     * @inheritDoc
+     */
+    public static function forge(?string $logfileName = null, ?string $logDirectory = null): self
     {
         return new self($logfileName, $logDirectory);
     }
 
-    public function createLogDirectory(string $directory = null): self
+    /**
+     * @inheritDoc
+     */
+    public function createLogDirectory(): self
     {
         $logDirectory = $this->options['logDirectory'];
 
         if (null === $logDirectory)
         {
-            $logDirectory = Config::get('default', 'logger.log_dir');
-        }
+            try
+            {
+                $logDirectory = Config::get('default', 'logger.log_dir');
+                if (!File::forge()
+                    ->directory_exists($logDirectory))
+                {
+                    File::forge()
+                        ->create_directory($logDirectory);
+                }
 
-        if (!File::forge()
-            ->directory_exists($logDirectory))
-        {
-            File::forge()
-                ->create_directory($logDirectory);
+            }
+            catch (ConfigLoadException $e)
+            {
+                throw new LoggerException($e->getMessage());
+            }
         }
 
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function setOptions(array $options): self
     {
         $this->options = array_merge($this->options, $options);
@@ -59,6 +82,9 @@ class Logger
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function info(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -71,6 +97,9 @@ class Logger
         ]);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function notice(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -83,6 +112,9 @@ class Logger
         ]);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function debug(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -95,6 +127,9 @@ class Logger
         ]);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function warning(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -107,6 +142,9 @@ class Logger
         ]);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function error(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -119,6 +157,9 @@ class Logger
         ]);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function fatal(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -131,6 +172,9 @@ class Logger
         ]);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function critical(string $message, array $context = []): void
     {
         $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -143,34 +187,55 @@ class Logger
         ]);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function writeLog(array $args = []): void
     {
-        $this->createLogDirectory();
-
-        $this->file = $this->openLog();
-
-        if (!$this->file)
+        try
         {
-            return;
+            $this->createLogDirectory();
+            $fileHandle = $this->openLog();
+
+            if (false === $fileHandle)
+            {
+                return;
+            }
+
+            $time = date($this->options['logFormat']);
+
+            try
+            {
+                $context = json_encode($args['context'], JSON_THROW_ON_ERROR);
+            }
+            catch (JsonException $e)
+            {
+                throw new LoggerException($e->getMessage());
+            }
+
+            $currentEnv = strtolower(Asterios::getEnvironment());
+
+            $timeLog = '['.$time.'] ';
+            $severityLog = $currentEnv . '.';
+            $severityLog .= is_null($args['severity']) ? 'N/A' : $args['severity'];
+            $messageLog = is_null($args['message']) ? 'N/A' : (string)($args['message']);
+            $contextLog = empty($args['context']) ? '' : (string)($context);
+
+            $fileContent = $timeLog.$severityLog.': '.$messageLog.' '.$contextLog. PHP_EOL;
+
+            fwrite($fileHandle, $fileContent);
+            fclose($fileHandle);
         }
-
-        $time = date($this->options['logFormat']);
-
-        $context = json_encode($args['context'], JSON_THROW_ON_ERROR);
-
-        $currentEnv = strtolower(Asterios::getEnvironment());
-
-        $timeLog = "[{$time}] ";
-        $severityLog = $currentEnv . '.';
-        $severityLog .= is_null($args['severity']) ? 'N/A' : $args['severity'];
-        $messageLog = is_null($args['message']) ? "N/A" : (string)($args['message']);
-        $contextLog = empty($args['context']) ? "" : (string)($context);
-
-        fwrite($this->file, "{$timeLog}{$severityLog}: {$messageLog} {$contextLog}" . PHP_EOL);
-
-        $this->closeFile();
+        catch (ConfigLoadException $e)
+        {
+            throw new LoggerException($e->getMessage());
+        }
     }
 
+    /**
+     * @return false|resource
+     * @throws ConfigLoadException
+     */
     private function openLog()
     {
         $openFile = $this->getLogfileName();
@@ -186,14 +251,9 @@ class Logger
         return $handle;
     }
 
-    public function closeFile(): void
-    {
-        if ($this->file)
-        {
-            fclose($this->file);
-        }
-    }
-
+    /**
+     * @inheritDoc
+     */
     public function absToRealPath(string $pathToConvert): string
     {
         $pathAbs = str_replace(['/', '\\'], '/', $pathToConvert);
@@ -202,6 +262,10 @@ class Logger
         return $_SERVER['SERVER_NAME'] . str_replace($documentRoot, '', $pathAbs);
     }
 
+    /**
+     * @return string
+     * @throws ConfigLoadException
+     */
     protected function getLogfileName(): string
     {
         $config = Config::get('default', 'logger');

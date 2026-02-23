@@ -27,7 +27,7 @@ class Router implements RouterInterface
     /**
      * @inheritDoc
      */
-    public function setNamespace(string $namespace): Router
+    public function setNamespace(string $namespace): self
     {
         $this->namespace = rtrim($namespace, '\\');
         return $this;
@@ -41,7 +41,7 @@ class Router implements RouterInterface
         return $this->namespace;
     }
 
-    public function setMiddlewareNamespace(string $namespace): Router
+    public function setMiddlewareNamespace(string $namespace): self
     {
         $this->middlewareNamespace = rtrim($namespace, '\\');
         return $this;
@@ -58,7 +58,7 @@ class Router implements RouterInterface
     /**
      * @inheritDoc
      */
-    public function setRoutes(array $routes): Router
+    public function setRoutes(array $routes): self
     {
         $this->routes = $routes;
         return $this;
@@ -67,7 +67,7 @@ class Router implements RouterInterface
     /**
      * @inheritDoc
      */
-    public function run(callable $callback = null): bool
+    public function run(?callable $callback = null): bool
     {
         $this->requestedMethod = $this->getRequestMethod();
 

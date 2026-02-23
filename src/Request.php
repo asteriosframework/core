@@ -104,7 +104,7 @@ class Request
     {
         if (!empty($vars))
         {
-            $url .= (strpos($url, '?') !== false) ? '&' : '?';
+            $url .= (str_contains($url, '?')) ? '&' : '?';
             $url .= (is_string($vars)) ? $vars : http_build_query($vars, '', '&');
         }
 

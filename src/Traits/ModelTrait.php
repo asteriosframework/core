@@ -6,8 +6,8 @@ use Asterios\Core\Model;
 
 trait ModelTrait
 {
-    /** @var Model */
-    protected $modelOrm;
+    /** @var Model|null */
+    protected Model|null $modelOrm;
 
     public function setModelOrm(Model $modelOrm): self
     {

@@ -62,7 +62,7 @@ class Math implements MathInterface
     /**
      * @inheritdoc
      */
-    public function percentage(float $percentageValue, float $netto = null, int $precision = 2): float
+    public function percentage(float $percentageValue, ?float $netto = null, int $precision = 2): float
     {
         return $this->getFloatWithPrecision(($percentageValue / $netto) * 100, $precision);
     }
