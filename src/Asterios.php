@@ -9,35 +9,35 @@ class Asterios
     /**
      * @var  string  The version of Asterios PHP Framework
      */
-    public const VERSION = '1.6.0';
+    public const string VERSION = '1.6.1';
 
     /**
      * @var  string  The version of Asterios PHP Framework
      */
-    public const NAME = 'Asterios PHP Framework';
+    public const string NAME = 'Asterios PHP Framework';
 
     /**
      * @var  string  constant used for when in development
      */
-    public const DEVELOPMENT = 'development';
+    public const string DEVELOPMENT = 'development';
 
     /**
      * @var  string  constant used for when in testing mode
      */
-    public const TEST = 'test';
+    public const string TEST = 'test';
 
     /**
      * @var  string  constant used for when testing the app on a staging system.
      */
-    public const STAGING = 'staging';
+    public const string STAGING = 'staging';
 
     /** @var string constant used for feature environment */
-    public const FEATURE = 'feature';
+    public const string FEATURE = 'feature';
 
     /**
      * @var  string  constant used for when in production
      */
-    public const PRODUCTION = 'production';
+    public const string PRODUCTION = 'production';
 
     /**
      * @var  string  The Asterios environment
