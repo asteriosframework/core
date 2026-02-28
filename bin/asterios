@@ -1,21 +1,32 @@
-#!/usr/bin/php
+#!/usr/bin/env php
 <?php declare(strict_types=1);
 
 use Asterios\Core\Cli\Builder\ColorBuilder;
 use Asterios\Core\Cli\CommandRegistry;
 
-require getcwd() . '/vendor/autoload.php';
+$localAutoload = getcwd() . '/vendor/autoload.php';
+$globalAutoload = __DIR__ . '/../vendor/autoload.php';
+
+if (file_exists($localAutoload))
+{
+    require $localAutoload;
+}
+elseif (file_exists($globalAutoload))
+{
+    require $globalAutoload;
+}
+else
+{
+    echo "Autoload file not found.\n";
+    exit(1);
+}
+
 
 $input = $argv[1] ?? 'list';
 $argument = $argv[2] ?? null;
 
 handleCommand($input, $argument);
 
-/**
- * @param string $commandName
- * @param string|null $argument
- * @return void
- */
 function handleCommand(string $commandName, ?string $argument = null): void
 {
     $commandRegistry = new CommandRegistry();
