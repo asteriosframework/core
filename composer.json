@@ -41,7 +41,7 @@
     "firebase/php-jwt": "^7",
     "symfony/mailer": "^7.3",
     "symfony/mime": "^7.3",
-    "twig/twig": "^3.21",
+    "twig/twig": "^3.23",
     "symfony/twig-bridge": "^7.3",
     "spomky-labs/otphp": "^11.3",
     "endroid/qr-code": "^6.0"
