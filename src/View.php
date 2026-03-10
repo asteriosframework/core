@@ -7,9 +7,6 @@ use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Exception\ViewTemplateAccessException;
 use Asterios\Core\View\Twig\TwigManager;
 use Twig\Environment;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
 
 class View
 {
@@ -43,55 +40,98 @@ class View
 
         if ($this->autoRender)
         {
-            try
+            $this->render();
+        }
+    }
+
+    /**
+     * Haupt-Template Verarbeitung
+     */
+    protected function processTemplate(): string
+    {
+        $twigTemplate = $this->resolveTwigTemplate();
+        $phpTemplate  = $this->resolvePhpTemplate();
+
+        if ($twigTemplate && file_exists($twigTemplate['path']))
+        {
+            return $this->renderTwig($twigTemplate['name']);
+        }
+
+        if ($phpTemplate && file_exists($phpTemplate))
+        {
+            return $this->renderPhp($phpTemplate);
+        }
+
+        throw new ViewTemplateAccessException('Template not found: ' . $this->template);
+    }
+
+    /**
+     * Twig Render
+     */
+    protected function renderTwig(string $template): string
+    {
+        return $this->twig->render($template, $this->data);
+    }
+
+    /**
+     * Alte PHP Engine (Fallback)
+     */
+    protected function renderPhp(string $templateFile): string
+    {
+        $data = $this->data;
+
+        $cleanRoom = function ($templateFile) use ($data) {
+            extract($data, EXTR_SKIP);
+
+            ob_start();
+            include $templateFile;
+            return ob_get_clean();
+        };
+
+        return $cleanRoom($templateFile);
+    }
+
+    /**
+     * Twig Template Pfad
+     */
+    protected function resolveTwigTemplate(): ?array
+    {
+        $extension = $this->getEnvData('TEMPLATE_EXTENSION');
+
+        $name = $this->template . '.' . $extension;
+
+        $path = $this->getTemplatePath() . $name;
+
+        return [
+            'name' => $name,
+            'path' => $path
+        ];
+    }
+
+    /**
+     * Alte PHP Template Pfade
+     */
+    protected function resolvePhpTemplate(): ?string
+    {
+        $base = $this->getTemplatePath();
+
+        $paths = [
+
+            $base . $this->template . '.html.php',
+            $base . $this->template . '.php',
+            $base . $this->template . '.html'
+
+        ];
+
+        foreach ($paths as $path)
+        {
+            if (file_exists($path))
             {
-                $this->render();
-            }
-            catch (ViewTemplateAccessException)
-            {
-                $this->viewErrorTemplate();
+                return $path;
             }
         }
-    }
 
-    protected function processTemplate(string $override = ''): string
-    {
-        $template = $override ?: $this->resolveTemplate();
-
-        try
-        {
-            return $this->twig->render($template, $this->data);
-        }
-        catch (LoaderError|RuntimeError|SyntaxError $e)
-        {
-            throw new ViewTemplateAccessException($e->getMessage());
-        }
-    }
-
-    protected function resolveTemplate(): string
-    {
-        if (str_contains($this->template, '::'))
-        {
-            [$namespace, $view] = explode('::', $this->template);
-
-            return "@$namespace/$view." . $this->getTemplateExtension();
-        }
-
-        return $this->template . '.' . $this->getTemplateExtension();
-    }
-
-    private function viewErrorTemplate(): void
-    {
-        try
-        {
-            echo $this->twig->render('404.' . $this->getTemplateExtension());
-        }
-        catch (\Exception)
-        {
-            throw new ViewTemplateAccessException(
-                'FATAL ERROR: Could not load error-template "404"!'
-            );
-        }
+        return null;
     }
 
     public function renderAsString(): string
@@ -104,9 +144,9 @@ class View
         echo $this->renderAsString();
     }
 
-    protected function getTemplateExtension(): string
+    protected function getTemplatePath(): string
     {
-        return $this->getEnvData('TEMPLATE_EXTENSION');
+        return Asterios::getBasePath() . $this->getEnvData('TEMPLATE_PATH');
     }
 
     protected function getEnvData(string $key): string
