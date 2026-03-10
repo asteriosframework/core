@@ -5,42 +5,32 @@ namespace Asterios\Core;
 use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Exception\ViewTemplateAccessException;
+use Asterios\Core\View\Twig\TwigManager;
+use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 class View
 {
     protected string $template;
-    protected string $templateFile;
     protected bool $autoRender;
     protected array $data = [];
     protected string $envFile = '.env';
 
     protected ?Env $env = null;
+    protected ?Environment $twig = null;
 
-    /**
-     * @param string $template
-     * @param bool $autoRender
-     * @param array $data
-     * @param string $envFile
-     * @return View
-     * @throws ViewTemplateAccessException
-     */
     public static function forge(string $template, bool $autoRender = true, array $data = [], string $envFile = '.env'): self
     {
         return new self($template, $autoRender, $data, $envFile);
     }
 
-    /**
-     * @param string $template
-     * @param bool $autoRender
-     * @param array $data
-     * @param string $envFile
-     * @throws ViewTemplateAccessException
-     */
     protected function __construct(string $template, bool $autoRender = true, array $data = [], string $envFile = '.env')
     {
         $this->envFile = Asterios::getBasePath() . DIRECTORY_SEPARATOR . $envFile;
 
-        if (null === $this->env)
+        if ($this->env === null)
         {
             $this->env = new Env($this->envFile);
         }
@@ -48,7 +38,8 @@ class View
         $this->template = $template;
         $this->data = $data;
         $this->autoRender = $autoRender;
-        $this->setTemplateFile();
+
+        $this->twig = TwigManager::getTwig($this->env);
 
         if ($this->autoRender)
         {
@@ -63,107 +54,61 @@ class View
         }
     }
 
-    /**
-     * @return void
-     * @throws ViewTemplateAccessException
-     */
-    private function viewErrorTemplate(): void
+    protected function processTemplate(string $override = ''): string
     {
-        $error_template = $this->getTemplatePath() . 404 . '.' . $this->getTemplateExtension();
+        $template = $override ?: $this->resolveTemplate();
 
-        if (!file_exists($error_template))
+        try
         {
-            ob_end_clean();
-            throw new ViewTemplateAccessException('FATAL ERROR: Could not load error-template "' . 404 . '"!');
+            return $this->twig->render($template, $this->data);
+        }
+        catch (LoaderError|RuntimeError|SyntaxError $e)
+        {
+            throw new ViewTemplateAccessException($e->getMessage());
+        }
+    }
+
+    protected function resolveTemplate(): string
+    {
+        if (str_contains($this->template, '::'))
+        {
+            [$namespace, $view] = explode('::', $this->template);
+
+            return "@$namespace/$view." . $this->getTemplateExtension();
         }
 
-        include $error_template;
+        return $this->template . '.' . $this->getTemplateExtension();
     }
 
-    /**
-     * @param string $overrideFile
-     * @return string|false
-     * @throws ViewTemplateAccessException
-     */
-    protected function processTemplate(string $overrideFile = ''): string|false
+    private function viewErrorTemplate(): void
     {
-        $data = $this->data;
-
-        $cleanRoom = function ($templateFile) use ($data) {
-            extract($data, EXTR_SKIP);
-            ob_start();
-
-            try
-            {
-                if (!file_exists($templateFile))
-                {
-                    throw new ViewTemplateAccessException('404');
-                }
-                include $templateFile;
-            }
-            catch (ViewTemplateAccessException)
-            {
-                $this->viewErrorTemplate();
-            }
-
-            return ob_get_clean();
-        };
-
-        return $cleanRoom($overrideFile ?: $this->templateFile);
+        try
+        {
+            echo $this->twig->render('404.' . $this->getTemplateExtension());
+        }
+        catch (\Exception)
+        {
+            throw new ViewTemplateAccessException(
+                'FATAL ERROR: Could not load error-template "404"!'
+            );
+        }
     }
 
-    /**
-     * @return void
-     * @throws ViewTemplateAccessException
-     */
-    private function setTemplateFile(): void
-    {
-        $this->templateFile = $this->getTemplatePath() . $this->template . '.' . $this->getTemplateExtension();
-    }
-
-    /**
-     * @return string
-     * @throws ViewTemplateAccessException
-     */
     public function renderAsString(): string
     {
-        return $this->processTemplate() ?: '';
+        return $this->processTemplate();
     }
 
-    /**
-     * @return void
-     * @throws ViewTemplateAccessException
-     */
     public function render(): void
     {
         echo $this->renderAsString();
     }
 
-    /**
-     * @return string
-     * @throws ViewTemplateAccessException
-     */
-    protected function getTemplatePath(): string
-    {
-        $templatePath = $this->getEnvData('TEMPLATE_PATH');
-
-        return $templatePath ? $this->getProtectedPath() . $templatePath : '';
-    }
-
-    /**
-     * @return string
-     * @throws ViewTemplateAccessException
-     */
     protected function getTemplateExtension(): string
     {
         return $this->getEnvData('TEMPLATE_EXTENSION');
     }
 
-    /**
-     * @param string $key
-     * @return string
-     * @throws ViewTemplateAccessException
-     */
     protected function getEnvData(string $key): string
     {
         try
@@ -174,13 +119,5 @@ class View
         {
             throw new ViewTemplateAccessException($e->getMessage());
         }
-    }
-
-    /**
-     * @return string
-     */
-    protected function getProtectedPath(): string
-    {
-        return Asterios::getBasePath();
     }
 }
