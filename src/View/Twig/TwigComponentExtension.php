@@ -8,6 +8,9 @@ use Twig\TwigFunction;
 
 class TwigComponentExtension extends AbstractExtension
 {
+    /**
+     * @return TwigFunction[]
+     */
     public function getFunctions(): array
     {
         return [
@@ -16,8 +19,7 @@ class TwigComponentExtension extends AbstractExtension
                 Environment $twig,
                 string $component,
                 array $data = []
-            )
-            {
+            ) {
                 return $twig->render("components/$component.twig", $data);
 
             }, [
