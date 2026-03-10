@@ -9,7 +9,7 @@ class Asterios
     /**
      * @var  string  The version of Asterios PHP Framework
      */
-    public const string VERSION = '1.6.1';
+    public const string VERSION = '1.7.0';
 
     /**
      * @var  string  The version of Asterios PHP Framework
