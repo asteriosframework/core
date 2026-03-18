@@ -80,7 +80,7 @@ class View
     {
         $data = $this->data;
 
-        $cleanRoom = function ($templateFile) use ($data) {
+        $cleanRoom = static function ($templateFile) use ($data) {
             extract($data, EXTR_SKIP);
 
             ob_start();
