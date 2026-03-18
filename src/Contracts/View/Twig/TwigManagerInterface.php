@@ -16,4 +16,21 @@ interface TwigManagerInterface
      * @throws TwigTemplateManagerException
      */
     public static function getTwig(Env $env): Environment;
+
+    /**
+     * @return string|null
+     */
+    public static function getCachePath(): ?string;
+
+    /**
+     * @return void
+     */
+    public static function clearCache(): void;
+
+    /**
+     * @param Environment $twig
+     * @return void
+     * @throws TwigTemplateManagerException
+     */
+    public static function warmupCache(Environment $twig): void;
 }
