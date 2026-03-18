@@ -2,8 +2,11 @@
 
 namespace Asterios\Core\Cli\Commands;
 
+use Asterios\Core\Asterios;
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
+use Asterios\Core\Env;
+use Asterios\Core\Exception\TwigTemplateManagerException;
 use Asterios\Core\View\Twig\TwigManager;
 
 #[Command(
@@ -18,8 +21,13 @@ class ViewClearCommand extends BaseCommand
      */
     public function handle(?string $argument): void
     {
-        TwigManager::clearCache();
+        $env = new Env(Asterios::getBasePath() . '/.env');
+        try {
+            TwigManager::clearCache($env);
 
-        $this->success('Twig cache cleared.');
+            $this->success('Twig cache cleared.');
+        } catch (TwigTemplateManagerException $e) {
+            $this->error('Twig cache clear failed: '.$e->getMessage());
+        }
     }
 }

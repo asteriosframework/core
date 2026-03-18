@@ -29,7 +29,7 @@ class ViewCacheCommand  extends BaseCommand
             $this->success('Twig cache warmed up.');
         } catch (TwigTemplateManagerException|ViewNamespaceLoaderException $e)
         {
-            $this->error('Twig cache warmed up: '.$e->getMessage());
+            $this->error('Twig cache warmed up failed: '.$e->getMessage());
         }
     }
 }
