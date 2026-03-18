@@ -23,9 +23,18 @@ interface TwigManagerInterface
     public static function getCachePath(): ?string;
 
     /**
-     * @return void
+     * @param Env $env
+     * @return string
+     * @throws TwigTemplateManagerException
      */
-    public static function clearCache(): void;
+    public static function resolveCachePath(Env $env): string;
+
+    /**
+     * @param Env $env
+     * @return void
+     * @throws TwigTemplateManagerException
+ */
+    public static function clearCache(Env $env): void;
 
     /**
      * @param Environment $twig
