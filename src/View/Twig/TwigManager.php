@@ -33,7 +33,6 @@ class TwigManager implements TwigManagerInterface
         try
         {
             $templatePath = $base . $env->get('TEMPLATE_PATH');
-            $cachePath    = $base . $env->get('TWIG_CACHE');
             $twigDebug    = filter_var($env->get('TWIG_DEBUG'), FILTER_VALIDATE_BOOLEAN);
             $twigAutoReload = filter_var($env->get('TWIG_AUTO_RELOAD'), FILTER_VALIDATE_BOOLEAN);
             $twigCacheEnabled =  filter_var($env->get('TWIG_CACHE_ENABLED'), FILTER_VALIDATE_BOOLEAN);
@@ -43,23 +42,23 @@ class TwigManager implements TwigManagerInterface
             throw new TwigTemplateManagerException($e->getMessage());
         }
 
-        self::$cachePath = $cachePath;
+        self::$cachePath = self::resolveCachePath($env);
 
         if (
             $twigCacheEnabled &&
-            !is_dir($cachePath) &&
-            !mkdir($cachePath, 0777, true)
-            && !is_dir($cachePath)
+            !is_dir(self::getCachePath()) &&
+            !mkdir(self::getCachePath(), 0777, true)
+            && !is_dir(self::getCachePath())
         )
         {
-            throw new TwigTemplateManagerException(sprintf('Directory "%s" was not created', $cachePath));
+            throw new TwigTemplateManagerException(sprintf('Directory "%s" was not created', self::getCachePath()));
         }
 
         $loader = new FilesystemLoader($templatePath);
         NamespaceLoader::register($loader, $templatePath);
 
         self::$twig = new Environment($loader, [
-            'cache'       => $twigCacheEnabled ? $cachePath : false,
+            'cache'       => $twigCacheEnabled ? self::getCachePath() : false,
             'debug'       => $twigDebug,
             'auto_reload' => $twigAutoReload,
             'autoescape'  => 'html'
@@ -88,15 +87,29 @@ class TwigManager implements TwigManagerInterface
     /**
      * @inheritDoc
      */
-    public static function clearCache(): void
+    public static function resolveCachePath(Env $env): string
     {
-        if (!self::$cachePath || !is_dir(self::$cachePath))
+        try {
+            return Asterios::getBasePath() . $env->get('TWIG_CACHE');
+        } catch (EnvException|EnvLoadException $e) {
+            throw new TwigTemplateManagerException($e->getMessage());
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function clearCache(Env $env): void
+    {
+        self::$cachePath = self::resolveCachePath($env);
+
+        if (!self::getCachePath() || !is_dir(self::getCachePath()))
         {
             return;
         }
 
         $files = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator(self::$cachePath, \FilesystemIterator::SKIP_DOTS),
+            new \RecursiveDirectoryIterator(self::getCachePath(), \FilesystemIterator::SKIP_DOTS),
             \RecursiveIteratorIterator::CHILD_FIRST
         );
 
