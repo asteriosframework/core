@@ -19,7 +19,7 @@ class AboutCommandTest extends MockeryTestCase
         $expectedData = [
             'System' => [
                 'PHP Version' => PHP_VERSION,
-                'Framework Version' => Asterios::VERSION,
+                'Framework Version' => Asterios::version(),
                 'Environment' => Asterios::getEnvironment(),
                 'Encoding' => Asterios::getEncoding(),
                 'Timezone' => Asterios::getTimezone(),

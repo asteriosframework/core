@@ -279,8 +279,6 @@ trait CommandsBuilderTrait
             str_contains($label, 'version') => '🛠',
             str_contains($label, 'debug') => $value ? '🐞' : '✅',
             str_contains($label, 'cache') => '🗃',
-            str_contains($label, 'env') => '🌍',
-            str_contains($label, 'php') => '🐘',
             str_contains($label, 'db') => '🛢',
             default => '🛠',
         };

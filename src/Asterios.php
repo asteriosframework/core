@@ -3,14 +3,10 @@
 namespace Asterios\Core;
 
 use Asterios\Core\Exception\AsteriosException;
+use Composer\InstalledVersions;
 
 class Asterios
 {
-    /**
-     * @var  string  The version of Asterios PHP Framework
-     */
-    public const string VERSION = '1.9.0';
-
     /**
      * @var  string  The version of Asterios PHP Framework
      */
@@ -53,6 +49,17 @@ class Asterios
      * @var bool It will be true if Asterios has been initialized
      */
     private static bool $initialized = false;
+
+
+    public static function version(): ?string
+    {
+        return InstalledVersions::getPrettyVersion('asterios/core');
+    }
+
+    public static function twigVersion(): ?string
+    {
+        return InstalledVersions::getPrettyVersion('twig/twig');
+    }
 
     /**
      * @param string $environment
