@@ -23,10 +23,11 @@ class AboutCommand extends BaseCommand
         $this->printDataTable([
             'System' => [
                 'PHP Version' => PHP_VERSION,
-                'Framework Version' => Asterios::VERSION,
+                'Framework Version' => Asterios::version(),
                 'Environment' => Asterios::getEnvironment(),
                 'Encoding' => Asterios::getEncoding(),
                 'Timezone' => Asterios::getTimezone(),
+                'Template engine: ' => 'Twig ' . Asterios::twigVersion()
             ],
         ]);
     }
