@@ -18,6 +18,12 @@ interface TwigManagerInterface
     public static function getTwig(Env $env): Environment;
 
     /**
+     * @param callable $callback
+     * @return void
+     */
+    public static function configure(callable $callback): void;
+
+    /**
      * @return string|null
      */
     public static function getCachePath(): ?string;

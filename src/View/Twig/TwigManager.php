@@ -17,6 +17,8 @@ class TwigManager implements TwigManagerInterface
 {
     private static ?Environment $twig = null;
     private static ?string $cachePath = null;
+    private static array $configurators = [];
+    private static bool $initialized = false;
 
     /**
      * @inheritDoc
@@ -49,8 +51,7 @@ class TwigManager implements TwigManagerInterface
             !is_dir(self::getCachePath()) &&
             !mkdir(self::getCachePath(), 0777, true)
             && !is_dir(self::getCachePath())
-        )
-        {
+        ) {
             throw new TwigTemplateManagerException(sprintf('Directory "%s" was not created', self::getCachePath()));
         }
 
@@ -64,16 +65,39 @@ class TwigManager implements TwigManagerInterface
             'autoescape'  => 'html'
         ]);
 
-        if ($twigDebug)
+        if (!self::$initialized)
         {
-            self::$twig->addExtension(new DebugExtension());
+            if ($twigDebug)
+            {
+                self::$twig->addExtension(new DebugExtension());
+            }
+
+            self::$twig->addExtension(new TwigExtension());
+            self::$twig->addExtension(new TwigDirectiveExtension());
+            self::$twig->addExtension(new TwigComponentExtension());
+
+            foreach (self::$configurators as $configurator)
+            {
+                $configurator(self::$twig);
+            }
+
+            self::$initialized = true;
         }
 
-        self::$twig->addExtension(new TwigExtension());
-        self::$twig->addExtension(new TwigDirectiveExtension());
-        self::$twig->addExtension(new TwigComponentExtension());
-
         return self::$twig;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function configure(callable $callback): void
+    {
+        self::$configurators[] = $callback;
+
+        if (self::$twig !== null)
+        {
+            $callback(self::$twig);
+        }
     }
 
     /**
@@ -89,9 +113,12 @@ class TwigManager implements TwigManagerInterface
      */
     public static function resolveCachePath(Env $env): string
     {
-        try {
+        try
+        {
             return Asterios::getBasePath() . $env->get('TWIG_CACHE');
-        } catch (EnvException|EnvLoadException $e) {
+        }
+        catch (EnvException|EnvLoadException $e)
+        {
             throw new TwigTemplateManagerException($e->getMessage());
         }
     }
