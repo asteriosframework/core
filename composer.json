@@ -1,8 +1,5 @@
 {
   "name": "asterios/core",
-  "bin": [
-    "bin/asterios"
-  ],
   "description": "Asterios PHP Core",
   "type": "asterios-package",
   "homepage": "https://www.asteriosphp.de",
@@ -15,7 +12,11 @@
       "name": "Jörg Heinrich"
     }
   ],
-  "minimum-stability": "stable",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "bin": [
+    "bin/asterios"
+  ],
   "config": {
     "preferred-install": {
       "*": "dist"
@@ -54,10 +55,15 @@
     "friendsofphp/php-cs-fixer": "^3.40",
     "phan/phan": "^5.4"
   },
+  "extra": {
+    "branch-alias": {
+      "dev-develop": "1.0.x-dev"
+    }
+  },
   "scripts": {
     "tests": [
       "Composer\\Config::disableProcessTimeout",
-      "XDEBUG_MODE=coverage ./vendor/bin/phpunit  --colors=never -c ./phpunit.xml"
+      "XDEBUG_MODE=coverage ./vendor/bin/phpunit --colors=never -c ./phpunit.xml"
     ],
     "tests:coverage": [
       "Composer\\Config::disableProcessTimeout",
