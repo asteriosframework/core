@@ -8,9 +8,9 @@ class Controller
 {
     protected const string CONTENT_TYPE_JSON = 'application/json';
 
-    private string $content_type = self::CONTENT_TYPE_JSON;
+    private string $contentType = self::CONTENT_TYPE_JSON;
 
-    private array $content_types = [
+    private array $contentTypes = [
         'application/xml',
         'application/xml',
         'application/json',
@@ -19,15 +19,9 @@ class Controller
         'text/plain',
         'text/html',
         'application/csv',
+        'application/x-www-form-urlencoded',
+        'multipart/form-data',
     ];
-
-    public function __construct()
-    {
-        if (isset($_SERVER['CONTENT_TYPE']))
-        {
-            $this->set_content_type($_SERVER['CONTENT_TYPE']);
-        }
-    }
 
     public static array $statuses = [
         100 => 'Continue',
@@ -96,10 +90,10 @@ class Controller
      * @param int $status_code
      * @throws JsonException
      */
-    public function response($data, int $status_code = 200): void
+    public function response(mixed $data, int $status_code = 200): void
     {
 
-        header("Content-Type: " . $this->content_type);
+        header("Content-Type: " . $this->contentType);
         header("Expires: on, 01 Jan 1970 00:00:00 GMT");
         header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
         header("Cache-Control: no-store, no-cache, must-revalidate");
@@ -120,18 +114,18 @@ class Controller
             }
         }
 
-        $this->return_response($data);
+        $this->returnResponse($data);
     }
 
     /**
-     * @param string|array|\stdClass $data
+     * @param mixed $data
      * @throws JsonException
      */
-    private function return_response($data): void
+    private function returnResponse(mixed $data): void
     {
         if (is_array($data) || !empty($data))
         {
-            if ($this->content_type === self::CONTENT_TYPE_JSON)
+            if ($this->contentType === self::CONTENT_TYPE_JSON)
             {
                 echo json_encode($data, JSON_THROW_ON_ERROR);
             }
@@ -142,16 +136,30 @@ class Controller
         }
     }
 
+    /**
+     * @param string $content_type
+     * @return bool
+     */
     protected function is_supported_content_type(string $content_type): bool
     {
-        return in_array($content_type, $this->content_types, true);
+        return $this->isSupportedContentType($content_type);
     }
 
-    public function set_content_type(string $content_type): self
+    protected function isSupportedContentType(string $content_type): bool
     {
-        if ($this->is_supported_content_type($this->content_type))
+        return in_array($content_type, $this->contentTypes, true);
+    }
+
+    public function set_content_type(string $contentType): self
+    {
+        return $this->setContentType($contentType);
+    }
+
+    public function setContentType(string $contentType): self
+    {
+        if ($this->isSupportedContentType($contentType))
         {
-            $this->content_type = $content_type;
+            $this->contentType = $contentType;
         }
 
         return $this;
