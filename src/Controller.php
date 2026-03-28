@@ -85,6 +85,11 @@ class Controller
         511 => 'Network Authentication Required',
     ];
 
+    public function __construct()
+    {
+
+    }
+
     /**
      * @param mixed $data
      * @param int $status_code
