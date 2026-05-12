@@ -222,4 +222,27 @@ interface SchemaBuilderInterface
      * @return ColumnDefinitionBuilder
      */
     public function fullText(string $name): ColumnDefinitionBuilder;
+
+    /**
+     * @return bool
+     */
+    public function isAlterMode(): bool;
+
+    /**
+     * @param string|array $columns
+     * @return void
+     */
+    public function dropColumn(string|array $columns): void;
+
+    /**
+     * @param string $name
+     * @return void
+     */
+    public function dropIndex(string $name): void;
+
+    /**
+     * @param string $name
+     * @return void
+     */
+    public function dropForeign(string $name): void;
 }

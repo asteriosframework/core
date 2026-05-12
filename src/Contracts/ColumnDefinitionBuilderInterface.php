@@ -33,4 +33,9 @@ interface ColumnDefinitionBuilderInterface
      * @throws ConfigLoadException
      */
     public function build(): void;
+
+    /**
+     * @return self
+     */
+    public function change(): self;
 }

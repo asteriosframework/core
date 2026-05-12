@@ -17,6 +17,13 @@ interface SchemaInterface
 
     /**
      * @param string $table
+     * @param Closure $callback
+     * @return void
+     */
+    public static function table(string $table, Closure $callback): void;
+
+    /**
+     * @param string $table
      * @return void
      */
     public static function drop(string $table): void;

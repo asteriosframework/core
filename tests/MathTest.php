@@ -5,6 +5,7 @@ namespace Asterios\Test;
 use Asterios\Core\Dto\MathDto;
 use Asterios\Core\Enum\MathEnum;
 use Asterios\Core\Math;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class MathTest extends TestCase
@@ -16,7 +17,7 @@ class MathTest extends TestCase
     {
         parent::setUp();
 
-        $this->dto = new MathDto;
+        $this->dto = new MathDto();
         $this->dto->setTax(19);
         $this->dto->setCurrency('EUR');
 
@@ -37,9 +38,7 @@ class MathTest extends TestCase
         self::assertEquals(19.95, $actual);
     }
 
-    /**
-     * @dataProvider percentageValueProvider
-     */
+    #[DataProvider('percentageValueProvider')]
     public function test_percentageValue(float $netto, ?float $percentage, float $expected): void
     {
         $actual = $this->testedClass->percentageValue($netto, $percentage);
@@ -54,9 +53,7 @@ class MathTest extends TestCase
         self::assertEquals(19, $actual);
     }
 
-    /**
-     * @dataProvider squareMetreProvider
-     */
+    #[DataProvider('squareMetreProvider')]
     public function test_squareMetre(float $length, float $width, int $precision, float $expected): void
     {
         $actual = $this->testedClass->squareMetre($length, $width, $precision);
@@ -64,9 +61,7 @@ class MathTest extends TestCase
         self::assertEquals($expected, $actual);
     }
 
-    /**
-     * @dataProvider cubicMetreProvider
-     */
+    #[DataProvider('cubicMetreProvider')]
     public function test_cubicMetre(float $length, float $width, float $height, int $precision, float $expected): void
     {
         $actual = $this->testedClass->cubicMetre($length, $width, $height, $precision);
@@ -74,9 +69,7 @@ class MathTest extends TestCase
         self::assertEquals($expected, $actual);
     }
 
-    /**
-     * @dataProvider cubicInLitreProvider
-     */
+    #[DataProvider('cubicInLitreProvider')]
     public function test_cubicInLitre(float $cubicMetre, float $expected): void
     {
 
@@ -114,9 +107,7 @@ class MathTest extends TestCase
         self::assertEquals(161, $actual);
     }
 
-    /**
-     * @dataProvider temperatureProvider
-     */
+    #[DataProvider('temperatureProvider')]
     public function test_temperature(float $value, MathEnum $source, MathEnum $target, float $expected): void
     {
         $actual = $this->testedClass->temperature($value, $source, $target);

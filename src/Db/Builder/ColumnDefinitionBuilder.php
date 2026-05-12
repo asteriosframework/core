@@ -13,8 +13,10 @@ class ColumnDefinitionBuilder implements ColumnDefinitionBuilderInterface
     protected string $type;
     protected bool $notNull = true;
     protected bool $isNullable = false;
-    protected string|int|null|object $default = null; // kann jetzt auch Funktionsausdruck sein
+    protected string|int|null|object $default = null;
     protected bool $isUnique = false;
+
+    protected bool $change = false;
 
     public function __construct(SchemaBuilder $builder, string $name, string $type)
     {
@@ -54,14 +56,12 @@ class ColumnDefinitionBuilder implements ColumnDefinitionBuilderInterface
         }
         elseif ($isExpression)
         {
-            // SQL-Funktion
             $obj = new \stdClass();
             $obj->expr = $value;
             $this->default = $obj;
         }
         else
         {
-            // Literalwert
             $this->default = $value;
         }
 
@@ -91,28 +91,54 @@ class ColumnDefinitionBuilder implements ColumnDefinitionBuilderInterface
             default => $this->type,
         };
 
-        $sql = '`' . $this->name . '` ' . $sqlType;
-        $sql .= $this->notNull ? ' NOT NULL' : ' NULL';
+        $definition = '`' . $this->name . '` ' . $sqlType;
+        $definition .= $this->notNull ? ' NOT NULL' : ' NULL';
 
         if ($this->default !== null)
         {
             if (is_object($this->default) && isset($this->default->expr))
             {
-                $sql .= ' DEFAULT ' . $this->default->expr;
+                $definition .= ' DEFAULT ' . $this->default->expr;
             }
             else
             {
-                $sql .= ' DEFAULT \'' . addslashes((string)$this->default) . '\'';
+                $definition .= ' DEFAULT \'' . addslashes((string)$this->default) . '\'';
             }
+        }
+
+        if ($this->builder->isAlterMode())
+        {
+            $sql = $this->change
+                ? 'MODIFY COLUMN ' . $definition
+                : 'ADD COLUMN ' . $definition;
+        }
+        else
+        {
+            $sql = $definition;
         }
 
         $this->builder->addColumn($sql);
 
         if ($this->isUnique)
         {
-            $index = "UNIQUE INDEX `unique_{$this->name}` (`{$this->name}`)";
+            $index = "ADD UNIQUE INDEX `unique_{$this->name}` (`{$this->name}`)";
+
+            if (!$this->builder->isAlterMode())
+            {
+                $index = "UNIQUE INDEX `unique_{$this->name}` (`{$this->name}`)";
+            }
+
             $this->builder->addIndex($index);
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function change(): self
+    {
+        $this->change = true;
+        return $this;
     }
 
     /**
