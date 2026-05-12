@@ -27,7 +27,7 @@ class AboutCommand extends BaseCommand
                 'Environment' => Asterios::getEnvironment(),
                 'Encoding' => Asterios::getEncoding(),
                 'Timezone' => Asterios::getTimezone(),
-                'Template engine: ' => 'Twig ' . Asterios::twigVersion()
+                'Template Engine' => 'Twig ' . Asterios::twigVersion()
             ],
         ]);
     }
