@@ -42,6 +42,36 @@ class Schema implements SchemaInterface
     /**
      * @inheritDoc
      */
+    public static function table(string $table, Closure $callback): void
+    {
+        $schemaBuilder = new SchemaBuilder($table, true);
+        $callback($schemaBuilder);
+
+        [$columns, $foreignKeys, $indexes] = $schemaBuilder->build();
+
+        $statements = array_filter(array_merge($columns, $foreignKeys, $indexes));
+
+        if (empty($statements))
+        {
+            return;
+        }
+
+        $sql = 'ALTER TABLE `' . $table . "`\n" . implode(",\n", $statements);
+
+        try
+        {
+            Db::write($sql);
+        }
+        catch (ConfigLoadException $e)
+        {
+            Logger::forge()
+                ->fatal('Alter migration for table ' . $table . ' failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
     public static function drop(string $table): void
     {
         $sql = 'DROP TABLE IF EXISTS `' . $table . '`';

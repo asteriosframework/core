@@ -23,6 +23,7 @@ class AboutCommandTest extends MockeryTestCase
                 'Environment' => Asterios::getEnvironment(),
                 'Encoding' => Asterios::getEncoding(),
                 'Timezone' => Asterios::getTimezone(),
+                'Template Engine' => 'Twig ' . Asterios::twigVersion(),
             ],
         ];
 

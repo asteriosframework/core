@@ -11,8 +11,8 @@ use Random\RandomException;
 
 class Str implements StrInterface, SingletonInterface
 {
-    /** @var Str */
-    private static Str $str;
+    /** @var Str|null */
+    private static ?Str $str = null;
 
     public static function getInstance(): self
     {
