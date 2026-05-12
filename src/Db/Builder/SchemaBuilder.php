@@ -12,9 +12,12 @@ class SchemaBuilder implements SchemaBuilderInterface
     protected array $indexes = [];
     protected array $timestampPrecisions = [];
 
-    public function __construct(string $table)
+    protected bool $alterMode = false;
+
+    public function __construct(string $table, bool $alterMode = false)
     {
         $this->table = $table;
+        $this->alterMode = $alterMode;
     }
 
     /**
@@ -328,6 +331,40 @@ class SchemaBuilder implements SchemaBuilderInterface
         return $this->column($name, 'TEXT');
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function isAlterMode(): bool
+    {
+        return $this->alterMode;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function dropColumn(string|array $columns): void
+    {
+        foreach ((array)$columns as $column)
+        {
+            $this->columns[] = 'DROP COLUMN `' . $column . '`';
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function dropIndex(string $name): void
+    {
+        $this->indexes[] = 'DROP INDEX `' . $name . '`';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function dropForeign(string $name): void
+    {
+        $this->foreignKeys[] = 'DROP FOREIGN KEY `' . $name . '`';
+    }
 
     /**
      * @param string $column
