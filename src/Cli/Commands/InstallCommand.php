@@ -72,7 +72,7 @@ MAILER_DSN=""
 MAIL_FROM_ADDRESS=""
 MAIL_FROM_NAME=""
 MAIL_TEMPLATES_PATH="/templates/emails"
-CLI_COMMAND_PATH="/app/Cli/Commands"
+CLI_COMMAND_PATH="app/Cli/Commands"
 
 ENV;
     }
