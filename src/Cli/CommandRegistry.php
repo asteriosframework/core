@@ -6,7 +6,6 @@ use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Config;
 use Asterios\Core\Contracts\Cli\CommandRegistryInterface;
 use Asterios\Core\Contracts\CommandInterface;
-use Asterios\Core\Exception\ConfigLoadException;
 use ReflectionClass;
 
 class CommandRegistry implements CommandRegistryInterface
@@ -107,7 +106,6 @@ class CommandRegistry implements CommandRegistryInterface
 
     /**
      * @return array
-     * @throws ConfigLoadException
      */
     private function getCommandDirectories(): array
     {
@@ -115,18 +113,27 @@ class CommandRegistry implements CommandRegistryInterface
             __DIR__ . '/Commands',
         ];
 
-        $configuredPath = Config::get('cli', 'command_path');
+        $projectRoot = dirname($_SERVER['SCRIPT_FILENAME']);
 
-        if (!empty($configuredPath))
-        {
-            $projectRoot = dirname($_SERVER['SCRIPT_FILENAME']);
+        $configuredPath = $this->getConfiguredCommandPath();
 
-            $directories[] = rtrim($projectRoot, DIRECTORY_SEPARATOR)
-                . DIRECTORY_SEPARATOR
-                . ltrim((string)$configuredPath, DIRECTORY_SEPARATOR);
-        }
+        $directories[] = rtrim($projectRoot, DIRECTORY_SEPARATOR)
+            . DIRECTORY_SEPARATOR
+            . ltrim($configuredPath, DIRECTORY_SEPARATOR);
 
         return array_unique($directories);
+    }
+
+    private function getConfiguredCommandPath(): string
+    {
+        try
+        {
+            return Config::get('cli.command_path') ?? 'app/Cli/Commands';
+        }
+        catch (\Throwable)
+        {
+            return 'app/Cli/Commands';
+        }
     }
 
     /**
