@@ -115,11 +115,13 @@ class CommandRegistry implements CommandRegistryInterface
             __DIR__ . '/Commands',
         ];
 
-        $configuredPath = Config::get('cli.command_path');
+        $configuredPath = Config::get('cli', 'command_path');
 
         if (!empty($configuredPath))
         {
-            $directories[] = rtrim(getcwd(), DIRECTORY_SEPARATOR)
+            $projectRoot = dirname($_SERVER['SCRIPT_FILENAME']);
+
+            $directories[] = rtrim($projectRoot, DIRECTORY_SEPARATOR)
                 . DIRECTORY_SEPARATOR
                 . ltrim((string)$configuredPath, DIRECTORY_SEPARATOR);
         }
