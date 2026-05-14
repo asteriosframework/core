@@ -3,8 +3,10 @@
 namespace Asterios\Core\Cli;
 
 use Asterios\Core\Cli\Attributes\Command;
+use Asterios\Core\Config;
 use Asterios\Core\Contracts\Cli\CommandRegistryInterface;
 use Asterios\Core\Contracts\CommandInterface;
+use Asterios\Core\Exception\ConfigLoadException;
 use ReflectionClass;
 
 class CommandRegistry implements CommandRegistryInterface
@@ -21,16 +23,10 @@ class CommandRegistry implements CommandRegistryInterface
             return $this->discovered;
         }
 
+        $this->loadCommandClasses();
+
         $commands = [];
-
-        $files = $this->getAllPhpFiles(__DIR__ . '/Commands');
-
-        // @codeCoverageIgnoreStart
-        foreach ($files as $file)
-        {
-            require_once $file;
-        }
-        // @codeCoverageIgnoreEnd
+        $registeredNames = [];
 
         foreach (get_declared_classes() as $class)
         {
@@ -39,24 +35,29 @@ class CommandRegistry implements CommandRegistryInterface
                 continue;
             }
 
-            $ref = new ReflectionClass($class);
-            $attrs = $ref->getAttributes(Command::class);
+            $reflection = new ReflectionClass($class);
+            $attributes = $reflection->getAttributes(Command::class);
 
-            // @codeCoverageIgnoreStart
-            if (empty($attrs))
+            if (empty($attributes))
             {
                 continue;
             }
-            // @codeCoverageIgnoreEnd
 
-            /** @var Command $attr */
-            $attr = $attrs[0]->newInstance();
+            /** @var Command $attribute */
+            $attribute = $attributes[0]->newInstance();
+
+            if (isset($registeredNames[$attribute->name]))
+            {
+                continue;
+            }
+
+            $registeredNames[$attribute->name] = true;
 
             $commands[] = [
-                'name' => $attr->name,
-                'description' => $attr->description,
-                'group' => $attr->group,
-                'aliases' => $attr->aliases,
+                'name' => $attribute->name,
+                'description' => $attribute->description,
+                'group' => $attribute->group,
+                'aliases' => $attribute->aliases,
                 'class' => $class,
             ];
         }
@@ -71,7 +72,12 @@ class CommandRegistry implements CommandRegistryInterface
     {
         foreach ($this->all() as $command)
         {
-            if ($command['name'] === $name || in_array($name, $command['aliases'] ?? [], true))
+            if ($command['name'] === $name)
+            {
+                return $command;
+            }
+
+            if (in_array($name, $command['aliases'] ?? [], true))
             {
                 return $command;
             }
@@ -81,15 +87,59 @@ class CommandRegistry implements CommandRegistryInterface
     }
 
     /**
-     * @param string $dir
+     * @return void
+     */
+    private function loadCommandClasses(): void
+    {
+        foreach ($this->getCommandDirectories() as $directory)
+        {
+            if (!is_dir($directory))
+            {
+                continue;
+            }
+
+            foreach ($this->getAllPhpFiles($directory) as $file)
+            {
+                require_once $file;
+            }
+        }
+    }
+
+    /**
+     * @return array
+     * @throws ConfigLoadException
+     */
+    private function getCommandDirectories(): array
+    {
+        $directories = [
+            __DIR__ . '/Commands',
+        ];
+
+        $configuredPath = Config::get('cli.command_path');
+
+        if (!empty($configuredPath))
+        {
+            $directories[] = rtrim(getcwd(), DIRECTORY_SEPARATOR)
+                . DIRECTORY_SEPARATOR
+                . ltrim((string)$configuredPath, DIRECTORY_SEPARATOR);
+        }
+
+        return array_unique($directories);
+    }
+
+    /**
+     * @param string $directory
      * @return array
      */
-    public function getAllPhpFiles(string $dir): array
+    private function getAllPhpFiles(string $directory): array
     {
         $files = [];
-        $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
 
-        foreach ($rii as $file)
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($directory)
+        );
+
+        foreach ($iterator as $file)
         {
             if ($file->isDir())
             {
