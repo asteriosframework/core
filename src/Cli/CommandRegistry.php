@@ -2,6 +2,7 @@
 
 namespace Asterios\Core\Cli;
 
+use Asterios\Core\Asterios;
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Config;
 use Asterios\Core\Contracts\Cli\CommandRegistryInterface;
@@ -113,13 +114,14 @@ class CommandRegistry implements CommandRegistryInterface
             __DIR__ . '/Commands',
         ];
 
-        $projectRoot = dirname($_SERVER['SCRIPT_FILENAME']);
-
         $configuredPath = $this->getConfiguredCommandPath();
 
-        $directories[] = rtrim($projectRoot, DIRECTORY_SEPARATOR)
-            . DIRECTORY_SEPARATOR
-            . ltrim($configuredPath, DIRECTORY_SEPARATOR);
+        if (!empty($configuredPath))
+        {
+            $directories[] = Asterios::getBasePath(
+                ltrim($configuredPath, DIRECTORY_SEPARATOR)
+            );
+        }
 
         return array_unique($directories);
     }
@@ -128,7 +130,7 @@ class CommandRegistry implements CommandRegistryInterface
     {
         try
         {
-            return Config::get('cli.command_path') ?? 'app/Cli/Commands';
+            return Config::get('cli', 'command_path') ?? 'app/Cli/Commands';
         }
         catch (\Throwable)
         {
