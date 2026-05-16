@@ -45,7 +45,9 @@
     "twig/twig": "^3.23",
     "symfony/twig-bridge": "^7.3",
     "spomky-labs/otphp": "^11.3",
-    "endroid/qr-code": "^6.0"
+    "endroid/qr-code": "^6.0",
+    "ext-dom": "*",
+    "ext-libxml": "*"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
