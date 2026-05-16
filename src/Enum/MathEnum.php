@@ -2,31 +2,21 @@
 
 namespace Asterios\Core\Enum;
 
-enum MathEnum
-{
-    case KMH;
-    case MPH;
-    case MILES;
-    case KM;
-    case CELSIUS;
-    case KELVIN;
-    case RANKINE;
-    case FAHRENHEIT;
-    case REAUMUR;
+use Asterios\Core\Enum\Math\TemperatureScale;
 
-    public function unit(): string
+/**
+ * @deprecated Use TemperatureScale instead.
+ */
+enum MathEnum: string
+{
+    case CELSIUS = 'celsius';
+    case KELVIN = 'kelvin';
+    case RANKINE = 'rankine';
+    case FAHRENHEIT = 'fahrenheit';
+    case REAUMUR = 'reaumur';
+
+    public function toTemperatureScale(): TemperatureScale
     {
-        return match ($this)
-        {
-            self::KMH => 'kmh',
-            self::MPH => 'mph',
-            self::MILES => 'miles',
-            self::KM => 'km',
-            self::CELSIUS => 'celsius',
-            self::KELVIN => 'kelvin',
-            self::RANKINE => 'rankine',
-            self::FAHRENHEIT => 'fahrenheit',
-            self::REAUMUR => 'reaumur',
-        };
+        return TemperatureScale::from($this->value);
     }
 }

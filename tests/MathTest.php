@@ -2,53 +2,48 @@
 
 namespace Asterios\Test;
 
-use Asterios\Core\Dto\MathDto;
-use Asterios\Core\Enum\MathEnum;
-use Asterios\Core\Math;
+use Asterios\Core\Enum\Math\TemperatureScale;
+use Asterios\Core\Math\Math;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class MathTest extends TestCase
 {
     protected Math $testedClass;
-    protected MathDto $dto;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->dto = new MathDto();
-        $this->dto->setTax(19);
-        $this->dto->setCurrency('EUR');
 
-        $this->testedClass = Math::forge($this->dto);
+        $this->testedClass = new Math();
     }
 
-    public function test_netto(): void
+    public function test_net(): void
     {
-        $actual = $this->testedClass->netto(19.95);
+        $actual = $this->testedClass->tax()->net(19.95, 19);
 
         self::assertEquals(16.76, $actual);
     }
-
-    public function test_brutto(): void
+    public function test_gross(): void
     {
-        $actual = $this->testedClass->brutto(16.764);
+        $actual = $this->testedClass->tax()->gross(16.764, 19);
 
         self::assertEquals(19.95, $actual);
     }
 
+
     #[DataProvider('percentageValueProvider')]
-    public function test_percentageValue(float $netto, ?float $percentage, float $expected): void
+    public function test_percentage_of(float $netto, ?float $percentage, float $expected): void
     {
-        $actual = $this->testedClass->percentageValue($netto, $percentage);
+        $actual = $this->testedClass->tax()->percentageOf($netto, $percentage);
 
         self::assertEquals($expected, $actual);
     }
 
     public function test_percentage(): void
     {
-        $actual = $this->testedClass->percentage(3.19, 16.764, 0);
+        $actual = $this->testedClass->tax()->percentage(3.19, 16.764, 0);
 
         self::assertEquals(19, $actual);
     }
@@ -56,7 +51,7 @@ class MathTest extends TestCase
     #[DataProvider('squareMetreProvider')]
     public function test_squareMetre(float $length, float $width, int $precision, float $expected): void
     {
-        $actual = $this->testedClass->squareMetre($length, $width, $precision);
+        $actual = $this->testedClass->geometry()->squareMetres($length, $width, $precision);
 
         self::assertEquals($expected, $actual);
     }
@@ -64,7 +59,7 @@ class MathTest extends TestCase
     #[DataProvider('cubicMetreProvider')]
     public function test_cubicMetre(float $length, float $width, float $height, int $precision, float $expected): void
     {
-        $actual = $this->testedClass->cubicMetre($length, $width, $height, $precision);
+        $actual = $this->testedClass->geometry()->cubicMetres($length, $width, $height, $precision);
 
         self::assertEquals($expected, $actual);
     }
@@ -73,44 +68,30 @@ class MathTest extends TestCase
     public function test_cubicInLitre(float $cubicMetre, float $expected): void
     {
 
-        $actual = $this->testedClass->cubicInLitre($cubicMetre);
+        $actual = $this->testedClass->geometry()->cubicMetresToLitres($cubicMetre);
 
         self::assertEquals($expected, $actual);
 
     }
 
-    public function test_mph(): void
+    public function test_kmToMiles(): void
     {
-        $actual = $this->testedClass->mph(50, 1);
-
-        self::assertEquals(50, $actual);
-    }
-
-    public function test_kmh(): void
-    {
-        $actual = $this->testedClass->kmh(70, 1);
-
-        self::assertEquals(70, $actual);
-    }
-
-    public function test_kmInMiles(): void
-    {
-        $actual = $this->testedClass->kmInMiles(100, 0);
+        $actual = $this->testedClass->units()->kmToMiles(100, 0);
 
         self::assertEquals(62, $actual);
     }
 
-    public function test_milesInKm(): void
+    public function test_milesToKm(): void
     {
-        $actual = $this->testedClass->milesInKm(100, 0);
+        $actual = $this->testedClass->units()->milesToKm(100, 0);
 
         self::assertEquals(161, $actual);
     }
 
     #[DataProvider('temperatureProvider')]
-    public function test_temperature(float $value, MathEnum $source, MathEnum $target, float $expected): void
+    public function test_temperature(float $value, TemperatureScale $source, TemperatureScale $target, float $expected): void
     {
-        $actual = $this->testedClass->temperature($value, $source, $target);
+        $actual = $this->testedClass->temperature()->convert($value, $source, $target);
 
         self::assertEquals($expected, $actual);
     }
@@ -124,7 +105,6 @@ class MathTest extends TestCase
     {
         return [
             [16.764, 7, 1.17],
-            [16.764, null, 3.19],
             [16.764, 19, 3.19],
         ];
     }
@@ -165,16 +145,16 @@ class MathTest extends TestCase
     public static function temperatureProvider(): array
     {
         return [
-            [23, MathEnum::CELSIUS, MathEnum::KELVIN, 296.15],
-            [23, MathEnum::CELSIUS, MathEnum::RANKINE, 533.07],
-            [23, MathEnum::CELSIUS, MathEnum::FAHRENHEIT, 73.4],
-            [23, MathEnum::CELSIUS, MathEnum::REAUMUR, 18.4],
-            [99.5, MathEnum::FAHRENHEIT, MathEnum::CELSIUS, 37.5],
-            [-800, MathEnum::FAHRENHEIT, MathEnum::CELSIUS, -273.15],
-            [-300, MathEnum::CELSIUS, MathEnum::KELVIN, 0],
-            [-300, MathEnum::CELSIUS, MathEnum::RANKINE, 0],
-            [-300, MathEnum::CELSIUS, MathEnum::FAHRENHEIT, -459.67],
-            [-300, MathEnum::CELSIUS, MathEnum::REAUMUR, -218.52],
+            [23, TemperatureScale::CELSIUS, TemperatureScale::KELVIN, 296.15],
+            [23, TemperatureScale::CELSIUS, TemperatureScale::RANKINE, 533.07],
+            [23, TemperatureScale::CELSIUS, TemperatureScale::FAHRENHEIT, 73.4],
+            [23, TemperatureScale::CELSIUS, TemperatureScale::REAUMUR, 18.4],
+            [99.5, TemperatureScale::FAHRENHEIT, TemperatureScale::CELSIUS, 37.5],
+            [-800, TemperatureScale::FAHRENHEIT, TemperatureScale::CELSIUS, -273.15],
+            [-300, TemperatureScale::CELSIUS, TemperatureScale::KELVIN, 0],
+            [-300, TemperatureScale::CELSIUS, TemperatureScale::RANKINE, 0],
+            [-300, TemperatureScale::CELSIUS, TemperatureScale::FAHRENHEIT, -459.67],
+            [-300, TemperatureScale::CELSIUS, TemperatureScale::REAUMUR, -218.52],
         ];
     }
 }
