@@ -7,4 +7,3 @@ enum IpVersion: int
     case IPv4 = 4;
     case IPv6 = 6;
 }
-
