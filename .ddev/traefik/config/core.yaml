@@ -9,7 +9,7 @@ http:
       entrypoints:
         - http-80
       rule: HostRegexp(`^core\.ddev\.site$`)
-      
+
       service: "core-web-80"
       tls: false
       # middlewares:
@@ -18,7 +18,7 @@ http:
       entrypoints:
         - http-8025
       rule: HostRegexp(`^core\.ddev\.site$`)
-      
+
       service: "core-web-8025"
       tls: false
       # middlewares:
@@ -27,43 +27,43 @@ http:
       entrypoints:
         - http-8143
       rule: HostRegexp(`^core\.ddev\.site$`)
-      
+
       service: "core-xhgui-80"
       tls: false
       # middlewares:
       #   - "core-redirectHttps"
-    
-    
-    
+
+
+
     core-web-80-https:
       entrypoints:
         - http-443
       rule: HostRegexp(`^core\.ddev\.site$`)
-      
+
       service: "core-web-80"
-      
+
       tls: true
-      
+
     core-web-8025-https:
       entrypoints:
         - http-8026
       rule: HostRegexp(`^core\.ddev\.site$`)
-      
+
       service: "core-web-8025"
-      
+
       tls: true
-      
-    
+
+
     core-xhgui-80-https:
       entrypoints:
         - http-8142
       rule: HostRegexp(`^core\.ddev\.site$`)
-      
+
       service: "core-xhgui-80"
-      
+
       tls: true
-      
-    
+
+
 
   middlewares:
     core-redirectHttps:
@@ -76,21 +76,21 @@ http:
       loadbalancer:
         servers:
           - url: http://ddev-core-web:80
-        
+
     core-web-8025:
       loadbalancer:
         servers:
           - url: http://ddev-core-web:8025
-        
-    
-    
+
+
+
     core-xhgui-80:
       loadbalancer:
         servers:
           - url: http://ddev-core-xhgui:80
-        
-    
-    
+
+
+
 
 tls:
   certificates:
