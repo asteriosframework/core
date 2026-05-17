@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo "Delete vendor directory"
+ddev exec rm -rf ./vendor || true
+ddev auth ssh
+ddev composer install
