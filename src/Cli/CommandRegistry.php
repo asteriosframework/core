@@ -142,7 +142,7 @@ class CommandRegistry implements CommandRegistryInterface
      * @param string $directory
      * @return array
      */
-    private function getAllPhpFiles(string $directory): array
+    public function getAllPhpFiles(string $directory): array
     {
         $files = [];
 
