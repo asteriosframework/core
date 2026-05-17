@@ -42,13 +42,15 @@ class IndexBuilder implements IndexBuilderInterface
      */
     public function add(): void
     {
-        $prefix = match (true) {
+        $prefix = match (true)
+        {
             $this->isFullText => 'FULLTEXT ',
             $this->isUnique   => 'UNIQUE ',
             default           => '',
         };
 
-        $indexNamePrefix = match (true) {
+        $indexNamePrefix = match (true)
+        {
             $this->isFullText => 'fulltext_index_',
             $this->isUnique   => 'unique_index_',
             default           => 'index_',
