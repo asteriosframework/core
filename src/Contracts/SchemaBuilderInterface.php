@@ -21,7 +21,7 @@ interface SchemaBuilderInterface
      * @param string $mode
      * @return ColumnDefinitionBuilder
      */
-    public function uuid(string $name = 'uuid', string $mode = 'char'): ColumnDefinitionBuilder;
+    public function uuid(string $name = 'uuid', string $mode = 'native'): ColumnDefinitionBuilder;
 
     /**
      * @param string $name
@@ -29,6 +29,53 @@ interface SchemaBuilderInterface
      * @return ColumnDefinitionBuilder
      */
     public function string(string $name, int $length = 255): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @param int $length
+     * @return ColumnDefinitionBuilder
+     */
+    public function char(string $name, int $length = 1): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @param int $length
+     * @return ColumnDefinitionBuilder
+     */
+    public function email(string $name = 'email', int $length = 255): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @param int $length
+     * @return ColumnDefinitionBuilder
+     */
+    public function url(string $name, int $length = 2048): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
+    public function ipAddress(string $name): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
+    public function macAddress(string $name): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @param int $length
+     * @return ColumnDefinitionBuilder
+     */
+    public function phone(string $name, int $length = 32): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
+    public function rememberToken(string $name = 'remember_token'): ColumnDefinitionBuilder;
+
 
     /**
      * @param string $name
@@ -49,6 +96,14 @@ interface SchemaBuilderInterface
      * @param bool $unsigned
      * @return ColumnDefinitionBuilder
      */
+    public function mediumInteger(string $name, bool $unsigned = true): ColumnDefinitionBuilder;
+
+
+    /**
+     * @param string $name
+     * @param bool $unsigned
+     * @return ColumnDefinitionBuilder
+     */
     public function bigInteger(string $name, bool $unsigned = true): ColumnDefinitionBuilder;
 
     /**
@@ -59,10 +114,41 @@ interface SchemaBuilderInterface
 
     /**
      * @param string $name
+     * @param int $precision
+     * @param int $scale
+     * @return ColumnDefinitionBuilder
+     */
+    public function float(string $name, int $precision = 10, int $scale = 2): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @param int $precision
+     * @param int $scale
+     * @return ColumnDefinitionBuilder
+     */
+    public function double(string $name, int $precision = 10, int $scale = 2): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @param int $precision
+     * @param int $scale
+     * @return ColumnDefinitionBuilder
+     */
+    public function decimal(string $name, int $precision = 10, int $scale = 2): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
      * @param array $values
      * @return ColumnDefinitionBuilder
      */
     public function enum(string $name, array $values): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @param array $values
+     * @return ColumnDefinitionBuilder
+     */
+    public function set(string $name, array $values): ColumnDefinitionBuilder;
 
     /**
      * @param string $name
@@ -74,7 +160,19 @@ interface SchemaBuilderInterface
      * @param string $name
      * @return ColumnDefinitionBuilder
      */
+    public function tinyText(string $name): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
     public function mediumText(string $name): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
+    public function longText(string $name): ColumnDefinitionBuilder;
 
     /**
      * @param string $name
@@ -87,13 +185,56 @@ interface SchemaBuilderInterface
      * @param int $length
      * @return ColumnDefinitionBuilder
      */
-    public function char(string $name, int $length = 1): ColumnDefinitionBuilder;
+    public function binary(string $name, int $length = 255): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
+    public function blob(string $name): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
+    public function mediumBlob(string $name): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
+    public function longBlob(string $name): ColumnDefinitionBuilder;
+
 
     /**
      * @param string $name
      * @return ColumnDefinitionBuilder
      */
     public function dateTime(string $name): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
+    public function timestamp(string $name): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
+    public function date(string $name): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
+    public function time(string $name): ColumnDefinitionBuilder;
+
+    /**
+     * @param string $name
+     * @return ColumnDefinitionBuilder
+     */
+    public function year(string $name): ColumnDefinitionBuilder;
 
     /**
      * @param string $createdAt
@@ -200,22 +341,6 @@ interface SchemaBuilderInterface
      * @return array
      */
     public function build(): array;
-
-    /**
-     * @param string $name
-     * @param int $precision
-     * @param int $scale
-     * @return ColumnDefinitionBuilder
-     */
-    public function double(string $name, int $precision = 10, int $scale = 2): ColumnDefinitionBuilder;
-
-    /**
-     * @param string $name
-     * @param int $precision
-     * @param int $scale
-     * @return ColumnDefinitionBuilder
-     */
-    public function decimal(string $name, int $precision = 10, int $scale = 2): ColumnDefinitionBuilder;
 
     /**
      * @param string $name
