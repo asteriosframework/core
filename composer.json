@@ -49,6 +49,11 @@
     "ext-dom": "*",
     "ext-libxml": "*"
   },
+  "suggest": {
+    "ext-redis": "*",
+    "ext-igbinary": "*",
+    "ext-apcu": "*"
+  },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
     "phpunit/phpunit": "^12.5",
