@@ -4,7 +4,8 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
-use Asterios\Core\Db\Seeder;
+use Asterios\Core\Env;
+use Asterios\Core\Execution\PathResolver;
 
 #[Command(
     name: 'make:seeder',
@@ -28,8 +29,9 @@ class MakeSeederCommand extends BaseCommand
 
         $seederName = strtolower($argument);
 
-        $seeder = $this->createSeeder();
-        $appSeederDirectory = $seeder->getSeederPath();
+        $env = new Env(getcwd() . DIRECTORY_SEPARATOR . '.env');
+        $pathResolver = new PathResolver($env);
+        $appSeederDirectory = getcwd() . $pathResolver->resolve('DATABASE_SEEDER_PATH');
 
         $this->ensureDirectoryExists($appSeederDirectory);
 
@@ -46,11 +48,4 @@ class MakeSeederCommand extends BaseCommand
 
         echo "✅  Seeder '{$seederName}' created.\n";
     }
-
-    /** @codeCoverageIgnoreSart */
-    protected function createSeeder(): Seeder
-    {
-        return new Seeder();
-    }
-    /** @codeCoverageIgnoreEnd */
 }

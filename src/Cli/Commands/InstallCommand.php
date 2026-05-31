@@ -86,6 +86,7 @@ CACHE_REDIS_PASSWORD=
 CACHE_FILE_PATH="storage/cache"
 CACHE_MYSQL_CONFIG_GROUP=default
 CACHE_MYSQL_TABLE=cache_entries
+OPERATION_PATH="operations"
 
 ENV;
     }

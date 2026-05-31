@@ -11,9 +11,11 @@ use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Exception\MigrationException;
+use Asterios\Core\Execution\AbstractFileExecutor;
+use Asterios\Core\Execution\PathResolver;
 use Asterios\Core\Logger;
 
-class Seeder implements SeederInterface
+class Seeder extends AbstractFileExecutor implements SeederInterface
 {
     protected array $errors = [];
     protected array $messages = [];
@@ -35,6 +37,7 @@ class Seeder implements SeederInterface
             $this->env = new Env($this->envFile);
         }
 
+        $this->pathResolver = new PathResolver($this->env);
     }
 
     /**
@@ -109,9 +112,16 @@ class Seeder implements SeederInterface
      */
     public function getSeederPath(): ?string
     {
-        $seederPath = $this->getPathsFromEnv('DATABASE_SEEDER_PATH');
-
-        return $seederPath ? $this->getProtectedPath() . $seederPath : null;
+        try
+        {
+            return Asterios::getBasePath()
+                . $this->pathResolver
+                    ->resolve('DATABASE_SEEDER_PATH');
+        }
+        catch (\Throwable)
+        {
+            return null;
+        }
     }
 
     /**
