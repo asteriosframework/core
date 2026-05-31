@@ -9,55 +9,64 @@ use Asterios\Core\Operation\Operation;
 
 #[Command(
     name: 'operations:status',
-    description: 'Show operation execution status',
+    description: 'Show the status of all operations (executed/pending)',
     group: 'Operations',
     aliases: ['--ops']
 )]
 final class OperationsStatusCommand extends BaseCommand
 {
+    private Operation $operation;
+
+    public function __construct(?Operation $operation = null)
+    {
+        parent::__construct();
+
+        $this->operation = $operation ?? new Operation();
+    }
+
     public function handle(?string $argument): void
     {
         $this->printHeader();
 
-        $operation = $this->createOperation();
+        $executedOperations = $this->operation->getRanOperations();
+        $allOperationFiles = $this->operation->getAllOperationFiles();
 
-        $executedOperations = $operation->getRanOperations();
-        $allOperationFiles = $operation->getAllOperationFiles();
+        $statusList = [];
 
-        if (empty($allOperationFiles))
+        foreach ($allOperationFiles as $operationFile)
         {
-            echo CliStatusIcon::Warning->icon() . 'No operations were found.' . PHP_EOL;
-
-            return;
-        }
-
-        foreach ($allOperationFiles as $file)
-        {
-            $operationName = basename(
-                $file,
-                '.php'
+            $operationName = pathinfo(
+                $operationFile,
+                PATHINFO_FILENAME
             );
 
-            $executed = $operation->hasExecuted(
+            $isExecuted = $this->operation->hasExecuted(
                 $executedOperations,
                 $operationName
             );
 
-            $status = $executed
-                ? CliStatusIcon::Success->icon() . 'Executed'
-                : CliStatusIcon::Warning->icon() . 'Pending';
-
-            echo $status
-                . ' '
-                . $operationName
-                . PHP_EOL;
+            $statusList[] = [
+                'Status' => $isExecuted
+                    ? CliStatusIcon::Success->icon() . 'Executed'
+                    : CliStatusIcon::Pending->icon() . 'Pending',
+                'Operation' => $operationName,
+            ];
         }
-    }
 
-    /** @codeCoverageIgnoreStart */
-    protected function createOperation(): Operation
-    {
-        return new Operation();
+        if ([] === $statusList)
+        {
+            echo CliStatusIcon::Warning->icon()
+                . 'No operations were found.'
+                . PHP_EOL;
+
+            return;
+        }
+
+        $this->printListTable(
+            'Operation Status',
+            $statusList,
+            'Status',
+            'Operation'
+        );
     }
-    /** @codeCoverageIgnoreEnd */
 }
