@@ -4,6 +4,8 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
+use Asterios\Core\Env;
+use Asterios\Core\Execution\PathResolver;
 
 #[Command(
     name: 'make:migration',
@@ -25,8 +27,9 @@ class MakeMigrationCommand extends BaseCommand
             return;
         }
 
-        $protectedDirectory = str_replace('/public', '', $_SERVER['DOCUMENT_ROOT']);
-        $appMigrationDirectory = $protectedDirectory . 'database/migrations/';
+        $env = new Env(getcwd() . DIRECTORY_SEPARATOR . '.env');
+        $pathResolver = new PathResolver($env);
+        $appMigrationDirectory = getcwd() . $pathResolver->resolve('DATABASE_MIGRATION_PATH');
 
         $formattedName = strtolower(preg_replace('/\W+/', '_', $argument));
         $timestamp = date('Y_m_d_His');

@@ -19,6 +19,8 @@ abstract class AbstractFileExecutor
 
     protected ?Env $env = null;
 
+    protected PathResolver $pathResolver;
+
     /**
      * @param string $msg
      * @return void
@@ -47,7 +49,7 @@ abstract class AbstractFileExecutor
         {
             $this->logError(
                 sprintf(
-                    'Env-Fehler [%s]: %s',
+                    'Env error [%s]: %s',
                     $key,
                     $e->getMessage()
                 )

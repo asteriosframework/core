@@ -10,6 +10,7 @@ use Asterios\Core\Env;
 use Asterios\Core\Exception\ConfigLoadException;
 use Asterios\Core\Exception\MigrationException;
 use Asterios\Core\Execution\AbstractFileExecutor;
+use Asterios\Core\Execution\PathResolver;
 use Asterios\Core\Logger;
 
 class Migration extends AbstractFileExecutor implements MigrationInterface
@@ -26,6 +27,8 @@ class Migration extends AbstractFileExecutor implements MigrationInterface
         {
             $this->env = new Env($this->envFile);
         }
+
+        $this->pathResolver = new PathResolver($this->env);
 
         $this->statusRepository = new MigrationStatusRepository();
     }
@@ -194,9 +197,16 @@ class Migration extends AbstractFileExecutor implements MigrationInterface
      */
     public function getMigrationsPath(): ?string
     {
-        $migrationPath = $this->getPathsFromEnv('DATABASE_MIGRATION_PATH');
-
-        return $migrationPath ? $this->getProtectedPath() . $migrationPath : null;
+        try
+        {
+            return Asterios::getBasePath()
+                . $this->pathResolver
+                    ->resolve('DATABASE_MIGRATION_PATH');
+        }
+        catch (\Throwable)
+        {
+            return null;
+        }
     }
 
     /**
