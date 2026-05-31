@@ -6,6 +6,7 @@ use Asterios\Core\Asterios;
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
 use Asterios\Core\Env;
+use Asterios\Core\Execution\PathResolver;
 
 #[Command(
     name: 'make:command',
@@ -28,7 +29,10 @@ class MakeCustomCommand extends BaseCommand
         }
 
         $className = $this->normalizeClassName($argument);
-        $directory = $this->getCommandDirectory();
+
+        $env = new Env(getcwd() . DIRECTORY_SEPARATOR . '.env');
+        $pathResolver = new PathResolver($env);
+        $directory = getcwd() . $pathResolver->resolve('CLI_COMMAND_PATH');
 
         $this->ensureDirectoryExists($directory);
 
