@@ -13,14 +13,14 @@ final class MigrationStatusRepository
      */
     public function ensureTableExists(): void
     {
-        $sql = <<<SQL
+        $sql = "
 CREATE TABLE IF NOT EXISTS `migration` (
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `migration` VARCHAR(255) NOT NULL UNIQUE,
     `batch` INT UNSIGNED NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-SQL;
+";
 
         Db::write($sql);
     }

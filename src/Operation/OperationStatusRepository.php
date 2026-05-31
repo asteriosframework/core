@@ -12,13 +12,13 @@ final class OperationStatusRepository
      */
     public function ensureTableExists(): void
     {
-        $sql = <<<SQL
+        $sql = "
 CREATE TABLE IF NOT EXISTS `operation` (
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `operation` VARCHAR(255) NOT NULL UNIQUE,
     `executed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-SQL;
+";
 
         Db::write($sql);
     }
