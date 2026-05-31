@@ -8,20 +8,14 @@ use Asterios\Core\Contracts\MigrationInterface;
 use Asterios\Core\Db;
 use Asterios\Core\Env;
 use Asterios\Core\Exception\ConfigLoadException;
-use Asterios\Core\Exception\EnvException;
-use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Exception\MigrationException;
+use Asterios\Core\Execution\AbstractFileExecutor;
 use Asterios\Core\Logger;
 
-class Migration implements MigrationInterface
+class Migration extends AbstractFileExecutor implements MigrationInterface
 {
-    protected array $errors = [];
-    protected array $messages = [];
-    protected string $envFile = '.env';
-
-    protected ?Env $env = null;
-
     protected bool $forceMigration = false;
+    private MigrationStatusRepository $statusRepository;
 
     public function __construct(string $envFile = '.env')
     {
@@ -33,6 +27,7 @@ class Migration implements MigrationInterface
             $this->env = new Env($this->envFile);
         }
 
+        $this->statusRepository = new MigrationStatusRepository();
     }
 
     /**
@@ -51,8 +46,8 @@ class Migration implements MigrationInterface
 
         try
         {
-            $this->ensureMigrationTableExists();
-            $batch = $this->getNextBatchNumber();
+            $this->statusRepository->ensureTableExists();
+            $batch = $this->statusRepository->getNextBatchNumber();
         }
         catch (ConfigLoadException $e)
         {
@@ -61,7 +56,7 @@ class Migration implements MigrationInterface
             return false;
         }
 
-        $files = glob($migrationPath . '/*.php');
+        $files = $this->getPhpFiles($migrationPath);
         sort($files);
 
         foreach ($files as $file)
@@ -72,8 +67,10 @@ class Migration implements MigrationInterface
             {
                 $migrationName = basename($file, '.php');
 
-                if (!$this->forceMigration && $this->hasMigrationRun($migrationName))
-                {
+                if (
+                    !$this->forceMigration
+                    && $this->statusRepository->hasRun($migrationName)
+                ) {
                     Logger::forge()
                         ->info('Skipping already run migration: ' . $migrationName);
                     $this->messages[][$migrationName] = 'skipped';
@@ -92,11 +89,11 @@ class Migration implements MigrationInterface
                     $this->dropTable($tableName);
                 }
 
-                $migration = require $file;
+                $migration = $this->loadPhpFile($file);
                 if (method_exists($migration, 'up'))
                 {
                     $migration->up();
-                    $this->markMigrationAsRun($migrationName, $batch);
+                    $this->statusRepository->markAsRun($migrationName, $batch);
                     Logger::forge()
                         ->info('Run migration: ' . basename($file));
 
@@ -134,14 +131,14 @@ class Migration implements MigrationInterface
             return false;
         }
 
-        $files = glob($migrationPath . '/*.php');
+        $files = $this->getPhpFilesReverse($migrationPath);
         rsort($files);
 
         foreach ($files as $file)
         {
             try
             {
-                $migration = require $file;
+                $migration = $this->loadPhpFile($file);
                 if (method_exists($migration, 'down'))
                 {
                     $migration->down();
@@ -166,23 +163,9 @@ class Migration implements MigrationInterface
 
     public function getRanMigrations(): array
     {
-        $this->ensureMigrationTableExists();
+        $this->statusRepository->ensureTableExists();
 
-        try
-        {
-            $migrations = Db::read('SELECT migration FROM migration');
-        }
-        catch (ConfigLoadException)
-        {
-            return [];
-        }
-
-        if (is_array($migrations))
-        {
-            return $migrations;
-        }
-
-        return [];
+        return $this->statusRepository->getRanMigrations();
     }
 
     public function getAllMigrationFiles(): array
@@ -209,14 +192,6 @@ class Migration implements MigrationInterface
     /**
      * @inheritDoc
      */
-    public function getErrors(): array
-    {
-        return $this->errors;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getMigrationsPath(): ?string
     {
         $migrationPath = $this->getPathsFromEnv('DATABASE_MIGRATION_PATH');
@@ -227,56 +202,11 @@ class Migration implements MigrationInterface
     /**
      * @inheritDoc
      */
-    public function getMessages(): array
-    {
-        return $this->messages;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function force(): self
     {
         $this->forceMigration = true;
 
         return $this;
-    }
-
-    /**
-     * @param string $msg
-     * @return void
-     */
-    protected function logError(string $msg): void
-    {
-        Logger::forge()
-            ->error($msg);
-        $this->errors[] = $msg;
-    }
-
-    /**
-     * @param string $key
-     * @return string|null
-     */
-    protected function getPathsFromEnv(string $key): ?string
-    {
-        try
-        {
-            return $this->env->get($key);
-        }
-        catch (EnvException|EnvLoadException $e)
-        {
-            $this->logError("Env-Fehler [$key]: " . $e->getMessage());
-
-            return null;
-        }
-    }
-
-    /**
-     * @return string
-     */
-    protected function getProtectedPath(): string
-    {
-        return Asterios::getBasePath();
     }
 
     /**
@@ -363,4 +293,22 @@ SQL;
 
         return '';
     }
+
+    private function isValidMigrationPath(
+        ?string $migrationPath
+    ): bool {
+        if (!$migrationPath || !is_dir($migrationPath))
+        {
+            $this->logError(
+                'Could not load migration path: '
+                . $migrationPath
+            );
+
+            return false;
+        }
+
+        return true;
+    }
+
 }
+
