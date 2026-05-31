@@ -84,8 +84,12 @@ CREATE TABLE IF NOT EXISTS `migration` (
      */
     public function getRanMigrations(): array
     {
-        return Db::read(
+        $result =  Db::read(
             'SELECT migration FROM migration'
-        ) ?? [];
+        );
+
+        return is_array($result)
+            ? $result
+            : [];
     }
 }

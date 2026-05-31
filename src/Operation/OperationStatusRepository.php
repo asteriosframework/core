@@ -57,9 +57,13 @@ CREATE TABLE IF NOT EXISTS `operation` (
      */
     public function getRanOperations(): array
     {
-        return Db::read(
+        $result = Db::read(
             'SELECT operation, executed_at FROM operation'
-        ) ?? [];
+        );
+
+        return is_array($result)
+            ? $result
+            : [];
     }
 
     /**
