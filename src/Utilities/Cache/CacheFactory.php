@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Asterios\Core\Utilities\Cache;
 
+use Asterios\Core\Asterios;
 use Asterios\Core\Config;
 use Asterios\Core\Contracts\Utilities\Cache\CacheDriverInterface;
 use Asterios\Core\Contracts\Utilities\Cache\SerializerInterface;
@@ -23,7 +24,7 @@ final class CacheFactory
     {
         $config = Config::get('cache');
 
-        $default = $config->{$configGroup};
+        $default = (object)$config->{$configGroup};
 
         $driver = $default->driver;
         $serializer = $default->serializer;
@@ -48,8 +49,8 @@ final class CacheFactory
             ),
 
             'mysql' => self::mysql(
-                configGroup: $config->mysql->config_group,
-                table: $config->mysql->table,
+                configGroup: $config->mysql['config_group'],
+                table: $config->mysql['table'],
                 serializer: $serializer,
                 prefix: $prefix,
                 defaultTtl: $ttl
@@ -63,7 +64,7 @@ final class CacheFactory
             ),
 
             default => self::file(
-                path: $config->file->path,
+                path: $config->file['path'],
                 serializer: $serializer,
                 prefix: $prefix,
                 defaultTtl: $ttl
@@ -175,18 +176,18 @@ final class CacheFactory
         $redis = new Redis();
 
         $redis->connect(
-            $config->redis->host,
-            (int)$config->redis->port,
-            (float)$config->redis->timeout
+            $config->redis['host'],
+            (int)$config->redis['port'],
+            (float)$config->redis['timeout']
         );
 
-        if (!empty($config->redis->password))
+        if (!empty($config->redis['password']))
         {
-            $redis->auth($config->redis->password);
+            $redis->auth($config->redis['password']);
         }
 
         $redis->select(
-            (int)$config->redis->database
+            (int)$config->redis['database']
         );
 
         return new RedisDriver(
@@ -205,7 +206,7 @@ final class CacheFactory
         $drivers = [];
         $serializerInstance = self::serializer($serializer);
 
-        foreach ($config->chain->drivers as $driver)
+        foreach ($config->chain['drivers'] as $driver)
         {
             $drivers[] = match ($driver)
             {
@@ -221,14 +222,14 @@ final class CacheFactory
                 ),
 
                 'file' => new FileDriver(
-                    cachePath: $config->file->path,
+                    cachePath: Asterios::getBasePath($config->file['path']),
                     serializer: $serializerInstance,
                     prefix: $prefix,
                 ),
 
                 'mysql' => new MySqlDriver(
-                    configGroup: $config->mysql->config_group,
-                    table: $config->mysql->table,
+                    configGroup: $config->mysql['config_group'],
+                    table: $config->mysql['table'],
                     serializer: $serializerInstance,
                     prefix: $prefix,
                 ),
