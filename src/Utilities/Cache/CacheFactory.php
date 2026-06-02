@@ -121,7 +121,7 @@ final class CacheFactory
     ): Cache {
         return new Cache(
             new FileDriver(
-                cachePath: $path,
+                cachePath: Asterios::getBasePath($path),
                 serializer: self::serializer($serializer),
                 prefix: $prefix,
             ),
