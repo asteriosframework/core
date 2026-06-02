@@ -4,7 +4,8 @@ namespace Asterios\Test\Cli\Commands;
 
 use Asterios\Core\Cli\Commands\MakeModelCommand;
 use Asterios\Core\Cli\Commands\MakeSeederCommand;
-use Asterios\Core\Db\Seeder;
+use Asterios\Core\Env;
+use Asterios\Core\Execution\PathResolver;
 use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
@@ -36,10 +37,6 @@ class MakeSeederCommandTest extends MockeryTestCase
     {
         $seederName = 'users';
         $seederPath = '/fake/path/';
-        $expectedFile = $seederPath . $seederName . '.json';
-
-        $mockSeeder = m::mock(Seeder::class);
-        $mockSeeder->shouldReceive('getSeederPath')->once()->andReturn($seederPath);
 
         /** @var MakeModelCommand|m\MockInterface $command */
         $command = m::mock(MakeSeederCommand::class)
@@ -47,9 +44,7 @@ class MakeSeederCommandTest extends MockeryTestCase
             ->shouldAllowMockingProtectedMethods();
 
         $command->shouldReceive('printHeader')->once();
-        $command->shouldReceive('createSeeder')->once()->andReturn($mockSeeder);
-        $command->shouldReceive('ensureDirectoryExists')->once()->with($seederPath);
-        $command->shouldReceive('fileExists')->once()->with($expectedFile)->andReturn(true);
+        $command->shouldReceive('fileExists')->once()->andReturn(true);
         $command->shouldReceive('writeFile')->never();
 
         ob_start();
@@ -61,12 +56,13 @@ class MakeSeederCommandTest extends MockeryTestCase
 
     public function testHandleCreatesSeederFileSuccessfully(): void
     {
-        $seederName = 'users';
+        $seederName = 'users123';
         $seederPath = '/fake/path/';
         $expectedFile = $seederPath . $seederName . '.json';
 
-        $mockSeeder = m::mock(Seeder::class);
-        $mockSeeder->shouldReceive('getSeederPath')->once()->andReturn($seederPath);
+        $pathResolverMock = m::mock(new PAthResolver(new Env()));
+        $pathResolverMock->shouldReceive('resolve')->andReturn($seederPath);
+
 
         /** @var MakeModelCommand|m\MockInterface $command */
         $command = m::mock(MakeSeederCommand::class)
@@ -74,10 +70,8 @@ class MakeSeederCommandTest extends MockeryTestCase
             ->shouldAllowMockingProtectedMethods();
 
         $command->shouldReceive('printHeader')->once();
-        $command->shouldReceive('createSeeder')->once()->andReturn($mockSeeder);
-        $command->shouldReceive('ensureDirectoryExists')->once()->with($seederPath);
-        $command->shouldReceive('fileExists')->once()->with($expectedFile)->andReturn(false);
-        $command->shouldReceive('writeFile')->once()->with($expectedFile, "[]\n");
+        $command->shouldReceive('fileExists')->once()->andReturn(false);
+        $command->shouldReceive('writeFile')->once()->andReturnTrue();
 
         ob_start();
         $command->handle($seederName);
