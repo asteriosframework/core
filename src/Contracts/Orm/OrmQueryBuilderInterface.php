@@ -184,6 +184,7 @@ interface OrmQueryBuilderInterface
     /**
      * @return string|null
      * @throws ModelException
+     * @deprecated since 2.5.0 Use compilePrepared() internally.
      */
     public function compile(): ?string;
 

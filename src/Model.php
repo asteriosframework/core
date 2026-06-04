@@ -916,10 +916,7 @@ class Model implements ModelInterface
 
         $this->hasProperties($data);
 
-        $sql = 'UPDATE ' . $this->table() . ' SET ' . $this->prepareUpdate($data) . ' WHERE ' . $this->formatter->backticks($this->primaryKey()) . ' = ' .
-            $id;
-
-        return Db::write($sql, $this->connection);
+        return Db::writePrepared($this->compileUpdatePrepared($id, $data), $this->connection);
     }
 
     /**
@@ -939,6 +936,7 @@ class Model implements ModelInterface
 
     /**
      * @inheritDoc
+     * @deprecated since 2.5.0 Legacy SQL string builder.
      */
     public function prepareUpdate(array $array): false|string
     {
@@ -996,6 +994,7 @@ class Model implements ModelInterface
 
     /**
      * @inheritDoc
+     * @deprecated since 2.5.0 Legacy SQL string builder.
      */
     public function prepareInsert(array $array): bool|array
     {

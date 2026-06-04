@@ -15,6 +15,8 @@ interface OrmSqlFormatterInterface
     /**
      * @param string|int|float|null|bool $value
      * @return string
+     *
+     * @deprecated since 2.5.0 Only used by legacy SQL builders.
      */
     public function formatValue(string|int|float|null|bool $value): string;
 

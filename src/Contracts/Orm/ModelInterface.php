@@ -162,6 +162,8 @@ interface ModelInterface
     /**
      * @return string|null
      * @throws ModelException
+     *
+     * @deprecated since 2.5.0 Use compilePrepared() internally.
      */
     public function compile(): ?string;
 
@@ -391,6 +393,8 @@ interface ModelInterface
      * @param array $array
      * @return string|false
      * @throws ConfigLoadException
+     *
+     * @deprecated since 2.5.0 Will be removed in 3.0
      */
     public function prepareUpdate(array $array): false|string;
 
@@ -414,6 +418,8 @@ interface ModelInterface
      * @param array $array
      * @return bool|array
      * @throws ConfigLoadException
+     *
+     * @deprecated since 2.5.0 Will be removed in 3.0
      */
     public function prepareInsert(array $array): bool|array;
 
