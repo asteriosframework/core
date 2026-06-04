@@ -4,6 +4,7 @@ namespace Asterios\Core\Contracts\Orm;
 
 use Asterios\Core\Exception\ModelException;
 use Asterios\Core\Exception\ModelInvalidArgumentException;
+use Asterios\Core\Orm\CompiledQuery;
 
 interface OrmQueryBuilderInterface
 {
@@ -185,6 +186,16 @@ interface OrmQueryBuilderInterface
      * @throws ModelException
      */
     public function compile(): ?string;
+
+    /**
+     * @return array
+     */
+    public function getBindings(): array;
+
+    /**
+     * @return CompiledQuery
+     */
+    public function compilePrepared(): CompiledQuery;
 
     /**
      * @return string|null
