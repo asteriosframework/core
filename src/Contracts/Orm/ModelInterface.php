@@ -480,4 +480,14 @@ interface ModelInterface
      * @throws ModelException
      */
     public function getDefault(string $columnName): string|int|float|null;
+
+    /**
+     * @param int|string $id
+     * @param array $data
+     * @return bool
+     * @throws ConfigLoadException
+     * @throws ModelException
+     * @throws ModelPropertyException
+     */
+    public function updatePrepared(int|string $id, array $data = []): bool;
 }

@@ -1355,4 +1355,61 @@ class Model implements ModelInterface
             $this->connection
         );
     }
+
+    /**
+     * @param int|string $id
+     * @param array $data
+     * @return CompiledQuery
+     * @throws ModelException
+     */
+    protected function compileUpdatePrepared(int|string $id, array $data): CompiledQuery
+    {
+        $bindings = [];
+        $setParts = [];
+
+        foreach ($data as $column => $value)
+        {
+            $setParts[] =
+                $this->formatter->backticks($column)
+                . ' = ?';
+
+            $bindings[] = $value;
+        }
+
+        $bindings[] = $id;
+
+        $sql =
+            'UPDATE '
+            . $this->table()
+            . ' SET '
+            . implode(', ', $setParts)
+            . ' WHERE '
+            . $this->formatter->backticks(
+                $this->primaryKey()
+            )
+            . ' = ?';
+
+        return new CompiledQuery($sql, $bindings);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function updatePrepared(int|string $id, array $data = []): bool
+    {
+        if (empty($data))
+        {
+            return false;
+        }
+
+        $this->hasProperties($data);
+
+        return Db::writePrepared(
+            $this->compileUpdatePrepared(
+                $id,
+                $data
+            ),
+            $this->connection
+        );
+    }
 }
