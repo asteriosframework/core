@@ -22,6 +22,7 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
 
     private ?string $rawQuery = null;
     private string $nextBoolean = 'AND';
+    private array $bindings = [];
 
     public function __construct(
         private readonly OrmMetadata $metadata,
@@ -318,12 +319,136 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         $new->whereParts[] = [
             'type' => 'raw',
             'boolean' => $new->nextBoolean,
-            'expression' => $expr,
+            'expression' => "MATCH($cols) AGAINST (?$mode)",
+            'bindings' => [$search],
         ];
 
         $new->nextBoolean = 'AND';
 
         return $new;
+    }
+
+    /** @inheritDoc */
+    public function getBindings(): array
+    {
+        return $this->bindings;
+    }
+
+    /** @inheritDoc */
+    public function compilePrepared(): CompiledQuery
+    {
+        $builder = clone $this;
+
+        $builder->bindings = [];
+
+        $sql = 'SELECT ';
+
+        if ($builder->distinct)
+        {
+            $sql .= 'DISTINCT ';
+        }
+
+        $sql .= $builder->compileSelect();
+        $sql .= $builder->compileFrom();
+        $sql .= $builder->compileJoins();
+        $sql .= $builder->compileWherePrepared();
+        $sql .= $builder->compileGroupBy();
+        $sql .= $builder->compileOrderBy();
+        $sql .= $builder->compileLimit();
+
+        return new CompiledQuery(
+            trim($sql),
+            $builder->bindings
+        );
+    }
+
+    private function compileWherePrepared(): string
+    {
+        if (empty($this->whereParts))
+        {
+            return '';
+        }
+
+        $sql = ' WHERE ';
+        $first = true;
+        $previousWasOpenBracket = false;
+
+        foreach ($this->whereParts as $part)
+        {
+
+            if ($part['type'] === 'bracket')
+            {
+
+                if ($part['value'] === '(')
+                {
+
+                    if (!$first)
+                    {
+                        $sql .= ' ' . $part['boolean'] . ' ';
+                    }
+
+                    $sql .= '(';
+                    $previousWasOpenBracket = true;
+                    $first = false;
+                    continue;
+                }
+
+                if ($part['value'] === ')')
+                {
+                    $sql .= ')';
+                    $previousWasOpenBracket = false;
+                    continue;
+                }
+            }
+
+            if (!$first && !$previousWasOpenBracket)
+            {
+                $sql .= ' ' . ($part['boolean'] ?? 'AND') . ' ';
+            }
+
+            if ($part['type'] === 'condition')
+            {
+
+                $column = $part['backticks']
+                    ? $this->formatter->backticks($part['column'])
+                    : $part['column'];
+
+                $sql .= $column . ' ' . $part['operator'];
+
+                if (!$this->formatter->isOperatorNull($part['operator']))
+                {
+
+                    if ($part['formatValue'])
+                    {
+                        $sql .= ' ?';
+
+                        $this->bindings[] = $part['value'];
+                    }
+                    else
+                    {
+                        $sql .= ' ' . $part['value'];
+                    }
+                }
+
+            }
+            elseif ($part['type'] === 'raw')
+            {
+                $sql .= $part['expression'];
+
+                if (!empty($part['bindings']))
+                {
+                    foreach ($part['bindings'] as $binding)
+                    {
+                        $this->bindings[] = $binding;
+                    }
+                }
+            }
+
+            $previousWasOpenBracket = false;
+            $first = false;
+        }
+
+        return $sql;
     }
 
     /** @inheritDoc */
