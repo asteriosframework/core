@@ -319,7 +319,8 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
         $new->whereParts[] = [
             'type' => 'raw',
             'boolean' => $new->nextBoolean,
-            'expression' => $expr,
+            'expression' => "MATCH($cols) AGAINST (?$mode)",
+            'bindings' => [$search],
         ];
 
         $new->nextBoolean = 'AND';
@@ -432,8 +433,15 @@ final class OrmQueryBuilder implements OrmQueryBuilderInterface
             }
             elseif ($part['type'] === 'raw')
             {
-
                 $sql .= $part['expression'];
+
+                if (!empty($part['bindings']))
+                {
+                    foreach ($part['bindings'] as $binding)
+                    {
+                        $this->bindings[] = $binding;
+                    }
+                }
             }
 
             $previousWasOpenBracket = false;
