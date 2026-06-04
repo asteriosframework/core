@@ -9,6 +9,7 @@ use Asterios\Core\Exception\ModelException;
 use Asterios\Core\Exception\ModelInvalidArgumentException;
 use Asterios\Core\Exception\ModelPrimaryKeyException;
 use Asterios\Core\Exception\ModelPropertyException;
+use Asterios\Core\Orm\CompiledQuery;
 
 interface ModelInterface
 {
@@ -148,8 +149,21 @@ interface ModelInterface
     public function execute(string $option = self::EXECUTE_MODE_READ): static;
 
     /**
+     * @return $this
+     * @throws ConfigLoadException
+     */
+    public function executePrepared(): static;
+
+    /**
+     * @return CompiledQuery
+     */
+    public function compilePrepared(): CompiledQuery;
+
+    /**
      * @return string|null
      * @throws ModelException
+     *
+     * @deprecated since 2.5.0 Use compilePrepared() internally.
      */
     public function compile(): ?string;
 
@@ -379,6 +393,8 @@ interface ModelInterface
      * @param array $array
      * @return string|false
      * @throws ConfigLoadException
+     *
+     * @deprecated since 2.5.0 Will be removed in 3.0
      */
     public function prepareUpdate(array $array): false|string;
 
@@ -402,6 +418,8 @@ interface ModelInterface
      * @param array $array
      * @return bool|array
      * @throws ConfigLoadException
+     *
+     * @deprecated since 2.5.0 Will be removed in 3.0
      */
     public function prepareInsert(array $array): bool|array;
 
@@ -468,4 +486,23 @@ interface ModelInterface
      * @throws ModelException
      */
     public function getDefault(string $columnName): string|int|float|null;
+
+    /**
+     * @param int|string $id
+     * @param array $data
+     * @return bool
+     * @throws ConfigLoadException
+     * @throws ModelException
+     * @throws ModelPropertyException
+     */
+    public function updatePrepared(int|string $id, array $data = []): bool;
+
+    /**
+     * @param array $data
+     * @return false|int|string
+     * @throws ConfigLoadException
+     * @throws ModelException
+     * @throws ModelPropertyException
+     */
+    public function insertPrepared(array $data = []): false|int|string;
 }

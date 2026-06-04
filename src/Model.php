@@ -12,6 +12,7 @@ use Asterios\Core\Exception\ModelException;
 use Asterios\Core\Exception\ModelInvalidArgumentException;
 use Asterios\Core\Exception\ModelPrimaryKeyException;
 use Asterios\Core\Exception\ModelPropertyException;
+use Asterios\Core\Orm\CompiledQuery;
 use Asterios\Core\Orm\OrmMetadata;
 use Asterios\Core\Orm\OrmQueryBuilder;
 use Asterios\Core\Orm\OrmSqlFormatter;
@@ -200,7 +201,20 @@ class Model implements ModelInterface
             return $this;
         }
 
-        $this->result = Db::read($this->compile(), $this->connection);
+        $this->result = Db::readPrepared($this->compilePrepared(), $this->connection);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function executePrepared(): static
+    {
+        $this->result = Db::readPrepared(
+            $this->compilePrepared(),
+            $this->connection
+        );
 
         return $this;
     }
@@ -211,6 +225,14 @@ class Model implements ModelInterface
     public function compile(): ?string
     {
         return $this->queryBuilder->compile();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function compilePrepared(): CompiledQuery
+    {
+        return $this->queryBuilder->compilePrepared();
     }
 
     /**
@@ -894,10 +916,7 @@ class Model implements ModelInterface
 
         $this->hasProperties($data);
 
-        $sql = 'UPDATE ' . $this->table() . ' SET ' . $this->prepareUpdate($data) . ' WHERE ' . $this->formatter->backticks($this->primaryKey()) . ' = ' .
-            $id;
-
-        return Db::write($sql, $this->connection);
+        return Db::writePrepared($this->compileUpdatePrepared($id, $data), $this->connection);
     }
 
     /**
@@ -917,6 +936,7 @@ class Model implements ModelInterface
 
     /**
      * @inheritDoc
+     * @deprecated since 2.5.0 Legacy SQL string builder.
      */
     public function prepareUpdate(array $array): false|string
     {
@@ -969,20 +989,12 @@ class Model implements ModelInterface
         }
 
         $this->hasProperties($data);
-        $insert_data = $this->prepareInsert($data);
-
-        $sql = 'INSERT INTO
-                    ' . $this->table() . '
-                    ' . $insert_data[0] . '
-                         VALUES
-                    ' . $insert_data[1] . '
-                ';
-
-        return Db::insert($sql, $this->connection);
+        return Db::insertPrepared($this->compileInsertPrepared($data), $this->connection);
     }
 
     /**
      * @inheritDoc
+     * @deprecated since 2.5.0 Legacy SQL string builder.
      */
     public function prepareInsert(array $array): bool|array
     {
@@ -1299,5 +1311,143 @@ class Model implements ModelInterface
         }
 
         return $this->properties[$columnName]['default'];
+    }
+
+    /**
+     * @param int|string $id
+     * @return CompiledQuery
+     * @throws ModelException
+     */
+    protected function compileDeletePrepared(int|string $id): CompiledQuery
+    {
+        return new CompiledQuery(
+            sprintf(
+                'DELETE FROM %s WHERE %s = ?',
+                $this->table(),
+                $this->formatter->backticks(
+                    $this->primaryKey()
+                )
+            ),
+            [$id]
+        );
+    }
+
+    /**
+     * @param int|string $id
+     * @return bool
+     * @throws ConfigLoadException
+     * @throws ModelException
+     */
+    public function deletePrepared(int|string $id): bool
+    {
+        return Db::writePrepared(
+            $this->compileDeletePrepared($id),
+            $this->connection
+        );
+    }
+
+    /**
+     * @param int|string $id
+     * @param array $data
+     * @return CompiledQuery
+     * @throws ModelException
+     */
+    protected function compileUpdatePrepared(int|string $id, array $data): CompiledQuery
+    {
+        $bindings = [];
+        $setParts = [];
+
+        foreach ($data as $column => $value)
+        {
+            $setParts[] =
+                $this->formatter->backticks($column)
+                . ' = ?';
+
+            $bindings[] = $value;
+        }
+
+        $bindings[] = $id;
+
+        $sql =
+            'UPDATE '
+            . $this->table()
+            . ' SET '
+            . implode(', ', $setParts)
+            . ' WHERE '
+            . $this->formatter->backticks(
+                $this->primaryKey()
+            )
+            . ' = ?';
+
+        return new CompiledQuery($sql, $bindings);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function updatePrepared(int|string $id, array $data = []): bool
+    {
+        if (empty($data))
+        {
+            return false;
+        }
+
+        $this->hasProperties($data);
+
+        return Db::writePrepared(
+            $this->compileUpdatePrepared(
+                $id,
+                $data
+            ),
+            $this->connection
+        );
+    }
+
+    /**
+     * @param array $data
+     * @return CompiledQuery
+     * @throws ModelException
+     */
+    protected function compileInsertPrepared(array $data): CompiledQuery
+    {
+        $columns = [];
+        $placeholders = [];
+        $bindings = [];
+
+        foreach ($data as $column => $value)
+        {
+            $columns[] =
+                $this->formatter->backticks($column);
+
+            $placeholders[] = '?';
+
+            $bindings[] = $value;
+        }
+
+        $sql =
+            'INSERT INTO '
+            . $this->table()
+            . ' ('
+            . implode(', ', $columns)
+            . ') VALUES ('
+            . implode(', ', $placeholders)
+            . ')';
+
+        return new CompiledQuery($sql, $bindings);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function insertPrepared(array $data = []): false|int|string
+    {
+        if (empty($data))
+        {
+            return false;
+        }
+
+        $this->hasProperties($data);
+
+        return Db::insertPrepared($this->compileInsertPrepared($data), $this->connection);
     }
 }
