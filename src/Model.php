@@ -1412,4 +1412,52 @@ class Model implements ModelInterface
             $this->connection
         );
     }
+
+    /**
+     * @param array $data
+     * @return CompiledQuery
+     * @throws ModelException
+     */
+    protected function compileInsertPrepared(array $data): CompiledQuery
+    {
+        $columns = [];
+        $placeholders = [];
+        $bindings = [];
+
+        foreach ($data as $column => $value)
+        {
+            $columns[] =
+                $this->formatter->backticks($column);
+
+            $placeholders[] = '?';
+
+            $bindings[] = $value;
+        }
+
+        $sql =
+            'INSERT INTO '
+            . $this->table()
+            . ' ('
+            . implode(', ', $columns)
+            . ') VALUES ('
+            . implode(', ', $placeholders)
+            . ')';
+
+        return new CompiledQuery($sql, $bindings);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function insertPrepared(array $data = []): false|int|string
+    {
+        if (empty($data))
+        {
+            return false;
+        }
+
+        $this->hasProperties($data);
+
+        return Db::insertPrepared($this->compileInsertPrepared($data), $this->connection);
+    }
 }

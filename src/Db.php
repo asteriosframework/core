@@ -128,6 +128,42 @@ class Db
     }
 
     /**
+     * @param CompiledQuery $query
+     * @param string $config_group
+     * @return false|int|string
+     * @throws Exception\ConfigLoadException
+     */
+    public static function insertPrepared(CompiledQuery $query, string $config_group = 'default'): false|int|string
+    {
+        $connection = self::forge($config_group)->get_connection();
+
+        $stmt = $connection->prepare($query->sql);
+
+        if ($stmt === false)
+        {
+            return false;
+        }
+
+        if ($query->hasBindings())
+        {
+            self::bindStatement($stmt, $query->bindings);
+        }
+
+        if (!$stmt->execute())
+        {
+            $stmt->close();
+
+            return false;
+        }
+
+        $insertId = $connection->insert_id;
+
+        $stmt->close();
+
+        return $insertId;
+    }
+
+    /**
      * @throws Exception\ConfigLoadException
      */
     public static function escape(string $value, string $config_group = 'default'): string

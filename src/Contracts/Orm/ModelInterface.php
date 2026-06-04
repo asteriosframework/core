@@ -490,4 +490,13 @@ interface ModelInterface
      * @throws ModelPropertyException
      */
     public function updatePrepared(int|string $id, array $data = []): bool;
+
+    /**
+     * @param array $data
+     * @return false|int|string
+     * @throws ConfigLoadException
+     * @throws ModelException
+     * @throws ModelPropertyException
+     */
+    public function insertPrepared(array $data = []): false|int|string;
 }
