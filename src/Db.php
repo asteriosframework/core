@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Asterios\Core;
 
+use Asterios\Core\Orm\CompiledQuery;
+use mysqli_stmt;
+
 class Db
 {
     /** @var \mysqli|null */
@@ -398,5 +401,118 @@ class Db
     private function get_charset(): string
     {
         return $this->charset;
+    }
+
+    private static function buildBindingTypes(array $bindings): string
+    {
+        $types = '';
+
+        foreach ($bindings as $binding)
+        {
+            if (is_int($binding))
+            {
+                $types .= 'i';
+            }
+            elseif (is_float($binding))
+            {
+                $types .= 'd';
+            }
+            else
+            {
+                $types .= 's';
+            }
+        }
+
+        return $types;
+    }
+
+    private static function bindStatement(mysqli_stmt $stmt, array $bindings): void
+    {
+        if ($bindings === [])
+        {
+            return;
+        }
+
+        $types = self::buildBindingTypes($bindings);
+
+        $stmt->bind_param(
+            $types,
+            ...$bindings
+        );
+    }
+
+    /**
+     * @param CompiledQuery $query
+     * @param string $config_group
+     * @return array|bool
+     * @throws Exception\ConfigLoadException
+     */
+    public static function readPrepared(CompiledQuery $query, string $config_group = 'default'): array|bool
+    {
+        $connection = self::forge($config_group)->get_connection();
+        $stmt = $connection->prepare($query->sql);
+
+        if ($stmt === false)
+        {
+            return false;
+        }
+
+        if (!empty($query->bindings))
+        {
+            self::bindStatement($stmt, $query->bindings);
+        }
+
+        if (!$stmt->execute())
+        {
+            $stmt->close();
+
+            return false;
+        }
+
+        $result = $stmt->get_result();
+
+        $result_array = [];
+
+        if ($result !== false)
+        {
+            while ($row = $result->fetch_assoc())
+            {
+                $result_array[] = $row;
+            }
+
+            $result->free();
+        }
+
+        $stmt->close();
+
+        return !empty($result_array) ? $result_array : false;
+    }
+
+    /**
+     * @param CompiledQuery $query
+     * @param string $config_group
+     * @return bool
+     * @throws Exception\ConfigLoadException
+     */
+    public static function writePrepared(CompiledQuery $query, string $config_group = 'default'): bool
+    {
+        $connection = self::forge($config_group)->get_connection();
+        $stmt = $connection->prepare($query->sql);
+
+        if ($stmt === false)
+        {
+            return false;
+        }
+
+        if ($query->hasBindings())
+        {
+            self::bindStatement($stmt, $query->bindings);
+        }
+
+        $result = $stmt->execute();
+
+        $stmt->close();
+
+        return $result;
     }
 }

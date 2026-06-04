@@ -1322,4 +1322,37 @@ class Model implements ModelInterface
 
         return $this->properties[$columnName]['default'];
     }
+
+    /**
+     * @param int|string $id
+     * @return CompiledQuery
+     * @throws ModelException
+     */
+    protected function compileDeletePrepared(int|string $id): CompiledQuery
+    {
+        return new CompiledQuery(
+            sprintf(
+                'DELETE FROM %s WHERE %s = ?',
+                $this->table(),
+                $this->formatter->backticks(
+                    $this->primaryKey()
+                )
+            ),
+            [$id]
+        );
+    }
+
+    /**
+     * @param int|string $id
+     * @return bool
+     * @throws ConfigLoadException
+     * @throws ModelException
+     */
+    public function deletePrepared(int|string $id): bool
+    {
+        return Db::writePrepared(
+            $this->compileDeletePrepared($id),
+            $this->connection
+        );
+    }
 }
