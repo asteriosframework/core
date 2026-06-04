@@ -201,7 +201,7 @@ class Model implements ModelInterface
             return $this;
         }
 
-        $this->result = Db::read($this->compile(), $this->connection);
+        $this->result = Db::readPrepared($this->compilePrepared(), $this->connection);
 
         return $this;
     }
@@ -991,16 +991,7 @@ class Model implements ModelInterface
         }
 
         $this->hasProperties($data);
-        $insert_data = $this->prepareInsert($data);
-
-        $sql = 'INSERT INTO
-                    ' . $this->table() . '
-                    ' . $insert_data[0] . '
-                         VALUES
-                    ' . $insert_data[1] . '
-                ';
-
-        return Db::insert($sql, $this->connection);
+        return Db::insertPrepared($this->compileInsertPrepared($data), $this->connection);
     }
 
     /**
