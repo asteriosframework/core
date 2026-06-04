@@ -9,6 +9,7 @@ use Asterios\Core\Exception\ModelException;
 use Asterios\Core\Exception\ModelInvalidArgumentException;
 use Asterios\Core\Exception\ModelPrimaryKeyException;
 use Asterios\Core\Exception\ModelPropertyException;
+use Asterios\Core\Orm\CompiledQuery;
 
 interface ModelInterface
 {
@@ -146,6 +147,17 @@ interface ModelInterface
      * @throws ConfigLoadException
      */
     public function execute(string $option = self::EXECUTE_MODE_READ): static;
+
+    /**
+     * @return $this
+     * @throws ConfigLoadException
+     */
+    public function executePrepared(): static;
+
+    /**
+     * @return CompiledQuery
+     */
+    public function compilePrepared(): CompiledQuery;
 
     /**
      * @return string|null

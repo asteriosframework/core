@@ -12,6 +12,7 @@ use Asterios\Core\Exception\ModelException;
 use Asterios\Core\Exception\ModelInvalidArgumentException;
 use Asterios\Core\Exception\ModelPrimaryKeyException;
 use Asterios\Core\Exception\ModelPropertyException;
+use Asterios\Core\Orm\CompiledQuery;
 use Asterios\Core\Orm\OrmMetadata;
 use Asterios\Core\Orm\OrmQueryBuilder;
 use Asterios\Core\Orm\OrmSqlFormatter;
@@ -208,9 +209,30 @@ class Model implements ModelInterface
     /**
      * @inheritDoc
      */
+    public function executePrepared(): static
+    {
+        $this->result = Db::readPrepared(
+            $this->compilePrepared(),
+            $this->connection
+        );
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function compile(): ?string
     {
         return $this->queryBuilder->compile();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function compilePrepared(): CompiledQuery
+    {
+        return $this->queryBuilder->compilePrepared();
     }
 
     /**
