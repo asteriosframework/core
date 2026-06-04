@@ -13,6 +13,8 @@ final class CompiledQuery extends Data
     /** @var list<int|float|string|bool|null> */
     public array $bindings = [];
 
+    public bool $prepared = true;
+
     public function __construct(
         string $sql = '',
         array $bindings = []
