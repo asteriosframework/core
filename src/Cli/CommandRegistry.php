@@ -4,14 +4,25 @@ namespace Asterios\Core\Cli;
 
 use Asterios\Core\Asterios;
 use Asterios\Core\Cli\Attributes\Command;
-use Asterios\Core\Config;
 use Asterios\Core\Contracts\Cli\CommandRegistryInterface;
 use Asterios\Core\Contracts\CommandInterface;
+use Asterios\Core\Env;
+use Asterios\Core\Execution\AbstractFileExecutor;
+use Asterios\Core\Execution\PathResolver;
 use ReflectionClass;
 
-class CommandRegistry implements CommandRegistryInterface
+class CommandRegistry extends AbstractFileExecutor implements CommandRegistryInterface
 {
     private ?array $discovered = null;
+
+    public function __construct(string $envFile = '.env')
+    {
+        $this->envFile = Asterios::getBasePath() . DIRECTORY_SEPARATOR . $envFile;
+
+        $this->env = new Env($this->envFile);
+
+        $this->pathResolver = new PathResolver($this->env);
+    }
 
     /**
      * @inheritDoc
@@ -130,7 +141,7 @@ class CommandRegistry implements CommandRegistryInterface
     {
         try
         {
-            return Config::get('cli', 'command_path') ?? 'app/Cli/Commands';
+            return Asterios::getBasePath() . $this->pathResolver->commands();
         }
         catch (\Throwable)
         {
