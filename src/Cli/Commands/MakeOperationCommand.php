@@ -5,19 +5,37 @@ namespace Asterios\Core\Cli\Commands;
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
 use Asterios\Core\Env;
+use Asterios\Core\Exception\EnvException;
+use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Execution\PathResolver;
 
 #[Command(
     name: 'make:operation',
     description: 'Create a new operation class',
     group: 'Make',
-    aliases: ['--mop']
+    aliases: ['--mop'],
+    options: [
+        '--help' => 'Show command help',
+    ],
 )]
 class MakeOperationCommand extends BaseCommand
 {
+    /**
+     * @param string|null $argument
+     * @return void
+     * @throws EnvException
+     * @throws EnvLoadException
+     */
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         if (!$argument)
         {
@@ -29,7 +47,7 @@ class MakeOperationCommand extends BaseCommand
 
         $env = new Env(getcwd() . DIRECTORY_SEPARATOR . '.env');
         $pathResolver = new PathResolver($env);
-        $operationDirectory = getcwd() . $pathResolver->resolve('OPERATION_PATH');
+        $operationDirectory = getcwd() . $pathResolver->operations();
 
         $formattedName = strtolower(
             preg_replace('/\W+/', '_', $argument)

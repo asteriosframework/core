@@ -12,7 +12,10 @@ use Asterios\Core\View\Twig\TwigManager;
 #[Command(
 name: 'view:clear',
 description: 'Clear Twig template cache',
-group: 'View'
+group: 'View',
+options: [
+    '--help' => 'Show command help',
+],
 )]
 class ViewClearCommand extends BaseCommand
 {
@@ -21,6 +24,15 @@ class ViewClearCommand extends BaseCommand
      */
     public function handle(?string $argument): void
     {
+        $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
+
         $env = new Env(Asterios::getBasePath() . '/.env');
         try {
             TwigManager::clearCache($env);

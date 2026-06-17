@@ -10,12 +10,22 @@ use Random\RandomException;
     name: 'fake:bank',
     description: 'Generate random bank test data (IBAN, BIC, Institute)',
     group: 'Testdata',
-    aliases: ['--fb']
+    aliases: ['--fb'],
+    options: [
+        '--help' => 'Show command help',
+    ]
 )]
 class FakeBankCommand extends BaseCommand
 {
     public function handle(?string $argument): void
     {
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
+
         $countryCode = strtoupper($argument ?? 'DE');
         $iban = $this->generateIban($countryCode);
         $bic = $this->generateBic($countryCode);

@@ -61,7 +61,7 @@ class MakeSeederCommandTest extends MockeryTestCase
         $expectedFile = $seederPath . $seederName . '.json';
 
         $pathResolverMock = m::mock(new PAthResolver(new Env()));
-        $pathResolverMock->shouldReceive('resolve')->andReturn($seederPath);
+        $pathResolverMock->shouldReceive('seeders')->andReturn($seederPath);
 
 
         /** @var MakeModelCommand|m\MockInterface $command */

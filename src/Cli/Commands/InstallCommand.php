@@ -8,13 +8,23 @@ use Asterios\Core\Cli\Base\BaseCommand;
 #[Command(
     name: 'install',
     description: 'Initialize application and create .env file',
-    group: 'Setup'
+    group: 'Setup',
+    options: [
+        '--help' => 'Show command help',
+    ]
 )]
 class InstallCommand extends BaseCommand
 {
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         $envPath = $this->getEnvPath();
 

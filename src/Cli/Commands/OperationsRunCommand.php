@@ -14,6 +14,7 @@ use Asterios\Core\Operation\Operation;
     aliases: ['--opr'],
     options: [
         '--force' => 'Re-run already executed operations',
+        '--help' => 'Show command help',
     ]
 )]
 final class OperationsRunCommand extends BaseCommand
@@ -21,6 +22,13 @@ final class OperationsRunCommand extends BaseCommand
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         $operation = $this->createOperation();
 
