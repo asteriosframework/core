@@ -30,7 +30,7 @@ class ViewCacheCommand  extends BaseCommand
 
             return;
         }
-        
+
         $env = new Env(Asterios::getBasePath() . '/.env');
 
         try

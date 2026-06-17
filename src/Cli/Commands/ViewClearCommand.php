@@ -25,14 +25,14 @@ class ViewClearCommand extends BaseCommand
     public function handle(?string $argument): void
     {
         $this->printHeader();
-        
+
         if ($this->hasFlag('--help'))
         {
             $this->printCommandHelpFromAttribute();
 
             return;
         }
-        
+
         $env = new Env(Asterios::getBasePath() . '/.env');
         try {
             TwigManager::clearCache($env);

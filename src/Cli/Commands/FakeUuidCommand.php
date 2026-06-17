@@ -23,7 +23,7 @@ class FakeUuidCommand extends BaseCommand
     public function handle(?string $argument): void
     {
         $this->printHeader();
-        
+
         if ($this->hasFlag('--help'))
         {
             $this->printCommandHelpFromAttribute();
