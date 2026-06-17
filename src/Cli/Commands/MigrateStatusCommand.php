@@ -11,7 +11,10 @@ use Asterios\Core\Enum\CliStatusIcon;
     name: 'migrate:status',
     description: 'Show the status of all migrations (ran/pending)',
     group: 'Database',
-    aliases: ['--mi']
+    aliases: ['--mi'],
+    options: [
+        '--help' => 'Show command help',
+    ],
 )]
 class MigrateStatusCommand extends BaseCommand
 {
@@ -26,6 +29,13 @@ class MigrateStatusCommand extends BaseCommand
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         $ranMigrations = $this->migration->getRanMigrations();
         $allMigrationFiles = $this->migration->getAllMigrationFiles();

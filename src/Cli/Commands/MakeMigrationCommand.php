@@ -13,7 +13,10 @@ use Asterios\Core\Execution\PathResolver;
     name: 'make:migration',
     description: 'Create a new migration class',
     group: 'Make',
-    aliases: ['--mmi']
+    aliases: ['--mmi'],
+    options: [
+        '--help' => 'Show command help',
+    ],
 )]
 class MakeMigrationCommand extends BaseCommand
 {
@@ -26,6 +29,13 @@ class MakeMigrationCommand extends BaseCommand
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         if (!$argument)
         {

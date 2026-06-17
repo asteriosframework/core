@@ -11,7 +11,10 @@ use Asterios\Core\Operation\Operation;
     name: 'operations:status',
     description: 'Show the status of all operations (executed/pending)',
     group: 'Operations',
-    aliases: ['--ops']
+    aliases: ['--ops'],
+    options: [
+        '--help' => 'Show command help',
+    ],
 )]
 final class OperationsStatusCommand extends BaseCommand
 {
@@ -27,6 +30,13 @@ final class OperationsStatusCommand extends BaseCommand
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         $executedOperations = $this->operation->getRanOperations();
         $allOperationFiles = $this->operation->getAllOperationFiles();

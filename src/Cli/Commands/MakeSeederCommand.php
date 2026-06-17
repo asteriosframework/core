@@ -13,7 +13,10 @@ use Asterios\Core\Execution\PathResolver;
     name: 'make:seeder',
     description: 'Create a new json seeder file',
     group: 'Make',
-    aliases: ['--ms']
+    aliases: ['--ms'],
+    options: [
+        '--help' => 'Show command help',
+    ],
 )]
 class MakeSeederCommand extends BaseCommand
 {
@@ -26,6 +29,13 @@ class MakeSeederCommand extends BaseCommand
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         if (!$argument)
         {

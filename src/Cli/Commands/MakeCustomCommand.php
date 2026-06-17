@@ -14,7 +14,10 @@ use Asterios\Core\Execution\PathResolver;
     name: 'make:command',
     description: 'Create a new custom CLI command',
     group: 'Make',
-    aliases: ['--mc']
+    aliases: ['--mc'],
+    options: [
+        '--help' => 'Show command help',
+    ],
 )]
 class MakeCustomCommand extends BaseCommand
 {
@@ -27,6 +30,13 @@ class MakeCustomCommand extends BaseCommand
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         if (!$argument)
         {
@@ -44,7 +54,7 @@ class MakeCustomCommand extends BaseCommand
 
         $this->ensureDirectoryExists($directory);
 
-        $filename = $directory . DIRECTORY_SEPARATOR . $className . '.php';
+        $filename = $directory . $className . '.php';
 
         if ($this->fileExists($filename))
         {
@@ -108,13 +118,23 @@ use Asterios\Core\Cli\Base\BaseCommand;
     name: '{$commandName}',
     description: 'Describe your command',
     group: 'Custom',
-    aliases: []
+    aliases: [],
+    options: [
+        '--help' => 'Show command help',
+    ],
 )]
 class {$className} extends BaseCommand
 {
     public function handle(?string \$argument): void
     {
         \$this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         echo "Hello from {$className}!\\n";
 

@@ -13,7 +13,10 @@ use Asterios\Core\Execution\PathResolver;
     name: 'make:operation',
     description: 'Create a new operation class',
     group: 'Make',
-    aliases: ['--mop']
+    aliases: ['--mop'],
+    options: [
+        '--help' => 'Show command help',
+    ],
 )]
 class MakeOperationCommand extends BaseCommand
 {
@@ -26,6 +29,13 @@ class MakeOperationCommand extends BaseCommand
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         if (!$argument)
         {

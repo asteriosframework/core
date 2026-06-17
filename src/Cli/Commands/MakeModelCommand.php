@@ -4,19 +4,28 @@ namespace Asterios\Core\Cli\Commands;
 
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
-use Asterios\Core\Cli\Support\ArgumentParserTrait;
 
 #[Command(
     name: 'make:model',
     description: 'Create a new model class. Use --namespace= for optional namespace.',
     group: 'Make',
-    aliases: ['--mm']
+    aliases: ['--mm'],
+    options: [
+        '--help' => 'Show command help',
+    ],
 )]
 class MakeModelCommand extends BaseCommand
 {
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         $argument ??= $this->getPositional(0);
 

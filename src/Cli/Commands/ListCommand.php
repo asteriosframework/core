@@ -9,7 +9,10 @@ use Asterios\Core\Cli\Base\BaseCommand;
     name: 'list',
     description: 'Display all available commands',
     group: 'System',
-    aliases: ['--list']
+    aliases: ['--list'],
+    options: [
+        '--help' => 'Show command help',
+    ],
 )]
 class ListCommand extends BaseCommand
 {
@@ -19,6 +22,14 @@ class ListCommand extends BaseCommand
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
+
         $this->printTable();
     }
 }

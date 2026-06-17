@@ -13,12 +13,24 @@ use Asterios\Core\View\Twig\TwigManager;
 #[Command(
     name: 'view:cache',
     description: 'Warmup Twig template cache',
-    group: 'View'
+    group: 'View',
+    options: [
+        '--help' => 'Show command help',
+    ],
 )]
 class ViewCacheCommand  extends BaseCommand
 {
     public function handle(?string $argument): void
     {
+        $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
+        
         $env = new Env(Asterios::getBasePath() . '/.env');
 
         try
