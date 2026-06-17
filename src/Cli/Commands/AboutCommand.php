@@ -10,7 +10,10 @@ use Asterios\Core\Cli\Base\BaseCommand;
     name: 'about',
     description: 'Display information about AsteriosPHP',
     group: 'System',
-    aliases: ['--info']
+    aliases: ['--info'],
+    options: [
+        '--help' => 'Show command help',
+    ]
 )]
 class AboutCommand extends BaseCommand
 {
@@ -20,6 +23,14 @@ class AboutCommand extends BaseCommand
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
+
         $this->printDataTable([
             'System' => [
                 'PHP Version' => PHP_VERSION,

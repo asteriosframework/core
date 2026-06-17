@@ -14,6 +14,7 @@ use Asterios\Core\Enum\CliStatusIcon;
     aliases: ['--m'],
     options: [
         '--force' => 'Re-run already executed migrations',
+        '--help' => 'Show command help',
     ]
 )]
 class MigrateCommand extends BaseCommand

@@ -5,19 +5,37 @@ namespace Asterios\Core\Cli\Commands;
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
 use Asterios\Core\Env;
+use Asterios\Core\Exception\EnvException;
+use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Execution\PathResolver;
 
 #[Command(
     name: 'make:seeder',
     description: 'Create a new json seeder file',
     group: 'Make',
-    aliases: ['--ms']
+    aliases: ['--ms'],
+    options: [
+        '--help' => 'Show command help',
+    ],
 )]
 class MakeSeederCommand extends BaseCommand
 {
+    /**
+     * @param string|null $argument
+     * @return void
+     * @throws EnvException
+     * @throws EnvLoadException
+     */
     public function handle(?string $argument): void
     {
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         if (!$argument)
         {
@@ -31,7 +49,7 @@ class MakeSeederCommand extends BaseCommand
 
         $env = new Env(getcwd() . DIRECTORY_SEPARATOR . '.env');
         $pathResolver = new PathResolver($env);
-        $appSeederDirectory = getcwd() . $pathResolver->resolve('DATABASE_SEEDER_PATH');
+        $appSeederDirectory = getcwd() . $pathResolver->seeders();
 
         $this->ensureDirectoryExists($appSeederDirectory);
 

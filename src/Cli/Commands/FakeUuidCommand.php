@@ -10,7 +10,10 @@ use Random\RandomException;
     name: 'fake:uuid',
     description: 'Generate a random UUID',
     group: 'Testdata',
-    aliases: ['--fuuid']
+    aliases: ['--fuuid'],
+    options: [
+        '--help' => 'Show command help',
+    ]
 )]
 class FakeUuidCommand extends BaseCommand
 {
@@ -19,6 +22,14 @@ class FakeUuidCommand extends BaseCommand
      */
     public function handle(?string $argument): void
     {
+        $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         $this->printDataTable([
             'UUID Testdata' => [

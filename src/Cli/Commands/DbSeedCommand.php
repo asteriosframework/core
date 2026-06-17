@@ -11,14 +11,23 @@ use Asterios\Core\Enum\CliStatusIcon;
     name: 'db:seed',
     description: 'Run database seeding',
     group: 'Database',
-    aliases: ['--ds']
+    aliases: ['--ds'],
+    options: [
+        '--help' => 'Show command help',
+    ]
 )]
 class DbSeedCommand extends BaseCommand
 {
     public function handle(?string $argument): void
     {
-
         $this->printHeader();
+
+        if ($this->hasFlag('--help'))
+        {
+            $this->printCommandHelpFromAttribute();
+
+            return;
+        }
 
         $seeder = $this->getSeeder();
         $seeder->seed();

@@ -116,7 +116,7 @@ class Seeder extends AbstractFileExecutor implements SeederInterface
         {
             return Asterios::getBasePath()
                 . $this->pathResolver
-                    ->resolve('DATABASE_SEEDER_PATH');
+                    ->seeders();
         }
         catch (\Throwable)
         {
