@@ -5,6 +5,8 @@ namespace Asterios\Core\Cli\Commands;
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
 use Asterios\Core\Env;
+use Asterios\Core\Exception\EnvException;
+use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Execution\PathResolver;
 
 #[Command(
@@ -15,6 +17,12 @@ use Asterios\Core\Execution\PathResolver;
 )]
 class MakeMigrationCommand extends BaseCommand
 {
+    /**
+     * @param string|null $argument
+     * @return void
+     * @throws EnvException
+     * @throws EnvLoadException
+     */
     public function handle(?string $argument): void
     {
         $this->printHeader();
@@ -29,7 +37,7 @@ class MakeMigrationCommand extends BaseCommand
 
         $env = new Env(getcwd() . DIRECTORY_SEPARATOR . '.env');
         $pathResolver = new PathResolver($env);
-        $appMigrationDirectory = getcwd() . $pathResolver->resolve('DATABASE_MIGRATION_PATH');
+        $appMigrationDirectory = getcwd() . $pathResolver->migrations();
 
         $formattedName = strtolower(preg_replace('/\W+/', '_', $argument));
         $timestamp = date('Y_m_d_His');

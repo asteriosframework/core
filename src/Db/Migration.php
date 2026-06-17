@@ -201,7 +201,7 @@ class Migration extends AbstractFileExecutor implements MigrationInterface
         {
             return Asterios::getBasePath()
                 . $this->pathResolver
-                    ->resolve('DATABASE_MIGRATION_PATH');
+                    ->migrations();
         }
         catch (\Throwable)
         {

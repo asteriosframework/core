@@ -133,9 +133,7 @@ class Operation extends AbstractFileExecutor
     {
         try
         {
-            return Asterios::getBasePath()
-                . $this->pathResolver
-                    ->resolve('OPERATION_PATH');
+            return Asterios::getBasePath() . $this->pathResolver->operations();
         }
         catch (\Throwable)
         {

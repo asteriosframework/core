@@ -6,6 +6,8 @@ use Asterios\Core\Asterios;
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Base\BaseCommand;
 use Asterios\Core\Env;
+use Asterios\Core\Exception\EnvException;
+use Asterios\Core\Exception\EnvLoadException;
 use Asterios\Core\Execution\PathResolver;
 
 #[Command(
@@ -16,6 +18,12 @@ use Asterios\Core\Execution\PathResolver;
 )]
 class MakeCustomCommand extends BaseCommand
 {
+    /**
+     * @param string|null $argument
+     * @return void
+     * @throws EnvException
+     * @throws EnvLoadException
+     */
     public function handle(?string $argument): void
     {
         $this->printHeader();
@@ -32,7 +40,7 @@ class MakeCustomCommand extends BaseCommand
 
         $env = new Env(getcwd() . DIRECTORY_SEPARATOR . '.env');
         $pathResolver = new PathResolver($env);
-        $directory = getcwd() . $pathResolver->resolve('CLI_COMMAND_PATH');
+        $directory = getcwd() . $pathResolver->commands();
 
         $this->ensureDirectoryExists($directory);
 
