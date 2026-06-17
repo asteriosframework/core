@@ -129,9 +129,9 @@ class {$className} extends BaseCommand
     {
         \$this->printHeader();
 
-        if ($this->hasFlag('--help'))
+        if (\$this->hasFlag('--help'))
         {
-            $this->printCommandHelpFromAttribute();
+            \$this->printCommandHelpFromAttribute();
 
             return;
         }
