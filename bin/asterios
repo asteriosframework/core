@@ -4,21 +4,21 @@
 use Asterios\Core\Cli\Builder\ColorBuilder;
 use Asterios\Core\Cli\CommandRegistry;
 
-$localAutoload = getcwd() . '/vendor/autoload.php';
-$globalAutoload = __DIR__ . '/../vendor/autoload.php';
-
-if (file_exists($localAutoload))
+if (isset($GLOBALS['_composer_autoload_path']) && file_exists($GLOBALS['_composer_autoload_path']))
 {
-    require $localAutoload;
-}
-elseif (file_exists($globalAutoload))
-{
-    require $globalAutoload;
+    require $GLOBALS['_composer_autoload_path'];
 }
 else
 {
-    echo "Autoload file not found.\n";
-    exit(1);
+    $autoload = dirname(__DIR__, 3) . '/autoload.php';
+
+    if (!file_exists($autoload))
+    {
+        fwrite(STDERR, "Autoload file not found: {$autoload}\n");
+        exit(1);
+    }
+
+    require $autoload;
 }
 
 
