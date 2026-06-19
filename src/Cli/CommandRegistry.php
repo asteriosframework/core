@@ -141,7 +141,7 @@ class CommandRegistry extends AbstractFileExecutor implements CommandRegistryInt
     {
         try
         {
-            return Asterios::getBasePath() . $this->pathResolver->commands();
+            return $this->pathResolver->commands();
         }
         catch (\Throwable)
         {
