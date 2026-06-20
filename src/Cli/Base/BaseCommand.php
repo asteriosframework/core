@@ -11,7 +11,6 @@ use Asterios\Core\Config;
 use Asterios\Core\Contracts\CommandInterface;
 use Asterios\Core\Exception\AsteriosException;
 use Asterios\Core\Exception\ConfigLoadException;
-use Asterios\Core\Security\TwoFactor\Passkey\Exception\ChallengeServiceException;
 use Asterios\Core\Traits\Cli\Commands\CommandsBuilderTrait;
 use ReflectionException;
 
@@ -29,7 +28,7 @@ abstract class BaseCommand implements CommandInterface
         $this->parseArguments();
 
         try {
-            Config::set_config_path(getcwd() . '/config');
+            Config::set_config_path(Asterios::getBasePath('config'));
             Asterios::init();
         } catch (ConfigLoadException|ConfigLoadException $e) {
             throw new CliBaseCommandException(message: 'Unable to load Config in BaseCommand.', previous: $e);
