@@ -2,10 +2,16 @@
 
 namespace Asterios\Core\Cli\Base;
 
+use Asterios\Core\Asterios;
 use Asterios\Core\Cli\Attributes\Command;
 use Asterios\Core\Cli\Builder\ColorBuilder;
+use Asterios\Core\Cli\Exception\CliBaseCommandException;
 use Asterios\Core\Cli\Support\ArgumentParserTrait;
+use Asterios\Core\Config;
 use Asterios\Core\Contracts\CommandInterface;
+use Asterios\Core\Exception\AsteriosException;
+use Asterios\Core\Exception\ConfigLoadException;
+use Asterios\Core\Security\TwoFactor\Passkey\Exception\ChallengeServiceException;
 use Asterios\Core\Traits\Cli\Commands\CommandsBuilderTrait;
 use ReflectionException;
 
@@ -14,10 +20,22 @@ abstract class BaseCommand implements CommandInterface
     use CommandsBuilderTrait;
     use ArgumentParserTrait;
 
+    /**
+     * @throws CliBaseCommandException
+     */
     // @codeCoverageIgnoreStart
     public function __construct()
     {
         $this->parseArguments();
+
+        try {
+            Config::set_config_path(getcwd() . '/config');
+            Asterios::init();
+        } catch (ConfigLoadException|ConfigLoadException $e) {
+            throw new CliBaseCommandException(message: 'Unable to load Config in BaseCommand.', previous: $e);
+        } catch (AsteriosException $e) {
+            throw new CliBaseCommandException(message: 'Unable to initialize Asterios n aseCommand.', previous: $e);
+        }
     }
 
     // @codeCoverageIgnoreEnd
