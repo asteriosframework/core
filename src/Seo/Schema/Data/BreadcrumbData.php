@@ -8,8 +8,8 @@ use Asterios\Core\Data;
 
 final class BreadcrumbData extends Data
 {
-    /**
-     * @var BreadcrumbItemData[]
-     */
-    public array $items = [];
+    public function __construct(
+        public array $items = []
+    ) {
+    }
 }

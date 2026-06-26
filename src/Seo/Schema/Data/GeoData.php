@@ -8,7 +8,9 @@ use Asterios\Core\Data;
 
 final class GeoData extends Data
 {
-    public float $latitude;
-
-    public float $longitude;
+    public function __construct(
+        public float $latitude,
+        public float $longitude
+    ) {
+    }
 }

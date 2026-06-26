@@ -4,55 +4,53 @@ declare(strict_types=1);
 
 namespace Asterios\Test\Seo\Schema;
 
-use Asterios\Core\Seo\Schema\Contracts\Node;
 use Asterios\Core\Seo\Schema\Graph;
-use Mockery as m;
 use PHPUnit\Framework\TestCase;
 
 final class GraphTest extends TestCase
 {
-    public function test_build_returns_empty_graph(): void
+    public function testBuildReturnsEmptyArray(): void
     {
         $graph = new Graph();
 
         $this->assertSame([], $graph->build());
     }
 
-    public function test_add_appends_node(): void
+    public function testAddReturnsGraphInstance(): void
     {
-        $node = m::mock(Node::class);
-
-        $node->shouldReceive('build')
-            ->once()
-            ->andReturn([
-                '@type' => 'Organization',
-            ]);
-
         $graph = new Graph();
 
-        $graph->add($node);
+        $this->assertSame(
+            $graph,
+            $graph->add(new DummyNode())
+        );
+    }
+
+    public function testBuildReturnsAddedNodes(): void
+    {
+        $graph = new Graph();
+
+        $graph->add(new DummyNode());
 
         $this->assertSame([
             [
-                '@type' => 'Organization',
+                '@type' => 'Dummy',
+                'name' => 'Dummy Node',
             ],
         ], $graph->build());
     }
 
-    public function test_add_returns_graph_instance(): void
+    public function testBuildReturnsNodesInCorrectOrder(): void
     {
         $graph = new Graph();
 
-        $node = m::mock(Node::class);
+        $graph
+            ->add(new DummyNode())
+            ->add(new DummyNode());
 
-        $this->assertSame(
-            $graph,
-            $graph->add($node)
+        $this->assertCount(
+            2,
+            $graph->build()
         );
-    }
-
-    protected function tearDown(): void
-    {
-        m::close();
     }
 }

@@ -8,7 +8,9 @@ use Asterios\Core\Data;
 
 final class ResourceData extends Data
 {
-    public string $name;
-
-    public string $url;
+    public function __construct(
+        public string $name,
+        public string $url,
+    ) {
+    }
 }

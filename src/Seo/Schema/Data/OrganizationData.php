@@ -8,13 +8,12 @@ use Asterios\Core\Data;
 
 final class OrganizationData extends Data
 {
-    public string $name;
-
-    public string $url;
-
-    public ?string $email = null;
-
-    public ?string $telephone = null;
-
-    public ?string $logo = null;
+    public function __construct(
+        public string $name,
+        public string $url,
+        public ?string $email = null,
+        public ?string $telephone = null,
+        public ?string $logo = null,
+    ) {
+    }
 }

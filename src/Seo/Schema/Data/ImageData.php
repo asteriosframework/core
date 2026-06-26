@@ -8,13 +8,12 @@ use Asterios\Core\Data;
 
 final class ImageData extends Data
 {
-    public string $url;
-
-    public ?string $title = null;
-
-    public ?string $description = null;
-
-    public ?int $width = null;
-
-    public ?int $height = null;
+    public function __construct(
+        public string $url,
+        public ?string $title = null,
+        public ?string $description = null,
+        public ?int $width = null,
+        public ?int $height = null,
+    ) {
+    }
 }

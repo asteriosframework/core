@@ -8,13 +8,12 @@ use Asterios\Core\Data;
 
 final class AddressData extends Data
 {
-    public string $street;
-
-    public string $postalCode;
-
-    public string $city;
-
-    public string $region;
-
-    public string $country;
+    public function __construct(
+        public string $street,
+        public string $postalCode,
+        public string $city,
+        public string $region,
+        public string $country,
+    ) {
+    }
 }

@@ -8,12 +8,10 @@ use Asterios\Core\Data;
 
 final class OfferCatalogData extends Data
 {
-    public string $name;
-
-    public string $url;
-
-    /**
-     * @var OfferData[]
-     */
-    public array $offers = [];
+    public function __construct(
+        public string $name,
+        public string $url,
+        public array $offers = [],
+    ) {
+    }
 }

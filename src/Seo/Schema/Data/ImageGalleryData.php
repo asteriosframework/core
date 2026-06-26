@@ -8,10 +8,9 @@ use Asterios\Core\Data;
 
 final class ImageGalleryData extends Data
 {
-    public ResourceData $resource;
-
-    /**
-     * @var ImageData[]
-     */
-    public array $images = [];
+    public function __construct(
+        public ResourceData $resource,
+        public array $images = []
+    ) {
+    }
 }

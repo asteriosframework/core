@@ -2,35 +2,48 @@
 
 declare(strict_types=1);
 
-namespace Asterios\Test\Seo\Schema;
+namespace Asterios\Test\Seo\Schema\Node;
 
-use Asterios\Core\Seo\Schema\Enums\Data\OrganizationData;
+use Asterios\Core\Seo\Schema\Data\OrganizationData;
+use Asterios\Core\Seo\Schema\Node\Organization;
 use PHPUnit\Framework\TestCase;
 
-class OrganizationTest extends TestCase
+final class OrganizationTest extends TestCase
 {
-    public function test_build_returns_schema(): void
+    public function testBuildReturnsExpectedSchema(): void
     {
-        $data = new OrganizationData(
+        $node = new Organization(new OrganizationData(
             name: 'Asterios',
             url: 'https://asteriosphp.de',
-            email: 'info@test.de',
-            telephone: '123456',
+            email: 'info@asteriosphp.de',
+            telephone: '+49 123456',
             logo: 'https://asteriosphp.de/logo.svg',
-        );
-
-        $schema = new Organization($data);
+        ));
 
         $this->assertSame([
             '@type' => 'Organization',
             'name' => 'Asterios',
             'url' => 'https://asteriosphp.de',
-            'email' => 'info@test.de',
-            'telephone' => '123456',
+            'email' => 'info@asteriosphp.de',
+            'telephone' => '+49 123456',
             'logo' => [
                 '@type' => 'ImageObject',
                 'url' => 'https://asteriosphp.de/logo.svg',
             ],
-        ], $schema->build());
+        ], $node->build());
+    }
+
+    public function testOptionalPropertiesAreNotRendered(): void
+    {
+        $node = new Organization(new OrganizationData(
+            name: 'Asterios',
+            url: 'https://asteriosphp.de',
+        ));
+
+        $result = $node->build();
+
+        $this->assertArrayNotHasKey('email', $result);
+        $this->assertArrayNotHasKey('telephone', $result);
+        $this->assertArrayNotHasKey('logo', $result);
     }
 }

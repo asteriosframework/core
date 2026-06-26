@@ -8,5 +8,8 @@ use Asterios\Core\Data;
 
 final class AmenityData extends Data
 {
-    public string $name;
+    public function __construct(
+        public string $name
+    ) {
+    }
 }
