@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Asterios\Core\Seo\Schema\Enums\Node;
+namespace Asterios\Core\Seo\Schema\Node;
 
-use Asterios\Core\Seo\Schema\Enums\Contracts\Node;
-use Asterios\Core\Seo\Schema\Enums\Data\BreadcrumbData;
+use Asterios\Core\Seo\Schema\Contracts\Node;
+use Asterios\Core\Seo\Schema\Data\BreadcrumbData;
 
 readonly class Breadcrumb implements Node
 {

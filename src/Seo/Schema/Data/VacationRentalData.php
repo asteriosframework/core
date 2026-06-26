@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Asterios\Core\Seo\Schema\Enums\Data;
+namespace Asterios\Core\Seo\Schema\Data;
 
 use Asterios\Core\Data;
 

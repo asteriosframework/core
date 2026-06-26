@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Asterios\Core\Seo\Schema\Enums\Exceptions;
+namespace Asterios\Core\Seo\Schema\Exceptions;
 
 use Exception;
 

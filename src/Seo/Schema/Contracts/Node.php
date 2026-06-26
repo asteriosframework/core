@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Asterios\Core\Seo\Schema\Enums\Contracts;
+namespace Asterios\Core\Seo\Schema\Contracts;
 
 interface Node
 {

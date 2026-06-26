@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Asterios\Core\Seo\Schema;
 
-use Asterios\Core\Seo\Schema\Enums\Exceptions\RendererException;
+use Asterios\Core\Seo\Schema\Exceptions\RendererException;
 
 final class JsonRenderer
 {

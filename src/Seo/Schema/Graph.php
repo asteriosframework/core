@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Asterios\Core\Seo\Schema;
 
-use Asterios\Core\Seo\Schema\Enums\Contracts\Node;
+use Asterios\Core\Seo\Schema\Contracts\Node;
 
 final class Graph
 {

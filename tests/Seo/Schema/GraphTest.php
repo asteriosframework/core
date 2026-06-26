@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Asterios\Test\Seo\Schema;
 
-use Asterios\Core\Seo\Schema\Enums\Contracts\Node;
+use Asterios\Core\Seo\Schema\Contracts\Node;
 use Asterios\Core\Seo\Schema\Graph;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;

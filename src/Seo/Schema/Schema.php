@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 namespace Asterios\Core\Seo\Schema;
 
-use Asterios\Core\Seo\Schema\Enums\Contracts\Node;
-use Asterios\Core\Seo\Schema\Enums\Data\BreadcrumbData;
-use Asterios\Core\Seo\Schema\Enums\Data\ImageGalleryData;
-use Asterios\Core\Seo\Schema\Enums\Data\OfferCatalogData;
-use Asterios\Core\Seo\Schema\Enums\Data\OfferData;
-use Asterios\Core\Seo\Schema\Enums\Data\OrganizationData;
-use Asterios\Core\Seo\Schema\Enums\Data\ResourceData;
-use Asterios\Core\Seo\Schema\Enums\Data\VacationRentalData;
-use Asterios\Core\Seo\Schema\Enums\Exceptions\RendererException;
-use Asterios\Core\Seo\Schema\Enums\Node\Accommodation;
-use Asterios\Core\Seo\Schema\Enums\Node\Breadcrumb;
-use Asterios\Core\Seo\Schema\Enums\Node\ImageGallery;
-use Asterios\Core\Seo\Schema\Enums\Node\Legalpage;
-use Asterios\Core\Seo\Schema\Enums\Node\Offer;
-use Asterios\Core\Seo\Schema\Enums\Node\OfferCatalog;
-use Asterios\Core\Seo\Schema\Enums\Node\Organization;
-use Asterios\Core\Seo\Schema\Enums\Node\TouristDestination;
-use Asterios\Core\Seo\Schema\Enums\Node\VacationRental;
-use Asterios\Core\Seo\Schema\Enums\Node\Webpage;
-use Asterios\Core\Seo\Schema\Enums\Node\Website;
+use Asterios\Core\Seo\Schema\Contracts\Node;
+use Asterios\Core\Seo\Schema\Data\BreadcrumbData;
+use Asterios\Core\Seo\Schema\Data\ImageGalleryData;
+use Asterios\Core\Seo\Schema\Data\OfferCatalogData;
+use Asterios\Core\Seo\Schema\Data\OfferData;
+use Asterios\Core\Seo\Schema\Data\OrganizationData;
+use Asterios\Core\Seo\Schema\Data\ResourceData;
+use Asterios\Core\Seo\Schema\Data\VacationRentalData;
+use Asterios\Core\Seo\Schema\Exceptions\RendererException;
+use Asterios\Core\Seo\Schema\Node\Accommodation;
+use Asterios\Core\Seo\Schema\Node\Breadcrumb;
+use Asterios\Core\Seo\Schema\Node\ImageGallery;
+use Asterios\Core\Seo\Schema\Node\Legalpage;
+use Asterios\Core\Seo\Schema\Node\Offer;
+use Asterios\Core\Seo\Schema\Node\OfferCatalog;
+use Asterios\Core\Seo\Schema\Node\Organization;
+use Asterios\Core\Seo\Schema\Node\TouristDestination;
+use Asterios\Core\Seo\Schema\Node\VacationRental;
+use Asterios\Core\Seo\Schema\Node\Webpage;
+use Asterios\Core\Seo\Schema\Node\Website;
 
 final class Schema
 {
