@@ -10,12 +10,11 @@ final class PaypalPurchaseData extends Data
         public readonly string $merchantOrderId,
         public readonly float  $amount,
         public readonly string $currency,
-
         public readonly string $returnUrl,
         public readonly string $cancelUrl,
         public readonly string $captureUrl,
-
         public readonly string $description = '',
         public readonly array  $customData = []
-    ) {}
+    ) {
+    }
 }

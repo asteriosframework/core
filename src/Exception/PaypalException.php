@@ -2,6 +2,6 @@
 
 namespace Asterios\Core\Exception;
 
-class PaypalException extends AsteriosException {
-
+class PaypalException extends AsteriosException
+{
 }

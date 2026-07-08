@@ -27,12 +27,17 @@ abstract class BaseCommand implements CommandInterface
     {
         $this->parseArguments();
 
-        try {
+        try
+        {
             Config::set_config_path(Asterios::getBasePath('config'));
             Asterios::init();
-        } catch (ConfigLoadException|ConfigLoadException $e) {
+        }
+        catch (ConfigLoadException|ConfigLoadException $e)
+        {
             throw new CliBaseCommandException(message: 'Unable to load Config in BaseCommand.', previous: $e);
-        } catch (AsteriosException $e) {
+        }
+        catch (AsteriosException $e)
+        {
             throw new CliBaseCommandException(message: 'Unable to initialize Asterios n aseCommand.', previous: $e);
         }
     }

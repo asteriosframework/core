@@ -10,10 +10,10 @@ use Asterios\Core\Exception\TwigTemplateManagerException;
 use Asterios\Core\View\Twig\TwigManager;
 
 #[Command(
-name: 'view:clear',
-description: 'Clear Twig template cache',
-group: 'View',
-options: [
+    name: 'view:clear',
+    description: 'Clear Twig template cache',
+    group: 'View',
+    options: [
     '--help' => 'Show command help',
 ],
 )]
@@ -34,11 +34,14 @@ class ViewClearCommand extends BaseCommand
         }
 
         $env = new Env(Asterios::getBasePath() . '/.env');
-        try {
+        try
+        {
             TwigManager::clearCache($env);
 
             $this->success('Twig cache cleared.');
-        } catch (TwigTemplateManagerException $e) {
+        }
+        catch (TwigTemplateManagerException $e)
+        {
             $this->error('Twig cache clear failed: '.$e->getMessage());
         }
     }

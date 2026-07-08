@@ -8,7 +8,6 @@ final readonly class OrmMetadata
         public string $table,
         public ?string $alias,
         public string $connection
-    )
-    {
+    ) {
     }
 }

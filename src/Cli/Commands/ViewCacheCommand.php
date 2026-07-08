@@ -18,7 +18,7 @@ use Asterios\Core\View\Twig\TwigManager;
         '--help' => 'Show command help',
     ],
 )]
-class ViewCacheCommand  extends BaseCommand
+class ViewCacheCommand extends BaseCommand
 {
     public function handle(?string $argument): void
     {
@@ -39,7 +39,8 @@ class ViewCacheCommand  extends BaseCommand
             TwigManager::warmupCache($twig);
 
             $this->success('Twig cache warmed up.');
-        } catch (TwigTemplateManagerException|ViewNamespaceLoaderException $e)
+        }
+        catch (TwigTemplateManagerException|ViewNamespaceLoaderException $e)
         {
             $this->error('Twig cache warmed up failed: '.$e->getMessage());
         }
