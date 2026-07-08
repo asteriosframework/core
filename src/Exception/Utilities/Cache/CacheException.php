@@ -4,5 +4,4 @@ namespace Asterios\Core\Exception\Utilities\Cache;
 
 class CacheException extends \RuntimeException
 {
-
 }

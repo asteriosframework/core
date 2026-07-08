@@ -6,5 +6,4 @@ use Asterios\Core\Exception\Utilities\Cache\CacheException;
 
 class DriverUnavailableException extends CacheException
 {
-
 }

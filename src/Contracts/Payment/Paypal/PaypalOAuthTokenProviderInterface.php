@@ -4,8 +4,8 @@ namespace Asterios\Core\Contracts\Payment\Paypal;
 
 use Asterios\Core\Exception\PaypalException;
 
-interface PaypalOAuthTokenProviderInterface {
-
+interface PaypalOAuthTokenProviderInterface
+{
     /**
      * @return string
      * @throws PaypalException

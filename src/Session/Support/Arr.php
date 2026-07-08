@@ -4,12 +4,13 @@ namespace Asterios\Core\Session\Support;
 
 use Asterios\Core\Contracts\Session\Support\ArrInterface;
 
-class Arr implements ArrInterface{
-
+class Arr implements ArrInterface
+{
     /**
      * @inheritDoc
      */
-    public static function get(array $source, string|array|null $key, array|string|int|float|bool|null $default = null,): array|string|int|float|bool|null {
+    public static function get(array $source, string|array|null $key, array|string|int|float|bool|null $default = null): array|string|int|float|bool|null
+    {
         if ($key === null)
         {
             return $source;
@@ -50,7 +51,7 @@ class Arr implements ArrInterface{
     /**
      * @inheritDoc
      */
-    public static function set(array &$source, string|array|null $key, array|string|int|float|bool|null $value = null,): void
+    public static function set(array &$source, string|array|null $key, array|string|int|float|bool|null $value = null): void
     {
         if ($key === null)
         {
@@ -98,7 +99,8 @@ class Arr implements ArrInterface{
     /**
      * @inheritDoc
      */
-    public static function forget(array &$source, string $key): void {
+    public static function forget(array &$source, string $key): void
+    {
         $segments = explode('.', $key);
         $current = &$source;
 

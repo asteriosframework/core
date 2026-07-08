@@ -10,5 +10,6 @@ final class PaypalConfigData extends Data
         public readonly string $clientId,
         public readonly string $secret,
         public readonly string $baseUrl
-    ) {}
+    ) {
+    }
 }

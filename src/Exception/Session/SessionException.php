@@ -6,5 +6,4 @@ use Asterios\Core\Exception\AsteriosException;
 
 class SessionException extends AsteriosException
 {
-
 }
