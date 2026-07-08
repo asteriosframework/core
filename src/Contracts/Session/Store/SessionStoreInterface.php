@@ -2,7 +2,8 @@
 
 namespace Asterios\Core\Contracts\Session\Store;
 
-interface SessionStoreInterface {
+interface SessionStoreInterface
+{
     /**
      * @return void
      */

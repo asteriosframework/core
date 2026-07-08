@@ -4,6 +4,6 @@ namespace Asterios\Core\Cli\Exception;
 
 use Asterios\Core\Exception\AsteriosException;
 
-class CliBaseCommandException extends AsteriosException {
-
+class CliBaseCommandException extends AsteriosException
+{
 }

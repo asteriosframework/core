@@ -2,8 +2,8 @@
 
 namespace Asterios\Core\Contracts\Utilities\Cache;
 
-interface LockInterface {
-
+interface LockInterface
+{
     /**
      * @param int $ttl
      * @return bool

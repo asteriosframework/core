@@ -2,15 +2,15 @@
 
 namespace Asterios\Core\Contracts\Session\Support;
 
-interface ArrInterface {
-
+interface ArrInterface
+{
     /**
      * @param array $source
      * @param string|array|null $key
      * @param array|string|int|float|bool|null $default
      * @return array|string|int|float|bool|null
      */
-    public static function get(array $source, string|array|null $key, array|string|int|float|bool|null $default = null,): array|string|int|float|bool|null;
+    public static function get(array $source, string|array|null $key, array|string|int|float|bool|null $default = null): array|string|int|float|bool|null;
 
     /**
      * @param array $source
@@ -18,7 +18,7 @@ interface ArrInterface {
      * @param array|string|int|float|bool|null $value
      * @return void
      */
-    public static function set(array &$source, string|array|null $key, array|string|int|float|bool|null $value = null,): void;
+    public static function set(array &$source, string|array|null $key, array|string|int|float|bool|null $value = null): void;
 
     /**
      * @param array<string, mixed> $source
@@ -33,4 +33,4 @@ interface ArrInterface {
      * @return void
      */
     public static function forget(array &$source, string $key): void;
-    }
+}
