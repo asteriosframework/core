@@ -2,26 +2,17 @@
 
 namespace Asterios\Core;
 
+use Asterios\Core\Http\ContentType;
+use Asterios\Core\Http\Disposition;
 use JsonException;
 
 class Controller
 {
-    protected const string CONTENT_TYPE_JSON = 'application/json';
+    private string $contentType = ContentType::JSON;
 
-    private string $contentType = self::CONTENT_TYPE_JSON;
+    private ?string $contentDisposition = null;
 
-    private array $contentTypes = [
-        'application/xml',
-        'application/xml',
-        'application/json',
-        'text/javascript',
-        'application/vnd.php.serialized',
-        'text/plain',
-        'text/html',
-        'application/csv',
-        'application/x-www-form-urlencoded',
-        'multipart/form-data',
-    ];
+    private ?string $filename = null;
 
     public static array $statuses = [
         100 => 'Continue',
@@ -85,6 +76,7 @@ class Controller
         511 => 'Network Authentication Required',
     ];
 
+
     public function __construct()
     {
 
@@ -97,26 +89,39 @@ class Controller
      */
     public function response(mixed $data, int $status_code = 200): void
     {
-
-        header("Content-Type: " . $this->contentType);
-        header("Expires: on, 01 Jan 1970 00:00:00 GMT");
-        header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-        header("Cache-Control: no-store, no-cache, must-revalidate");
-        header("Cache-Control: post-check=0, pre-check=0", false);
-        header("Pragma: no-cache");
-
         if (!headers_sent())
         {
-            // Send the protocol/status line first, FCGI servers need different status header
+
             if (!empty($_SERVER['FCGI_SERVER_VERSION']))
             {
                 header('Status: ' . $status_code . ' ' . static::$statuses[$status_code]);
             }
             else
             {
-                $protocol = $_SERVER['SERVER_PROTOCOL'] ?: 'HTTP/1.1';
+                $protocol = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
                 header($protocol . ' ' . $status_code . ' ' . static::$statuses[$status_code]);
             }
+
+            header('Content-Type: ' . $this->contentType);
+
+            if ($this->contentDisposition !== null)
+            {
+
+                $header = 'Content-Disposition: ' . $this->contentDisposition;
+
+                if ($this->filename !== null)
+                {
+                    $header .= '; filename="' . basename($this->filename) . '"';
+                }
+
+                header($header);
+            }
+
+            header('Expires: on, 01 Jan 1970 00:00:00 GMT');
+            header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+            header('Cache-Control: no-store, no-cache, must-revalidate');
+            header('Cache-Control: post-check=0, pre-check=0', false);
+            header('Pragma: no-cache');
         }
 
         $this->returnResponse($data);
@@ -130,7 +135,7 @@ class Controller
     {
         if (is_array($data) || !empty($data))
         {
-            if ($this->contentType === self::CONTENT_TYPE_JSON)
+            if ($this->contentType === ContentType::JSON)
             {
                 echo json_encode($data, JSON_THROW_ON_ERROR);
             }
@@ -142,6 +147,7 @@ class Controller
     }
 
     /**
+     * @deprecated Use isSupportedContentType() instead
      * @param string $content_type
      * @return bool
      */
@@ -150,16 +156,29 @@ class Controller
         return $this->isSupportedContentType($content_type);
     }
 
+    /**
+     * @param string $content_type
+     * @return bool
+     */
     protected function isSupportedContentType(string $content_type): bool
     {
-        return in_array($content_type, $this->contentTypes, true);
+        return in_array($content_type, ContentType::all(), true);
     }
 
+    /**
+     * @@deprecated Use setContentType() instead
+     * @param string $contentType
+     * @return $this
+     */
     public function set_content_type(string $contentType): self
     {
         return $this->setContentType($contentType);
     }
 
+    /**
+     * @param string $contentType
+     * @return $this
+     */
     public function setContentType(string $contentType): self
     {
         if ($this->isSupportedContentType($contentType))
@@ -168,5 +187,45 @@ class Controller
         }
 
         return $this;
+    }
+
+    /**
+     * Sets the Content-Disposition header.
+     *
+     * Prefer using the convenience methods inline() or attachment()
+     * unless a custom disposition type is required.
+     *
+     * @param string $disposition
+     * @param string|null $filename
+     * @return $this
+     */
+    public function setContentDisposition(string $disposition, ?string $filename = null): self
+    {
+        $this->contentDisposition = $disposition;
+        $this->filename = $filename;
+
+        return $this;
+    }
+
+    /**
+     * Displays the response inline in the client, if supported.
+     *
+     * @param string|null $filename Optional filename.
+     * @return $this
+     */
+    public function inline(?string $filename = null): self
+    {
+        return $this->setContentDisposition(Disposition::INLINE, $filename);
+    }
+
+    /**
+     * Forces the response to be downloaded by the client.
+     *
+     * @param string|null $filename Optional filename.
+     * @return $this
+     */
+    public function attachment(?string $filename = null): self
+    {
+        return $this->setContentDisposition(Disposition::ATTACHMENT, $filename);
     }
 }
