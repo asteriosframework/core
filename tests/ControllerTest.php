@@ -3,6 +3,8 @@
 namespace Asterios\Test;
 
 use Asterios\Core\Controller;
+use Asterios\Core\Http\ContentType;
+use Asterios\Core\Http\Disposition;
 use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
@@ -32,14 +34,70 @@ class ControllerTest extends MockeryTestCase
         self::assertEquals($expected_value, $result);
     }
 
+    /**
+     * @test
+     */
+    public function set_content_type_is_fluent(): void
+    {
+        $controller = new Controller();
+
+        self::assertSame(
+            $controller,
+            $controller->setContentType(ContentType::JSON)
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function set_content_disposition_is_fluent(): void
+    {
+        $controller = new Controller();
+
+        self::assertSame(
+            $controller,
+            $controller->setContentDisposition(
+                Disposition::INLINE,
+                'calendar.ics'
+            )
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function inline_is_fluent(): void
+    {
+        $controller = new Controller();
+
+        self::assertSame(
+            $controller,
+            $controller->inline('calendar.ics')
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function attachment_is_fluent(): void
+    {
+        $controller = new Controller();
+
+        self::assertSame(
+            $controller,
+            $controller->attachment('invoice.pdf')
+        );
+    }
+
+
     ########## Provider ##########
 
     public static function response_provider(): array
     {
         return [
-            ['application/json', ['data' => true], '{"data":true}'],
-            ['application/json', (object)['data' => true], '{"data":true}'],
-            ['text/plain', 'output string', 'output string'],
+            [ContentType::JSON, ['data' => true], '{"data":true}'],
+            [ContentType::JSON, (object)['data' => true], '{"data":true}'],
+            [ContentType::PLAIN, 'output string', 'output string'],
         ];
     }
 }
