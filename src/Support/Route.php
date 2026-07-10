@@ -30,6 +30,14 @@ class Route implements RouteInterface
     /**
      * @inheritDoc
      */
+    public static function query(string $uri, string|array $action, array $options = []): void
+    {
+        self::addRoute('QUERY', $uri, $action, $options);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public static function put(string $uri, string|array $action, array $options = []): void
     {
         self::addRoute('PUT', $uri, $action, $options);

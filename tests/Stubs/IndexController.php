@@ -8,4 +8,9 @@ class IndexController
     {
         echo 'IndexController@index';
     }
+
+    public function query_index(): void
+    {
+        echo 'IndexController@query_index';
+    }
 }
