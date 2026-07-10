@@ -26,6 +26,14 @@ interface RouteInterface
      * @param array $options
      * @return void
      */
+    public static function query(string $uri, string|array $action, array $options = []): void;
+
+    /**
+     * @param string $uri
+     * @param string|array $action
+     * @param array $options
+     * @return void
+     */
     public static function put(string $uri, string|array $action, array $options = []): void;
 
     /**

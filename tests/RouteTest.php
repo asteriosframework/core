@@ -107,4 +107,13 @@ class RouteTest extends TestCase
         $this->assertContains('index', $routeNames);
         $this->assertContains('destroy', $routeNames);
     }
+
+    public function testQueryAddsRoute(): void
+    {
+        Route::query('search', 'SearchController@index');
+        $route = Route::$routes[0];
+
+        $this->assertSame('QUERY', $route['method']);
+        $this->assertSame('/search', $route['route']);
+    }
 }

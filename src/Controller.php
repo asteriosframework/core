@@ -4,11 +4,14 @@ namespace Asterios\Core;
 
 use Asterios\Core\Http\ContentType;
 use Asterios\Core\Http\Disposition;
+use Asterios\Core\Http\ServerRequest;
 use JsonException;
 
 class Controller
 {
     private string $contentType = ContentType::JSON;
+
+    protected ServerRequest $request;
 
     private ?string $contentDisposition = null;
 
@@ -79,7 +82,7 @@ class Controller
 
     public function __construct()
     {
-
+        $this->request = new ServerRequest();
     }
 
     /**
@@ -227,5 +230,27 @@ class Controller
     public function attachment(?string $filename = null): self
     {
         return $this->setContentDisposition(Disposition::ATTACHMENT, $filename);
+    }
+
+    /**
+     * @return ServerRequest
+     */
+    public function request(): ServerRequest
+    {
+        return $this->request;
+    }
+
+    /**
+     * @return array|object|null
+     * @throws JsonException
+     */
+    protected function json(): array|object|null
+    {
+        return $this->request->json();
+    }
+
+    protected function body(): string
+    {
+        return $this->request->body();
     }
 }
