@@ -85,14 +85,24 @@ class Router implements RouterInterface
 
         if ($countHandled === 0)
         {
-            http_response_code(404);
+            if ($this->routeExistsForAnotherMethod($this->getCurrentUri()))
+            {
+                $allowed = $this->getAllowedMethods($this->getCurrentUri());
+
+                header('Allow: ' . implode(', ', $allowed));
+                http_response_code(405);
+            }
+            else
+            {
+                http_response_code(404);
+            }
         }
         elseif ($callback)
         {
             $callback();
         }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'HEAD')
+        if (($_SERVER['REQUEST_METHOD'] ?? '') === 'HEAD')
         {
             ob_end_clean();
         }
@@ -115,10 +125,10 @@ class Router implements RouterInterface
         elseif ($method === 'POST')
         {
             $headers = $this->getRequestHeaders();
-            if (isset($headers['X-HTTP-Method-Override']) &&
-                in_array($headers['X-HTTP-Method-Override'], ['PUT', 'DELETE', 'PATCH'], true))
+            $override = strtoupper(trim($headers['X-HTTP-Method-Override'] ?? ''));
+            if (in_array($override, ['PUT', 'PATCH', 'DELETE', 'QUERY'], true))
             {
-                $method = $headers['X-HTTP-Method-Override'];
+                $method = $override;
             }
         }
 
@@ -215,7 +225,7 @@ class Router implements RouterInterface
     {
         if (is_callable($fn))
         {
-            call_user_func_array($fn, $params);
+            $fn(...$params);
             return;
         }
 
@@ -234,17 +244,17 @@ class Router implements RouterInterface
                 return;
             }
 
-            if (!method_exists($instance, $method))
+            $altMethod = strtolower($this->requestedMethod) . '_' . $method;
+
+            if (method_exists($instance, $altMethod))
             {
-                $altMethod = strtolower($this->requestedMethod) . '_' . $method;
-                if (method_exists($instance, $altMethod))
-                {
-                    $method = $altMethod;
-                }
-                else
-                {
-                    throw new RouterException('Method '.$method.' not found in '.$controller.'.');
-                }
+                $method = $altMethod;
+            }
+            elseif (!method_exists($instance, $method))
+            {
+                throw new RouterException(
+                    'Method ' . $method . ' not found in ' . $controller . '.'
+                );
             }
 
             $instance->$method(...$params);
@@ -322,5 +332,59 @@ class Router implements RouterInterface
         }
 
         return true;
+    }
+
+    /**
+     * @param string $uri
+     * @return bool
+     */
+    private function routeExistsForAnotherMethod(string $uri): bool
+    {
+        foreach ($this->afterRoutes as $method => $routes)
+        {
+            if ($method === $this->requestedMethod)
+            {
+                continue;
+            }
+
+            foreach ($routes as $route)
+            {
+                $pattern = preg_replace('/{(\w+)}/', '([^/]+)', $route['pattern']);
+
+                if ($pattern !== null && preg_match('#^' . $pattern . '$#', $uri))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $uri
+     * @return array
+     */
+    private function getAllowedMethods(string $uri): array
+    {
+        $methods = [];
+
+        foreach ($this->afterRoutes as $method => $routes)
+        {
+            foreach ($routes as $route)
+            {
+                $pattern = preg_replace('/{(\w+)}/', '([^/]+)', $route['pattern']);
+
+                if ($pattern !== null && preg_match('#^' . $pattern . '$#', $uri))
+                {
+                    $methods[] = $method;
+                    break;
+                }
+            }
+        }
+
+        sort($methods);
+
+        return array_unique($methods);
     }
 }

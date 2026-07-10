@@ -9,42 +9,42 @@ class Request
      *
      * @var string
      **/
-    public $cookie_file;
+    public string $cookie_file;
 
     /**
      * Determines whether requests should follow redirects
      *
      * @var boolean
      **/
-    public $follow_redirects = true;
+    public bool $follow_redirects = true;
 
     /**
      * An associative array of headers to send along with requests
      *
      * @var array
      **/
-    public $headers = [];
+    public array $headers = [];
 
     /**
      * An associative array of CURL-OPT options to send along with requests
      *
      * @var array
      **/
-    public $options = [];
+    public array $options = [];
 
     /**
      * The referer header to send along with requests
      *
      * @var string
      **/
-    public $referer;
+    public string $referer;
 
     /**
      * The user agent to send along with requests
      *
      * @var string
      **/
-    public $user_agent;
+    public string $user_agent;
 
     /**
      * Stores an error string for the last request if one occurred
@@ -52,10 +52,10 @@ class Request
      * @var string
      * @access protected
      **/
-    protected $error = '';
+    protected string $error = '';
 
     /** @var mixed */
-    protected $request;
+    protected mixed $request;
 
     /**
      * Initializes a Curl object
@@ -76,9 +76,9 @@ class Request
      *
      * @param string $url
      * @param array|string $vars
-     * @return Response object
-     **/
-    public function delete(string $url, $vars = [])
+     * @return Response|bool object
+     */
+    public function delete(string $url, array|string $vars = []): Response|bool
     {
         return $this->request('DELETE', $url, $vars);
     }
@@ -98,9 +98,9 @@ class Request
      *
      * @param string $url
      * @param array|string $vars
-     * @return Response
-     **/
-    public function get(string $url, $vars = [])
+     * @return Response|bool
+     */
+    public function get(string $url, array|string $vars = []): Response|bool
     {
         if (!empty($vars))
         {
@@ -118,9 +118,9 @@ class Request
      *
      * @param string $url
      * @param array|string $vars
-     * @return Response
-     **/
-    public function head($url, $vars = [])
+     * @return Response|bool
+     */
+    public function head(string $url,  array|string $vars = []): Response|bool
     {
         return $this->request('HEAD', $url, $vars);
     }
@@ -132,9 +132,21 @@ class Request
      * @param array|string $vars
      * @return Response|boolean
      **/
-    public function post($url, $vars = [])
+    public function post(string $url,  array|string $vars = []): Response|bool
     {
         return $this->request('POST', $url, $vars);
+    }
+
+    /**
+     * Makes an HTTP POST request to the specified $url with an optional array or string of $vars
+     *
+     * @param string $url
+     * @param array|string $vars
+     * @return Response|boolean
+     **/
+    public function query(string $url, array|string $vars = []): Response|bool
+    {
+        return $this->request('QUERY', $url, $vars);
     }
 
     /**
@@ -146,7 +158,7 @@ class Request
      * @param array|string $vars
      * @return Response|boolean
      **/
-    public function put($url, $vars = [])
+    public function put(string $url,  array|string $vars = []): Response|bool
     {
         return $this->request('PUT', $url, $vars);
     }
@@ -161,10 +173,11 @@ class Request
      * @param array|string $vars
      * @return Response|boolean
      **/
-    public function request(string $method, string $url, $vars = [])
+    public function request(string $method, string $url, array|string $vars = []): Response|bool
     {
         $this->error = '';
         $this->request = curl_init();
+
         if (is_array($vars))
         {
             $vars = http_build_query($vars);

@@ -142,4 +142,53 @@ class RouterTest extends TestCase
         $this->assertTrue($result);
         $this->assertEmpty($output);
     }
+
+    public function testRequestMethodQuery(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'QUERY';
+
+        $router = new Router();
+
+        $this->assertSame('QUERY', $router->getRequestMethod());
+    }
+
+    public function testMethodNotAllowedReturns405(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['REQUEST_URI'] = '/v1';
+
+        $router = new Router();
+        $router->setMiddlewareNamespace('Asterios\\Test\\Stubs');
+
+        ob_start();
+        $success = $router->run();
+        ob_end_clean();
+
+        $this->assertFalse($success);
+        $this->assertSame(405, http_response_code());
+    }
+
+    public function testSuccessfulQueryRouteExecution(): void
+    {
+        require_once __DIR__ . '/Stubs/AuthMiddleware.php';
+        require_once __DIR__ . '/Stubs/VersionMiddleware.php';
+        require_once __DIR__ . '/Stubs/IndexController.php';
+
+        Route::$routes = [];
+
+        Route::query('/', [IndexController::class, 'index']);
+
+        $_SERVER['REQUEST_METHOD'] = 'QUERY';
+        $_SERVER['REQUEST_URI'] = '/';
+
+        $router = new Router();
+        $router->setMiddlewareNamespace('Asterios\\Test\\Stubs');
+
+        ob_start();
+        $success = $router->run();
+        $output = ob_get_clean();
+
+        $this->assertTrue($success);
+        $this->assertSame('IndexController@query_index', trim($output));
+    }
 }
