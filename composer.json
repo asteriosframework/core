@@ -60,7 +60,7 @@
     "mockery/mockery": "1.6.12",
     "phpstan/phpstan": "2.1.17",
     "friendsofphp/php-cs-fixer": "^3.40",
-    "phan/phan": "^5.4"
+    "phan/phan": "^6.0"
   },
   "extra": {
     "branch-alias": {
