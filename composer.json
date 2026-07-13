@@ -36,7 +36,7 @@
   "require": {
     "php": "^8.3",
     "vanilla/htmlawed": "2.2.15",
-    "mobiledetect/mobiledetectlib": "4.8.09",
+    "mobiledetect/mobiledetectlib": "4.11.0",
     "ext-mysqli": "*",
     "ext-curl": "*",
     "firebase/php-jwt": "^7",
