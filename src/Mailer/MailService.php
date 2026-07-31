@@ -3,6 +3,7 @@
 namespace Asterios\Core\Mailer;
 
 use Asterios\Core\Asterios;
+use Asterios\Core\Contracts\Mailer\MailServiceInterface;
 use Asterios\Core\Env;
 use Asterios\Core\Exception\EnvException;
 use Asterios\Core\Exception\EnvLoadException;
@@ -10,48 +11,34 @@ use Asterios\Core\Exception\MailServiceException;
 use Asterios\Core\Logger;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Twig\Environment as Twig;
+use Twig\Error\LoaderError;
 use Twig\Loader\FilesystemLoader;
 
-class MailService
+class MailService implements MailServiceInterface
 {
     private static ?MailService $instance = null;
     protected string $envFile = '.env';
     protected ?Env $env = null;
-    private Mailer $mailer;
-    private string $fromAddress;
-    private string $fromName;
+    protected ?MailerInterface $mailer = null;
+    protected string $fromAddress;
+    protected string $fromName;
     private ?Twig $twig = null;
 
     /**
      * @param string $envFile
      * @throws MailServiceException
      */
-    private function __construct(string $envFile = '.env')
+    protected function __construct(string $envFile = '.env')
     {
-        $this->envFile = Asterios::getBasePath() . DIRECTORY_SEPARATOR . $envFile;
-
-        if (null === $this->env)
-        {
-            $this->env = new Env($this->envFile);
-        }
-
-        $transport = Transport::fromDsn($this->getDsn());
-        $this->mailer = $this->getMailer($transport);
-
-        $this->fromAddress = $this->getMailFromAddress();
-        $this->fromName = $this->getMailFromName();
-        $templatesPath = $this->getMailTemplatePath();
-
-        if ($templatesPath && is_dir($templatesPath))
-        {
-            $loader = $this->getFilesystemLoader($templatesPath);
-            $this->twig = $this->getTwig($loader);
-        }
+        $this->initializeEnv($envFile);
+        $this->initializeMailer();
+        $this->initializeTwig();
     }
 
     /**
@@ -59,35 +46,21 @@ class MailService
      * @return MailService
      * @throws MailServiceException
      */
-    public static function getInstance(string $envFile = '.env'): MailService
+    public static function getInstance(string $envFile = '.env'): static
     {
         if (self::$instance === null)
         {
-            self::$instance = new MailService($envFile);
+            self::$instance = static::create($envFile);
         }
 
         return self::$instance;
     }
 
     /**
-     * @param string|array $to
-     * @param string $subject
-     * @param string|null $template
-     * @param array $context
-     * @param string|null $htmlBody
-     * @param string|null $plainText
-     * @param array $attachments
-     * @return bool
+     * @inheritDoc
      */
-    public function send(
-        string|array $to,
-        string $subject,
-        ?string $template = null,
-        array $context = [],
-        ?string $htmlBody = null,
-        ?string $plainText = null,
-        array $attachments = []
-    ): bool {
+    public function send(string|array $to, string $subject, ?string $template = null, array $context = [], ?string $htmlBody = null, ?string $plainText = null, array $attachments = []): bool
+    {
         try
         {
             $email = $this->buildEmail($to, $subject, $template, $context, $htmlBody, $plainText);
@@ -118,7 +91,7 @@ class MailService
         }
     }
 
-    private function buildEmail(
+    protected function buildEmail(
         string|array $to,
         string $subject,
         ?string $template,
@@ -126,67 +99,86 @@ class MailService
         ?string $htmlBody,
         ?string $plainText
     ): Email {
-        $recipients = (array) $to;
+        $recipients = (array)$to;
 
-        if ($template && $this->twig)
+        if ($template)
         {
-            try
+            $base = preg_replace('/(\.html|\.txt)?\.twig$/', '', $template);
+
+            $htmlTemplate = $base . '.html.twig';
+            $textTemplate = $base . '.txt.twig';
+
+            if ($this->templateExists($htmlTemplate))
             {
-                $htmlBody = $this->twig->render($template, $context);
-            }
-            catch (\Throwable $e)
-            {
-                $this->logError('Twig render error: '.$e->getMessage());
-                $htmlBody = null;
+                $htmlBody = $this->renderTemplate($htmlTemplate, $context);
             }
 
-            if (class_exists(TemplatedEmail::class))
+            if ($this->templateExists($textTemplate))
             {
-                $email = $this->getTemplatedEmail()
-                    ->from($this->getAddress($this->fromAddress, $this->fromName))
-                    ->to(...$recipients)
-                    ->subject($subject)
-                    ->html($htmlBody ?? '');
+                $plainText = $this->renderTemplate($textTemplate, $context);
             }
-            else
-            {
-                $email = $this->getEmail()
-                    ->from($this->getAddress($this->fromAddress, $this->fromName))
-                    ->to(...$recipients)
-                    ->subject($subject)
-                    ->html($htmlBody ?? '');
+
+            if (
+                $htmlBody === null &&
+                $plainText === null &&
+                $this->templateExists($template)
+            ) {
+                $htmlBody = $this->renderTemplate($template, $context);
             }
+        }
+
+        if (class_exists(TemplatedEmail::class))
+        {
+            $email = $this->getTemplatedEmail();
         }
         else
         {
+            $email = $this->getEmail();
+        }
 
-            $email = $this->getEmail()
-                ->from($this->getAddress($this->fromAddress, $this->fromName))
-                ->to(...$recipients)
-                ->subject($subject);
+        $email
+            ->from($this->getAddress($this->fromAddress, $this->fromName))
+            ->to(...$recipients)
+            ->subject($subject);
 
+        if ($htmlBody !== null)
+        {
+            $email->html($htmlBody);
+        }
 
-            if ($htmlBody)
-            {
-                $email->html($htmlBody);
-            }
-            else
-            {
-                $email->html('');
-            }
-
-
-            if ($plainText)
-            {
-                $email->text($plainText);
-            }
-            else
-            {
-                $email->text(strip_tags($htmlBody ?? ''));
-            }
+        if ($plainText !== null)
+        {
+            $email->text($plainText);
+        }
+        elseif ($htmlBody !== null)
+        {
+            $email->text(strip_tags($htmlBody));
         }
 
         return $email;
+    }
+
+    /**
+     * @param string $template
+     * @param array $context
+     * @return string|null
+     */
+    protected function renderTemplate(string $template, array $context): ?string
+    {
+        if (!$this->twig)
+        {
+            return null;
+        }
+
+        try
+        {
+            return $this->twig->render($template, $context);
+        }
+        catch (\Throwable $e)
+        {
+            $this->logError('Twig render error: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
@@ -273,9 +265,9 @@ class MailService
 
     /**
      * @param TransportInterface $transport
-     * @return Mailer
+     * @return MailerInterface
      */
-    protected function getMailer(TransportInterface $transport): Mailer
+    protected function getMailer(TransportInterface $transport): MailerInterface
     {
         return new Mailer($transport);
     }
@@ -318,5 +310,82 @@ class MailService
     protected function getProtectedPath(): string
     {
         return Asterios::getBasePath();
+    }
+
+    protected function templateExists(string $template): bool
+    {
+        if (!$this->twig)
+        {
+            return false;
+        }
+
+        try
+        {
+            $this->twig->getLoader()->getSourceContext($template);
+            return true;
+        }
+        catch (LoaderError)
+        {
+            return false;
+        }
+    }
+
+    /**
+     * @return void
+     * @throws MailServiceException
+     */
+    protected function initializeMailer(): void
+    {
+        $transport = Transport::fromDsn($this->getDsn());
+        $this->mailer = $this->getMailer($transport);
+
+        $this->fromAddress = $this->getMailFromAddress();
+        $this->fromName = $this->getMailFromName();
+    }
+
+    /**
+     * @return void
+     * @throws MailServiceException
+     */
+    protected function initializeTwig(): void
+    {
+        $templatesPath = $this->getMailTemplatePath();
+
+        if ($templatesPath && is_dir($templatesPath))
+        {
+            $loader = $this->getFilesystemLoader($templatesPath);
+            $this->twig = $this->getTwig($loader);
+        }
+    }
+
+    /**
+     * @throws MailServiceException
+     */
+    protected static function create(string $envFile = '.env'): static
+    {
+        return new static($envFile);
+    }
+
+    /**
+     * @param string $envFile
+     * @return void
+     */
+    protected function initializeEnv(string $envFile): void
+    {
+        $this->envFile = Asterios::getBasePath() . DIRECTORY_SEPARATOR . $envFile;
+
+        if (null === $this->env)
+        {
+            $this->env = new Env($this->envFile);
+        }
+    }
+
+    /**
+     * @param MailerInterface $mailer
+     * @return void
+     */
+    protected function setMailer(MailerInterface $mailer): void
+    {
+        $this->mailer = $mailer;
     }
 }
