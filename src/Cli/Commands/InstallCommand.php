@@ -30,16 +30,18 @@ class InstallCommand extends BaseCommand
 
         if ($this->fileExists($envPath))
         {
-            echo "ℹ️  .env file already exists. Skipping installation.\n";
+            echo "ℹ️  .env file already exists. Skipping... \n";
+        }
+        else
+        {
+            $envContent = $this->buildEnvContent();
 
-            return;
+            $this->writeFile($envPath, $envContent);
+
+            echo "ℹ️  .env file created successfully.\n";
         }
 
-        $envContent = $this->buildEnvContent();
-
-        $this->writeFile($envPath, $envContent);
-
-        echo "✅  .env file created successfully.\n";
+        echo "✅  Installation complete.\n";
     }
 
     /**
