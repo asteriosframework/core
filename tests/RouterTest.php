@@ -8,6 +8,7 @@ use Asterios\Core\Router;
 use Asterios\Core\Support\Route;
 use Asterios\Test\Stubs\CategoriesController;
 use Asterios\Test\Stubs\IndexController;
+use Asterios\Test\Stubs\LegacyMiddleware;
 use PHPUnit\Framework\TestCase;
 
 class RouterTest extends TestCase
@@ -190,5 +191,33 @@ class RouterTest extends TestCase
 
         $this->assertTrue($success);
         $this->assertSame('IndexController@query_index', trim($output));
+    }
+
+    public function testLegacyMiddlewareWithoutInterfaceIsExecuted(): void
+    {
+        require_once __DIR__ . '/Stubs/LegacyMiddleware.php';
+        require_once __DIR__ . '/Stubs/IndexController.php';
+
+        Route::$routes = [];
+
+        Route::get('/', [IndexController::class, 'index'], [
+            'middleware' => ['legacy'],
+        ]);
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/';
+
+        LegacyMiddleware::$called = false;
+
+        $router = new Router();
+        $router->setMiddlewareNamespace('Asterios\\Test\\Stubs');
+
+        ob_start();
+        $success = $router->run();
+        $output = ob_get_clean();
+
+        $this->assertTrue($success);
+        $this->assertTrue(LegacyMiddleware::$called);
+        $this->assertSame('IndexController@index', trim($output));
     }
 }
