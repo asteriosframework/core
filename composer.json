@@ -21,7 +21,10 @@
     "preferred-install": {
       "*": "dist"
     },
-    "optimize-autoloader": true
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
   },
   "autoload": {
     "psr-4": {
@@ -60,7 +63,8 @@
     "mockery/mockery": "1.6.12",
     "phpstan/phpstan": "2.1.17",
     "friendsofphp/php-cs-fixer": "^3.40",
-    "phan/phan": "^5.4"
+    "phan/phan": "^5.4",
+    "pestphp/pest": "^4.0"
   },
   "extra": {
     "branch-alias": {
